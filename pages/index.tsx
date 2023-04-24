@@ -14,10 +14,10 @@ const Home: NextPage = () => {
       </Head>
 
       <main className={styles.main}>
-        <h2>Welcome to the Black Temple</h2>
-        <Image src="/portal.png" width={400} height={400} />
+        <Image src="/temple-title.png" alt="App Title" width={600} height={200} />
+        <Image src="/portal.png" alt="Temple Rune" width={400} height={400} />
         <br />
-        <Link href="/vestibule">Enter The Vestibule</Link>
+        <Link href="/vestibule"><Image alt="Enter Button" src="/enter-button.png" width={200} height={100} /></Link>
       </main>
 
       <footer className={styles.footer}>
