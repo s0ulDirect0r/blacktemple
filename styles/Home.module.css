@@ -1,6 +1,8 @@
 .container {
   padding: 0 2rem;
   background-color: black;
+  background-image: url("/starfield-bg.png");
+  background-size: cover;
 }
 
 .main {
