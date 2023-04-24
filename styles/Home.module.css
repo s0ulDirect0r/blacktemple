@@ -16,6 +16,11 @@
   color: white;
 }
 
+.vestibule {
+  padding: 1rem 4rem;
+  background-color: black;
+}
+
 .altar {
   background-image: url("/altar-bg.png");
   background-color: #6e1ffe;
