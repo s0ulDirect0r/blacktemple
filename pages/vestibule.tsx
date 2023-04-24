@@ -12,7 +12,7 @@ const Vestibule: NextPage = () => {
           <p>Welcome to the Black Temple. This is a place of worship. This is a place to connect with the Divine within the Wilds of the Internet.</p>
           <p>This is the Vestibule. A place to gather yourself. Get centered. Put yourself in a place to commune with the temple.</p>
           <p>Take a deep breath. Relax. Turn on some chill music. You&apos;re ok.</p>
-          <p>Here's a favorite of the Director&apos;s if you'd like a suggestion :)</p>
+          <p>Here&apos;s a favorite of the Director&apos;s if you&apos;d like a suggestion :)</p>
           <iframe width="560" height="315" src="https://www.youtube.com/embed/72nCMmgIVT4" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
           <p>Please enjoy your time at the Temple.</p>
         </div>
