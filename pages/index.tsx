@@ -3,14 +3,18 @@ import Link from 'next/link'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
+import templeTitle from '../public/temple-title.png'
+import portalRune from '../public/portal.png'
+import enterButton from '../public/enter-button.png'
+
 const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <Image src="/temple-title.png" alt="App Title" width={600} height={200} />
-        <Image src="/portal.png" alt="Temple Rune" width={400} height={400} />
+        <Image src={templeTitle} className={styles.templeTitle} alt="App Title" />
+        <Image src={portalRune} className={styles.portalRune} alt="Temple Rune" />
         <br />
-        <Link href="/vestibule"><Image alt="Enter Button" src="/enter-button.png" width={200} height={100} /></Link>
+        <Link href="/vestibule"><Image className={styles.enterButton} alt="Enter Button" src={enterButton} /></Link>
       </main>
 
       <footer className={styles.footer}>

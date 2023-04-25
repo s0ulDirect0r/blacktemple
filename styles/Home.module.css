@@ -16,6 +16,56 @@
   color: white;
 }
 
+.templeTitle {
+  width: 100%;
+  height: auto;
+}
+
+.enterButton {
+  width: 100%;
+  height: auto;
+}
+
+.portalRune {
+  width: 100%;
+  height: auto;
+}
+
+.freedomBanner {
+  width: 100%;
+  height: auto;
+}
+
+.freedomButton {
+  width: 100%;
+  height: auto;
+}
+
+.vestibuleButton {
+  width: 100%;
+  height: auto;
+}
+
+.vestibuleTitle {
+  width: 100%;
+  height: auto;
+}
+
+.sanctuaryTitle {
+  width: 100%;
+  height: auto;
+}
+
+.sanctuaryButton {
+  width: 100%;
+  height: auto;
+}
+
+.returnButton {
+  width: 100%;
+  height: auto;
+}
+
 .vestibule {
   padding: 1rem 4rem;
   background-color: rgba(0, 0, 0, 0.6);
