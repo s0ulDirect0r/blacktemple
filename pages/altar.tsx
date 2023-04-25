@@ -7,7 +7,7 @@ const Altar: NextPage = () => {
   return (
     <div className={`${styles.container} ${styles.altar}`}>
       <main className={styles.main}>
-        <Image alt="Altar Name" src="/freedom-banner.png" width={1500} height={500} />
+        <Image alt="Altar Name" src="/freedom-banner.png" width={1000} height={300} />
         {/* Embed a Youtube Link Here */}
         <iframe width="560" height="315" src="https://www.youtube.com/embed/iuIg7RQAEUM" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen></iframe>
         <br />
