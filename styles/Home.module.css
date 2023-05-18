@@ -23,52 +23,58 @@
 }
 
 .templeTitle {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .enterButton {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .portalRune {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .freedomBanner {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
+.freedomEpitaph {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 3rem;
+}
+
 .freedomButton {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .vestibuleButton {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .vestibuleTitle {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .sanctuaryTitle {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .sanctuaryButton {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
 .returnButton {
-  width: 100%;
+  max-width: 100%;
   height: auto;
 }
 

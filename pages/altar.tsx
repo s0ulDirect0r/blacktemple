@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import ReactPlayer from 'react-player/youtube'
 import styles from '../styles/Home.module.css'
-
+import freedomEpitaph from '../public/freedom-epitaph.png'
 import freedomBanner from '../public/freedom-banner.png'
 import returnButton from '../public/return-button.png'
 
@@ -13,6 +13,7 @@ const Altar: NextPage = () => {
       <main className={styles.main}>
         <Image alt="Altar Name" src={freedomBanner} className={styles.freedomBanner} />
         {/* Embed a Youtube Link Here */}
+        <Image alt="Freedom Epitaph" src={freedomEpitaph} className={styles.freedomEpitaph} />
         <ReactPlayer
           url="https://www.youtube.com/watch?v=iuIg7RQAEUM" className={styles.reactPlayer} />
         <br />

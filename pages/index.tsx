@@ -2,8 +2,6 @@ import type { NextPage } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
-
-import templeTitle from '../public/temple-title.png'
 import portalRune from '../public/portal.png'
 import enterButton from '../public/enter-button.png'
 
@@ -11,7 +9,6 @@ const Home: NextPage = () => {
   return (
     <div className={styles.container}>
       <main className={styles.main}>
-        <Image src={templeTitle} className={styles.templeTitle} alt="App Title" />
         <Image src={portalRune} className={styles.portalRune} alt="Temple Rune" />
         <br />
         <Link href="/vestibule"><Image className={styles.enterButton} alt="Enter Button" src={enterButton} /></Link>
