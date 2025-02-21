@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 
 export default function ArtUploader() {
@@ -98,8 +98,6 @@ export default function ArtUploader() {
         body: formData,
       });
 
-      const data = await response.json();
-
       if (response.ok) {
         setIsAuthenticated(true);
         setShowUploader(true);
@@ -141,7 +139,6 @@ export default function ArtUploader() {
           />
           <button
             onClick={() => {
-              console.log('Auth button clicked');
               handleAdminAuth();
             }}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
