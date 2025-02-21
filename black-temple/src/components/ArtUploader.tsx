@@ -11,7 +11,6 @@ export default function ArtUploader() {
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [adminSecret, setAdminSecret] = useState<string>('');
-  const [showUploader, setShowUploader] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { addImage } = useGallery();
 
@@ -50,8 +49,35 @@ export default function ArtUploader() {
     }
   };
 
+  const handleAdminAuth = async () => {
+    if (!adminSecret) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('ADMIN_SECRET', adminSecret);
+
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+      } else {
+        setError('Invalid password');
+        setAdminSecret('');
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      setError('Authentication failed');
+      setAdminSecret('');
+    }
+  };
+
   const handleUpload = async () => {
-    if (!selectedFile || !adminSecret || !isAuthenticated) return;
+    if (!selectedFile || !adminSecret) return;
 
     setUploading(true);
     setError(null);
@@ -68,62 +94,23 @@ export default function ArtUploader() {
 
       const data = await response.json();
 
-      if (!response.ok) throw new Error(data.error || 'Upload failed');
-
-      setUploadedUrl(data.url);
-      
-      addImage({
-        public_id: data.id,
-        secure_url: data.url,
-        created_at: new Date().toISOString(),
-      });
-
-      resetFileInput();
+      if (response.ok) {
+        setUploadedUrl(data.url);
+        addImage({
+          public_id: data.id,
+          secure_url: data.url,
+          created_at: new Date().toISOString(),
+        });
+        resetFileInput();
+      } else {
+        setError(data.error || 'Upload failed');
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Upload failed');
+      setError('Upload failed');
     } finally {
       setUploading(false);
     }
   };
-
-  const handleAdminAuth = async () => {
-    if (!adminSecret) return;
-    
-    try {
-      const formData = new FormData();
-      formData.append('ADMIN_SECRET', adminSecret);
-
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        setIsAuthenticated(true);
-        setShowUploader(true);
-      } else {
-        setError('Invalid password');
-        setAdminSecret('');
-      }
-    } catch (err) {
-      console.error('Auth error:', err);
-      setError('Authentication failed');
-      setAdminSecret('');
-    }
-  };
-
-  if (!showUploader) {
-    return (
-      <div className="space-y-4">
-        <button
-          onClick={() => setShowUploader(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Show Upload Form
-        </button>
-      </div>
-    );
-  }
 
   if (!isAuthenticated) {
     return (
@@ -132,15 +119,13 @@ export default function ArtUploader() {
           <input
             type="password"
             placeholder="Admin Password"
-            value={adminSecret || ''}
+            value={adminSecret}
             onChange={(e) => setAdminSecret(e.target.value)}
             className="w-full p-2 border rounded-md"
             onKeyDown={(e) => e.key === 'Enter' && handleAdminAuth()}
           />
           <button
-            onClick={() => {
-              handleAdminAuth();
-            }}
+            onClick={handleAdminAuth}
             className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Authenticate
@@ -210,7 +195,7 @@ export default function ArtUploader() {
           </div>
           <button
             onClick={handleUpload}
-            disabled={uploading || !adminSecret}
+            disabled={uploading}
             className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
           >
             {uploading ? 'Uploading...' : 'Upload to Gallery'}
@@ -218,15 +203,15 @@ export default function ArtUploader() {
         </div>
       )}
 
-      {error && (
-        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
-
       {uploadedUrl && (
         <div className="mt-4 p-4 bg-green-100 text-green-700 rounded-md">
           Upload successful!
+        </div>
+      )}
+
+      {error && (
+        <div className="mt-4 p-4 bg-red-100 text-red-700 rounded-md">
+          {error}
         </div>
       )}
     </div>
