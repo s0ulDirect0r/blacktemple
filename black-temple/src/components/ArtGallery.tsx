@@ -4,12 +4,6 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useGallery } from '@/context/GalleryContext';
 
-interface ArtworkImage {
-  public_id: string;
-  secure_url: string;
-  created_at: string;
-}
-
 export default function ArtGallery() {
   const { images, setImages } = useGallery();
   const [loading, setLoading] = useState(true);
