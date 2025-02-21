@@ -1,29 +1,28 @@
-import { v2 as cloudinary } from 'cloudinary';
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+import { list } from '@vercel/blob';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic'; // This ensures the route is not statically optimized
 export const revalidate = 0; // This disables caching for this route
 
 export async function GET() {
   try {
-    const result = await cloudinary.search
-      .expression('folder:art-gallery/*')
-      .sort_by('created_at', 'desc')
-      .max_results(30)
-      .execute();
+    const { blobs } = await list({
+      token: process.env.BLOB_READ_WRITE_TOKEN!,
+    });
 
-    return Response.json({
+    const images = blobs.map(blob => ({
+      public_id: blob.url,
+      secure_url: blob.url,
+      created_at: blob.uploadedAt,
+    }));
+
+    return NextResponse.json({
       success: true,
-      images: result.resources,
+      images: images,
     });
   } catch (error) {
     console.error('Gallery fetch error:', error);
-    return Response.json(
+    return NextResponse.json(
       { error: 'Failed to fetch gallery' },
       { status: 500 }
     );

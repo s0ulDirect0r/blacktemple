@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useGallery } from '@/context/GalleryContext';
 
 export default function ArtUploader() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -8,6 +9,7 @@ export default function ArtUploader() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { addImage } = useGallery();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -54,6 +56,15 @@ export default function ArtUploader() {
       if (!response.ok) throw new Error(data.error || 'Upload failed');
 
       setUploadedUrl(data.url);
+      
+      addImage({
+        public_id: data.publicId,
+        secure_url: data.url,
+        created_at: new Date().toISOString(),
+      });
+
+      setSelectedFile(null);
+      setPreview(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {

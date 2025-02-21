@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useGallery } from '@/context/GalleryContext';
 
 interface ArtworkImage {
   public_id: string;
@@ -10,7 +11,7 @@ interface ArtworkImage {
 }
 
 export default function ArtGallery() {
-  const [images, setImages] = useState<ArtworkImage[]>([]);
+  const { images, setImages } = useGallery();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
