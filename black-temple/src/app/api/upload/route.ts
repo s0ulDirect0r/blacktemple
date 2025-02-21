@@ -5,7 +5,15 @@ export async function POST(request: Request) {
   try {
     const data = await request.formData();
     const file = data.get('file') as File;
+    const adminSecret = data.get('adminSecret') as string;
     
+    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     if (!file) {
       return NextResponse.json(
         { error: 'No file provided' },

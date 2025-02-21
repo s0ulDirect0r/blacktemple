@@ -9,6 +9,8 @@ export default function ArtUploader() {
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [adminSecret, setAdminSecret] = useState('');
+  const [showUploader, setShowUploader] = useState(false);
   const { addImage } = useGallery();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,7 +39,7 @@ export default function ArtUploader() {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    if (!selectedFile || !adminSecret) return;
 
     setUploading(true);
     setError(null);
@@ -45,6 +47,7 @@ export default function ArtUploader() {
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
+      formData.append('adminSecret', adminSecret);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -58,7 +61,7 @@ export default function ArtUploader() {
       setUploadedUrl(data.url);
       
       addImage({
-        public_id: data.publicId,
+        public_id: data.id,
         secure_url: data.url,
         created_at: new Date().toISOString(),
       });
@@ -72,8 +75,29 @@ export default function ArtUploader() {
     }
   };
 
+  if (!showUploader) {
+    return (
+      <div className="space-y-4">
+        <button
+          onClick={() => setShowUploader(true)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+        >
+          Show Upload Form
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-4">
+      <input
+        type="password"
+        placeholder="Admin Password"
+        value={adminSecret}
+        onChange={(e) => setAdminSecret(e.target.value)}
+        className="w-full p-2 border rounded-md"
+      />
+      
       <div
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
         onDragOver={handleDragOver}
@@ -115,8 +139,8 @@ export default function ArtUploader() {
       </div>
 
       {preview && (
-        <div className="mt-8 space-y-4">
-          <h2 className="text-lg font-semibold">Preview:</h2>
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold mb-2">Preview:</h2>
           <div className="relative aspect-video w-full overflow-hidden rounded-lg">
             <img
               src={preview}
@@ -126,8 +150,8 @@ export default function ArtUploader() {
           </div>
           <button
             onClick={handleUpload}
-            disabled={uploading}
-            className="w-full py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+            disabled={uploading || !adminSecret}
+            className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
           >
             {uploading ? 'Uploading...' : 'Upload to Gallery'}
           </button>
@@ -142,10 +166,7 @@ export default function ArtUploader() {
 
       {uploadedUrl && (
         <div className="mt-4 p-4 bg-green-100 text-green-700 rounded-md">
-          Upload successful! Your image is now available at:{' '}
-          <a href={uploadedUrl} target="_blank" rel="noopener noreferrer" className="underline">
-            View Image
-          </a>
+          Upload successful!
         </div>
       )}
     </div>
