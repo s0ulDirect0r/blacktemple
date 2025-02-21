@@ -5,9 +5,10 @@ export async function POST(request: Request) {
   try {
     const data = await request.formData();
     const file = data.get('file') as File;
-    const adminSecret = data.get('adminSecret') as string;
+    const adminSecret = data.get('ADMIN_SECRET') as string;
     
     if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+      console.log('Upload auth failed - secrets don\'t match');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

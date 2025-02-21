@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 
 interface ArtworkImage {
   public_id: string;
@@ -19,12 +19,18 @@ const GalleryContext = createContext<GalleryContextType | undefined>(undefined);
 export function GalleryProvider({ children }: { children: ReactNode }) {
   const [images, setImages] = useState<ArtworkImage[]>([]);
 
-  const addImage = (newImage: ArtworkImage) => {
+  const addImage = useCallback((newImage: ArtworkImage) => {
     setImages((prevImages) => [newImage, ...prevImages]);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    images,
+    addImage,
+    setImages
+  }), [images, addImage]);
 
   return (
-    <GalleryContext.Provider value={{ images, addImage, setImages }}>
+    <GalleryContext.Provider value={value}>
       {children}
     </GalleryContext.Provider>
   );

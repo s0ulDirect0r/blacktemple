@@ -1,26 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 
 export default function ArtUploader() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [adminSecret, setAdminSecret] = useState('');
+  const [adminSecret, setAdminSecret] = useState<string>('');
   const [showUploader, setShowUploader] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { addImage } = useGallery();
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
     if (file) {
-      setSelectedFile(file);
-      const previewUrl = URL.createObjectURL(file);
-      setPreview(previewUrl);
-      setError(null);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const resetFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+    setSelectedFile(null);
+    setPreview(null);
   };
 
   const handleDragOver = (event: React.DragEvent) => {
@@ -39,7 +51,7 @@ export default function ArtUploader() {
   };
 
   const handleUpload = async () => {
-    if (!selectedFile || !adminSecret) return;
+    if (!selectedFile || !adminSecret || !isAuthenticated) return;
 
     setUploading(true);
     setError(null);
@@ -47,7 +59,7 @@ export default function ArtUploader() {
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('adminSecret', adminSecret);
+      formData.append('ADMIN_SECRET', adminSecret);
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -66,12 +78,39 @@ export default function ArtUploader() {
         created_at: new Date().toISOString(),
       });
 
-      setSelectedFile(null);
-      setPreview(null);
+      resetFileInput();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setUploading(false);
+    }
+  };
+
+  const handleAdminAuth = async () => {
+    if (!adminSecret) return;
+    
+    try {
+      const formData = new FormData();
+      formData.append('ADMIN_SECRET', adminSecret);
+
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setIsAuthenticated(true);
+        setShowUploader(true);
+      } else {
+        setError('Invalid password');
+        setAdminSecret('');
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      setError('Authentication failed');
+      setAdminSecret('');
     }
   };
 
@@ -88,22 +127,46 @@ export default function ArtUploader() {
     );
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="max-w-md mx-auto space-y-4">
+        <div className="space-y-2">
+          <input
+            type="password"
+            placeholder="Admin Password"
+            value={adminSecret || ''}
+            onChange={(e) => setAdminSecret(e.target.value)}
+            className="w-full p-2 border rounded-md"
+            onKeyDown={(e) => e.key === 'Enter' && handleAdminAuth()}
+          />
+          <button
+            onClick={() => {
+              console.log('Auth button clicked');
+              handleAdminAuth();
+            }}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Authenticate
+          </button>
+        </div>
+        {error && (
+          <div className="p-4 bg-red-100 text-red-700 rounded-md">
+            {error}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <input
-        type="password"
-        placeholder="Admin Password"
-        value={adminSecret}
-        onChange={(e) => setAdminSecret(e.target.value)}
-        className="w-full p-2 border rounded-md"
-      />
-      
       <div
         className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
         <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handleFileSelect}
