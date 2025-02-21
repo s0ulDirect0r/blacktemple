@@ -46,12 +46,12 @@ export default function ArtGallery() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {images.map((image) => (
         <div
-          key={image.public_id}
+          key={image.secure_url}
           className="relative aspect-square overflow-hidden rounded-lg hover:opacity-90 transition-opacity"
         >
           <Image
             src={image.secure_url}
-            alt={`Artwork ${image.public_id}`}
+            alt="Artwork"
             fill
             className="object-cover"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
