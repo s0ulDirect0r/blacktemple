@@ -13,7 +13,7 @@ function AuthForm({ onAuth }: { onAuth: (secret: string) => Promise<void> }) {
     try {
       await onAuth(secret);
     } catch (err) {
-      setError('Authentication failed');
+      setError('Authentication failed: ' + err);
       setSecret('');
     }
   };
