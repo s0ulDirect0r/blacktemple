@@ -2,48 +2,11 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGallery } from '@/context/GalleryContext';
+import { Project, ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
-import { ArtworkMetadata, Project } from '@/types/artwork';
 
-// Separate the authentication form into its own component
-function AuthForm({ onAuth }: { onAuth: (secret: string) => Promise<void> }) {
-  const [secret, setSecret] = useState('');
-  const [error, setError] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await onAuth(secret);
-    } catch (err) {
-      setError('Authentication failed: ' + err);
-      setSecret('');
-    }
-  };
-
-  return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-      <div className="space-y-2">
-        <input
-          type="password"
-          placeholder="Admin Password"
-          value={secret}
-          onChange={(e) => setSecret(e.target.value)}
-          className="w-full p-2 border rounded-md"
-        />
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Authenticate
-        </button>
-      </div>
-      {error && (
-        <div className="p-4 bg-red-100 text-red-700 rounded-md">
-          {error}
-        </div>
-      )}
-    </form>
-  );
+interface ArtUploaderProps {
+  adminSecret: string;
 }
 
 // Separate the file upload UI into its own component
@@ -116,9 +79,7 @@ function FileUploadZone({
 }
 
 // Main component orchestrates the others
-export default function ArtUploader() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminSecret, setAdminSecret] = useState('');
+export default function ArtUploader({ adminSecret }: ArtUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -141,27 +102,8 @@ export default function ArtUploader() {
       }
     };
 
-    if (isAuthenticated) {
-      fetchProjects();
-    }
-  }, [isAuthenticated]);
-
-  const handleAuth = async (secret: string) => {
-    const formData = new FormData();
-    formData.append('ADMIN_SECRET', secret);
-
-    const response = await fetch('/api/auth', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Authentication failed');
-    }
-
-    setAdminSecret(secret);
-    setIsAuthenticated(true);
-  };
+    fetchProjects();
+  }, []);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -177,7 +119,7 @@ export default function ArtUploader() {
   }, [preview]);
 
   const handleUpload = async () => {
-    if (!selectedFile || !adminSecret || !metadata) return;
+    if (!selectedFile || !metadata) return;
 
     setIsUploading(true);
     setError(null);
@@ -213,10 +155,6 @@ export default function ArtUploader() {
       setIsUploading(false);
     }
   };
-
-  if (!isAuthenticated) {
-    return <AuthForm onAuth={handleAuth} />;
-  }
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
