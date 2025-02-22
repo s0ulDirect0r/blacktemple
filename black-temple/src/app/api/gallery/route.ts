@@ -11,8 +11,8 @@ export async function GET() {
     });
 
     const images = blobs.map(blob => ({
-      public_id: blob.url,
-      secure_url: blob.url,
+      id: blob.url,  // Using URL as ID since we don't have DB records
+      url: blob.url,
       created_at: blob.uploadedAt,
     }));
 

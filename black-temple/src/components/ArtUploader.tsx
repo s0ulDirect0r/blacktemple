@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGallery } from '@/context/GalleryContext';
+import ArtworkMetadataForm from './ArtworkMetadataForm';
+import { ArtworkMetadata, Project } from '@/types/artwork';
 
 // Separate the authentication form into its own component
 function AuthForm({ onAuth }: { onAuth: (secret: string) => Promise<void> }) {
@@ -123,6 +125,26 @@ export default function ArtUploader() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { addImage } = useGallery();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [metadata, setMetadata] = useState<ArtworkMetadata | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects');
+        if (response.ok) {
+          const data = await response.json();
+          setProjects(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchProjects();
+    }
+  }, [isAuthenticated]);
 
   const handleAuth = async (secret: string) => {
     const formData = new FormData();
@@ -155,7 +177,7 @@ export default function ArtUploader() {
   }, [preview]);
 
   const handleUpload = async () => {
-    if (!selectedFile || !adminSecret) return;
+    if (!selectedFile || !adminSecret || !metadata) return;
 
     setIsUploading(true);
     setError(null);
@@ -164,6 +186,7 @@ export default function ArtUploader() {
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('ADMIN_SECRET', adminSecret);
+      formData.append('metadata', JSON.stringify(metadata));
 
       const response = await fetch('/api/upload', {
         method: 'POST',
@@ -175,14 +198,15 @@ export default function ArtUploader() {
       if (!response.ok) throw new Error(data.error || 'Upload failed');
 
       addImage({
-        public_id: data.id,
-        secure_url: data.url,
-        created_at: new Date().toISOString(),
+        id: data.id,
+        url: data.url,
+        metadata: metadata,
       });
 
       setSuccessMessage('Upload successful!');
       setSelectedFile(null);
       setPreview(null);
+      setMetadata(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Upload failed');
     } finally {
@@ -202,23 +226,37 @@ export default function ArtUploader() {
       />
 
       {preview && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold mb-2">Preview:</h2>
-          <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-            <img
-              src={preview}
-              alt="Preview"
-              className="object-contain w-full h-full"
+        <div className="mt-4 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Preview:</h2>
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
+              <img
+                src={preview}
+                alt="Preview"
+                className="object-contain w-full h-full"
+              />
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Image Details:</h2>
+            <ArtworkMetadataForm
+              projects={projects}
+              onSubmit={setMetadata}
+              isUploading={isUploading}
             />
           </div>
-          <button
-            onClick={handleUpload}
-            disabled={isUploading}
-            className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-md 
-              hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
-          >
-            {isUploading ? 'Uploading...' : 'Upload to Gallery'}
-          </button>
+
+          {metadata && (
+            <button
+              onClick={handleUpload}
+              disabled={isUploading}
+              className="w-full mt-4 py-2 px-4 bg-blue-600 text-white rounded-md 
+                hover:bg-blue-700 disabled:bg-blue-300 transition-colors"
+            >
+              {isUploading ? 'Uploading...' : 'Upload to Gallery'}
+            </button>
+          )}
         </div>
       )}
 
