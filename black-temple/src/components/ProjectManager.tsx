@@ -4,11 +4,7 @@ import { useState, useEffect } from 'react';
 import { Project } from '@/types/artwork';
 import { useGallery } from '@/context/GalleryContext';
 
-interface ProjectManagerProps {
-  adminSecret: string;
-}
-
-export default function ProjectManager({ adminSecret }: ProjectManagerProps) {
+export default function ProjectManager() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +34,6 @@ export default function ProjectManager({ adminSecret }: ProjectManagerProps) {
       const formData = new FormData();
       formData.append('name', name);
       formData.append('description', description);
-      formData.append('ADMIN_SECRET', adminSecret);
 
       const response = await fetch('/api/projects', {
         method: 'POST',

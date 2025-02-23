@@ -5,10 +5,6 @@ import { useGallery } from '@/context/GalleryContext';
 import { Project, ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
 
-interface ArtUploaderProps {
-  adminSecret: string;
-}
-
 // Separate the file upload UI into its own component
 function FileUploadZone({ 
   onFileSelect, 
@@ -79,7 +75,7 @@ function FileUploadZone({
 }
 
 // Main component orchestrates the others
-export default function ArtUploader({ adminSecret }: ArtUploaderProps) {
+export default function ArtUploader() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -127,7 +123,6 @@ export default function ArtUploader({ adminSecret }: ArtUploaderProps) {
     try {
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('ADMIN_SECRET', adminSecret);
       formData.append('metadata', JSON.stringify(metadata));
 
       const response = await fetch('/api/upload', {
