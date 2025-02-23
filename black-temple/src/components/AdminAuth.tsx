@@ -42,14 +42,4 @@ export default function AdminAuth({ children }: AdminAuthProps) {
       </div>
     );
   }
-
-  // Clone the children and pass adminSecret as a prop
-  const childrenWithProps = React.Children.map(children, child => {
-    if (React.isValidElement(child)) {
-      return React.cloneElement(child, { adminSecret });
-    }
-    return child;
-  });
-
-  return <>{childrenWithProps}</>;
 } 
