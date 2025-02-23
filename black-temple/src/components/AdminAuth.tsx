@@ -4,14 +4,8 @@ import { useState, ReactNode } from 'react';
 import AuthForm from './AuthForm';
 import React from 'react';
 
-interface AdminAuthProps {
-  children: ReactNode;
-}
-
-export default function AdminAuth({ children }: AdminAuthProps) {
+export default function AdminAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminSecret, setAdminSecret] = useState('');
-
   const handleAuth = async (secret: string) => {
     try {
       const formData = new FormData();
@@ -26,7 +20,6 @@ export default function AdminAuth({ children }: AdminAuthProps) {
         throw new Error('Authentication failed');
       }
 
-      setAdminSecret(secret);
       setIsAuthenticated(true);
     } catch (error) {
       console.error('Auth error:', error);
@@ -42,4 +35,6 @@ export default function AdminAuth({ children }: AdminAuthProps) {
       </div>
     );
   }
+
+
 } 
