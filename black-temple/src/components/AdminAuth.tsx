@@ -2,10 +2,14 @@
 
 import { useState, ReactNode } from 'react';
 import AuthForm from './AuthForm';
-import React from 'react';
 
-export default function AdminAuth() {
+interface AdminAuthProps {
+  children: ReactNode;
+}
+
+export default function AdminAuth({ children }: AdminAuthProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   const handleAuth = async (secret: string) => {
     try {
       const formData = new FormData();
@@ -36,5 +40,5 @@ export default function AdminAuth() {
     );
   }
 
-
+  return <>{children}</>;
 } 
