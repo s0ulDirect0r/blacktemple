@@ -45,7 +45,7 @@ export default function ProjectManager() {
       }
 
       const newProject = await response.json() as Project;
-      setProjects(prev => [...prev, newProject]);
+      setProjects([...projects, newProject]);
       setName('');
       setDescription('');
     } catch (error) {
