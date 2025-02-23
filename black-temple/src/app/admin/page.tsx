@@ -12,7 +12,7 @@ export default function AdminPage() {
           <div className="space-y-12">
             <section>
               <h2 className="text-2xl font-semibold mb-4">Projects</h2>
-              <ProjectManager adminSecret={adminSecret} />
+              <ProjectManager />
             </section>
             <section>
               <h2 className="text-2xl font-semibold mb-4">Upload New Artwork</h2>
