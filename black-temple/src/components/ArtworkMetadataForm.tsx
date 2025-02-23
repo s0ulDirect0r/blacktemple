@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Project, ArtworkMetadata } from '@/types/artwork';
+import { useState } from 'react';
+import { Project } from '@/types/artwork';
 
 interface ArtworkMetadataFormProps {
   initialMetadata?: Partial<ArtworkMetadata>;

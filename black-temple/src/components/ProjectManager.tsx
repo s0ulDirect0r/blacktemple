@@ -49,7 +49,7 @@ export default function ProjectManager({ adminSecret }: ProjectManagerProps) {
         throw new Error('Failed to create project');
       }
 
-      const newProject = await response.json();
+      const newProject = await response.json() as Project;
       setProjects(prev => [...prev, newProject]);
       setName('');
       setDescription('');

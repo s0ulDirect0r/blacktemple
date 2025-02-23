@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { Project } from '@/types/artwork';
 
 export async function GET() {
   try {
