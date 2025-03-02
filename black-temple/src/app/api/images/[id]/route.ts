@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { sql } from '@/lib/db';
 import { ArtworkMetadata } from '@/types/artwork';
 
-async function verifyAuth(request: Request) {
+// Simple auth verification
+async function verifyAuth(request: NextRequest) {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return false;
@@ -20,28 +21,29 @@ async function verifyAuth(request: Request) {
   }
 }
 
-type RouteContext = {
-  params: {
-    id: string;
-  };
-};
-
+// PATCH handler with Promise-based params for Next.js 15
 export async function PATCH(
-  request: Request,
-  context: RouteContext
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  // 1. Check authentication
+  if (!await verifyAuth(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    if (!await verifyAuth(request)) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+    // 2. Get the image ID from the URL (using await for Promise-based params)
+    const { id } = await params;
+    
+    // 3. Parse the request body
+    const body = await request.json();
+    const metadata = body.metadata as ArtworkMetadata;
+    
+    if (!metadata || !metadata.title) {
+      return NextResponse.json({ error: 'Invalid metadata' }, { status: 400 });
     }
-
-    const { metadata } = await request.json() as { metadata: ArtworkMetadata };
-    const { id } = context.params;
-
-    // Update the artwork metadata in the database
+    
+    // 4. Update the database
     const result = await sql`
       UPDATE artworks
       SET
@@ -53,15 +55,13 @@ export async function PATCH(
       WHERE id = ${id}
       RETURNING *;
     `;
-
+    
+    // 5. Handle not found case
     if (result.length === 0) {
-      return NextResponse.json(
-        { error: 'Image not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 });
     }
-
-    // Return the updated image data
+    
+    // 6. Return the updated image
     return NextResponse.json({
       id: result[0].id,
       url: result[0].url,
@@ -76,9 +76,6 @@ export async function PATCH(
     });
   } catch (error) {
     console.error('Failed to update image:', error);
-    return NextResponse.json(
-      { error: 'Failed to update image' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Failed to update image' }, { status: 500 });
   }
 } 
