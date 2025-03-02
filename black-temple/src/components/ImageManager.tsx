@@ -6,7 +6,14 @@ import { ArtworkImage, ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
 
 export default function ImageManager() {
-  const { images, setImages, projects, fetchProjects, fetchImages } = useGallery();
+  const { 
+    images, 
+    setImages, 
+    projects, 
+    fetchProjects, 
+    fetchImages,
+    refreshProjectCounts 
+  } = useGallery();
   const [selectedImage, setSelectedImage] = useState<ArtworkImage | null>(null);
   const [selectedProjectFilter, setSelectedProjectFilter] = useState<string>('unassigned');
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +25,8 @@ export default function ImageManager() {
   useEffect(() => {
     fetchProjects();
     fetchImages();
-  }, [fetchProjects, fetchImages]);
+    refreshProjectCounts();
+  }, [fetchProjects, fetchImages, refreshProjectCounts]);
 
   const filteredImages = useMemo(() => {
     if (selectedProjectFilter === 'all') return images;
@@ -76,6 +84,9 @@ export default function ImageManager() {
       const updatedImage = await response.json() as ArtworkImage;
       setImages(prev => prev.map(img => img.id === updatedImage.id ? updatedImage : img));
       setSuccessMessage('Image updated successfully');
+      
+      // Refresh project counts after updating an image
+      refreshProjectCounts();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update image');
     } finally {

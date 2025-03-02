@@ -4,8 +4,27 @@ import { useEffect, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { FiMenu, FiX, FiFolder, FiImage } from 'react-icons/fi';
 
+interface ProjectCount {
+  id: string;
+  name: string;
+  count: number;
+}
+
+interface ProjectCounts {
+  projects: ProjectCount[];
+  unassigned: number;
+  total: number;
+}
+
 export default function ProjectFilter() {
-  const { projects, setProjects, selectedProjectId, setSelectedProjectId, images } = useGallery();
+  const { 
+    projects, 
+    setProjects, 
+    selectedProjectId, 
+    setSelectedProjectId,
+    projectCounts,
+    refreshProjectCounts
+  } = useGallery();
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -24,11 +43,16 @@ export default function ProjectFilter() {
     fetchProjects();
   }, [setProjects]);
 
-  const getProjectImageCount = (projectId: string | null) => {
+  useEffect(() => {
+    refreshProjectCounts();
+  }, [refreshProjectCounts]);
+
+  const getProjectCount = (projectId: string | null): number => {
     if (!projectId) {
-      return images.filter(img => !img.metadata.projectId).length;
+      return projectCounts.unassigned;
     }
-    return images.filter(img => img.metadata.projectId === projectId).length;
+    const project = projectCounts.projects.find(p => p.id === projectId);
+    return project ? project.count : 0;
   };
 
   return (
@@ -80,7 +104,7 @@ export default function ProjectFilter() {
                   <span>All Projects</span>
                 </div>
                 <span className="text-sm bg-zinc-800 px-2 py-0.5 rounded">
-                  {images.length}
+                  {projectCounts.total}
                 </span>
               </button>
 
@@ -101,7 +125,7 @@ export default function ProjectFilter() {
                   <span>Unassigned</span>
                 </div>
                 <span className="text-sm bg-zinc-800 px-2 py-0.5 rounded">
-                  {getProjectImageCount(null)}
+                  {projectCounts.unassigned}
                 </span>
               </button>
 
@@ -124,7 +148,7 @@ export default function ProjectFilter() {
                     <span>{project.name}</span>
                   </div>
                   <span className="text-sm bg-zinc-800 px-2 py-0.5 rounded">
-                    {getProjectImageCount(project.id)}
+                    {getProjectCount(project.id)}
                   </span>
                 </button>
               ))}

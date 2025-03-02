@@ -5,7 +5,7 @@ import { useGallery } from '@/context/GalleryContext';
 import ProjectFilter from './ProjectFilter';
 
 export default function ArtGallery() {
-  const { images, setImages, selectedProjectId } = useGallery();
+  const { images, setImages, selectedProjectId, refreshProjectCounts } = useGallery();
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -18,6 +18,9 @@ export default function ArtGallery() {
         if (response.ok) {
           const data = await response.json();
           setImages(data);
+          
+          // Refresh project counts after loading images
+          refreshProjectCounts();
         }
       } catch (error) {
         console.error('Failed to fetch images:', error);
@@ -25,7 +28,7 @@ export default function ArtGallery() {
     };
 
     fetchImages();
-  }, [selectedProjectId, setImages]);
+  }, [selectedProjectId, setImages, refreshProjectCounts]);
 
   return (
     <div className="relative min-h-screen bg-black">
