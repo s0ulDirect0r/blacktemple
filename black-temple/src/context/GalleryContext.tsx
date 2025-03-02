@@ -5,7 +5,7 @@ import { ArtworkImage, Project } from '@/types/artwork';
 
 interface GalleryContextType {
   images: ArtworkImage[];
-  setImages: (images: ArtworkImage[]) => void;
+  setImages: (images: ArtworkImage[] | ((prev: ArtworkImage[]) => ArtworkImage[])) => void;
   projects: Project[];
   setProjects: (projects: Project[]) => void;
   selectedProjectId: string | null;
@@ -13,6 +13,7 @@ interface GalleryContextType {
   addImage: (image: ArtworkImage) => void;
   addProject: (project: Project) => void;
   fetchProjects: () => Promise<void>;
+  fetchImages: () => Promise<void>;
 }
 
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined);
@@ -42,6 +43,18 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const fetchImages = useCallback(async () => {
+    try {
+      const response = await fetch('/api/images');
+      if (response.ok) {
+        const data = await response.json();
+        setImages(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch images:', error);
+    }
+  }, []);
+
   return (
     <GalleryContext.Provider value={{
       images,
@@ -52,7 +65,8 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
       setSelectedProjectId,
       addImage,
       addProject,
-      fetchProjects
+      fetchProjects,
+      fetchImages
     }}>
       {children}
     </GalleryContext.Provider>

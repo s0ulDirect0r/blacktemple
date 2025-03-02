@@ -1,5 +1,6 @@
 import ArtUploader from "@/components/ArtUploader";
 import ProjectManager from "@/components/ProjectManager";
+import ImageManager from "@/components/ImageManager";
 import { GalleryProvider } from "@/context/GalleryContext";
 import AdminAuth from "@/components/AdminAuth";
 
@@ -17,6 +18,10 @@ export default function AdminPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Upload New Artwork</h2>
               <ArtUploader />
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Manage Artwork</h2>
+              <ImageManager />
             </section>
           </div>
         </main>

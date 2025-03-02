@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Project } from '@/types/artwork';
 
 interface ArtworkMetadataFormProps {
@@ -34,6 +34,13 @@ export default function ArtworkMetadataForm({
   });
 
   const [tagInput, setTagInput] = useState('');
+
+  useEffect(() => {
+    setMetadata(prev => ({
+      ...prev,
+      ...initialMetadata
+    }));
+  }, [initialMetadata]);
 
   const handleAddTag = () => {
     if (tagInput.trim() && !metadata.tags?.includes(tagInput.trim())) {
