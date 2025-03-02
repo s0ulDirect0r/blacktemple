@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGallery } from '@/context/GalleryContext';
-import { Project, ArtworkMetadata } from '@/types/artwork';
+import { ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
 
 // Separate the file upload UI into its own component
