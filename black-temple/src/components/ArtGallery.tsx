@@ -1,15 +1,17 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import ProjectFilter from './ProjectFilter';
 import Link from 'next/link';
 
 export default function ArtGallery() {
   const { images, setImages, selectedProjectId, refreshProjectCounts } = useGallery();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchImages = async () => {
+      setIsLoading(true);
       try {
         const url = selectedProjectId 
           ? `/api/images?projectId=${selectedProjectId}`
@@ -25,6 +27,8 @@ export default function ArtGallery() {
         }
       } catch (error) {
         console.error('Failed to fetch images:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -42,7 +46,22 @@ export default function ArtGallery() {
       </header>
       
       <main className="px-4 md:px-8 pb-16">
-        {images.length === 0 ? (
+        {isLoading ? (
+          <div className="py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <div 
+                  key={index} 
+                  className="aspect-video rounded-lg bg-zinc-900 border border-zinc-800 animate-pulse"
+                >
+                  <div className="h-full w-full flex items-center justify-center">
+                    <div className="w-8 h-8 border-t-2 border-zinc-500 border-solid rounded-full animate-spin"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : images.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-zinc-400">
             <p className="text-xl">No images found</p>
             <p className="text-sm mt-2">
