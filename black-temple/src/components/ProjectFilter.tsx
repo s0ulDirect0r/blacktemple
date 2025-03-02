@@ -4,18 +4,6 @@ import { useEffect, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { FiMenu, FiX, FiFolder, FiImage } from 'react-icons/fi';
 
-interface ProjectCount {
-  id: string;
-  name: string;
-  count: number;
-}
-
-interface ProjectCounts {
-  projects: ProjectCount[];
-  unassigned: number;
-  total: number;
-}
-
 export default function ProjectFilter() {
   const { 
     projects, 
