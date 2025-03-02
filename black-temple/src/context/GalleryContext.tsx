@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { ArtworkImage, Project } from '@/types/artwork';
 
 interface GalleryContextType {
@@ -11,6 +11,8 @@ interface GalleryContextType {
   selectedProjectId: string | null;
   setSelectedProjectId: (id: string | null) => void;
   addImage: (image: ArtworkImage) => void;
+  addProject: (project: Project) => void;
+  fetchProjects: () => Promise<void>;
 }
 
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined);
@@ -24,6 +26,22 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
     setImages(prev => [image, ...prev]);
   };
 
+  const addProject = (project: Project) => {
+    setProjects(prev => [...prev, project]);
+  };
+
+  const fetchProjects = useCallback(async () => {
+    try {
+      const response = await fetch('/api/projects');
+      if (response.ok) {
+        const data = await response.json();
+        setProjects(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    }
+  }, []);
+
   return (
     <GalleryContext.Provider value={{
       images,
@@ -32,7 +50,9 @@ export function GalleryProvider({ children }: { children: ReactNode }) {
       setProjects,
       selectedProjectId,
       setSelectedProjectId,
-      addImage
+      addImage,
+      addProject,
+      fetchProjects
     }}>
       {children}
     </GalleryContext.Provider>

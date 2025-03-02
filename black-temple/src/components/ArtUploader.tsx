@@ -81,25 +81,12 @@ export default function ArtUploader() {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const { addImage } = useGallery();
-  const [projects, setProjects] = useState<Project[]>([]);
+  const { addImage, projects, fetchProjects } = useGallery();
   const [metadata, setMetadata] = useState<ArtworkMetadata | null>(null);
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects');
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch projects:', error);
-      }
-    };
-
     fetchProjects();
-  }, []);
+  }, [fetchProjects]);
 
   const handleFileSelect = useCallback((file: File) => {
     setSelectedFile(file);
@@ -121,12 +108,20 @@ export default function ArtUploader() {
     setError(null);
 
     try {
+      const token = sessionStorage.getItem('adminSession');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
+
       const formData = new FormData();
       formData.append('file', selectedFile);
       formData.append('metadata', JSON.stringify(metadata));
 
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
 

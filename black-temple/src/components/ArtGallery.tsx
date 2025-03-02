@@ -42,12 +42,12 @@ export default function ArtGallery() {
               className="object-cover w-full h-full"
             />
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4">
-              <h3 className="text-white font-medium">{image.metadata.title}</h3>
+              {/* <h3 className="text-white font-medium">{image.metadata.title}</h3>
               {image.metadata.description && (
                 <p className="text-white/80 text-sm mt-1">
                   {image.metadata.description}
                 </p>
-              )}
+              )} */}
             </div>
           </div>
         ))}

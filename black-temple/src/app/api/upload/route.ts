@@ -1,22 +1,38 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { sql } from '@/lib/db';
+import { jwtVerify } from 'jose';
 import { ArtworkMetadata } from '@/types/artwork';
+
+async function verifyAuth(request: Request) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const token = authHeader.split(' ')[1];
+  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
+  
+  try {
+    await jwtVerify(token, secret);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function POST(request: Request) {
   try {
-    const data = await request.formData();
-    const file = data.get('file') as File;
-    const adminSecret = data.get('ADMIN_SECRET') as string;
-    const metadata = JSON.parse(data.get('metadata') as string) as ArtworkMetadata;
-
-    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
-      console.log('Upload auth failed - secrets don\'t match');
+    if (!await verifyAuth(request)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
+
+    const data = await request.formData();
+    const file = data.get('file') as File;
+    const metadata = JSON.parse(data.get('metadata') as string) as ArtworkMetadata;
 
     if (!file) {
       return NextResponse.json(

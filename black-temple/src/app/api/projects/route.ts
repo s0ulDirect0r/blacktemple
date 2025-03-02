@@ -1,5 +1,23 @@
 import { NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 import { sql } from '@/lib/db';
+
+async function verifyAuth(request: Request) {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return false;
+  }
+
+  const token = authHeader.split(' ')[1];
+  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
+  
+  try {
+    await jwtVerify(token, secret);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 export async function GET() {
   try {
@@ -20,18 +38,15 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.formData();
-    const adminSecret = data.get('ADMIN_SECRET') as string;
-    
-    if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+    if (!await verifyAuth(request)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const name = data.get('name') as string;
-    const description = data.get('description') as string;
+    const data = await request.json();
+    const { name, description } = data;
 
     if (!name) {
       return NextResponse.json(

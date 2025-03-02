@@ -8,36 +8,32 @@ export default function ProjectManager() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const { projects, setProjects } = useGallery();
+  const { projects, fetchProjects, addProject } = useGallery();
 
   useEffect(() => {
     fetchProjects();
-  }, []);
-
-  const fetchProjects = async () => {
-    try {
-      const response = await fetch('/api/projects');
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-    }
-  };
+  }, [fetchProjects]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     try {
-      const formData = new FormData();
-      formData.append('name', name);
-      formData.append('description', description);
+      const token = sessionStorage.getItem('adminSession');
+      if (!token) {
+        throw new Error('Not authenticated');
+      }
 
       const response = await fetch('/api/projects', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name,
+          description,
+        }),
       });
 
       if (!response.ok) {
@@ -45,7 +41,7 @@ export default function ProjectManager() {
       }
 
       const newProject = await response.json() as Project;
-      setProjects([...projects, newProject]);
+      addProject(newProject);
       setName('');
       setDescription('');
     } catch (error) {
