@@ -21,6 +21,46 @@ async function verifyAuth(request: NextRequest) {
   }
 }
 
+// GET handler to fetch a single image by ID
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Get the image ID from the URL
+    const { id } = await params;
+    
+    // Fetch the image from the database
+    const result = await sql`
+      SELECT * FROM artworks
+      WHERE id = ${id}
+    `;
+    
+    // Handle not found case
+    if (result.length === 0) {
+      return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+    }
+    
+    // Return the image data
+    const image = result[0];
+    return NextResponse.json({
+      id: image.id,
+      url: image.url,
+      metadata: {
+        title: image.title,
+        description: image.description,
+        projectId: image.project_id,
+        tags: image.tags,
+        created_at: image.created_at,
+        updated_at: image.updated_at
+      }
+    });
+  } catch (error) {
+    console.error('Failed to fetch image:', error);
+    return NextResponse.json({ error: 'Failed to fetch image' }, { status: 500 });
+  }
+}
+
 // PATCH handler with Promise-based params for Next.js 15
 export async function PATCH(
   request: NextRequest,
