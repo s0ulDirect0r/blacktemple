@@ -20,9 +20,15 @@ async function verifyAuth(request: Request) {
   }
 }
 
+type RouteContext = {
+  params: {
+    id: string;
+  };
+};
+
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  context: RouteContext
 ) {
   try {
     if (!await verifyAuth(request)) {
@@ -33,7 +39,7 @@ export async function PATCH(
     }
 
     const { metadata } = await request.json() as { metadata: ArtworkMetadata };
-    const { id } = params;
+    const { id } = context.params;
 
     // Update the artwork metadata in the database
     const result = await sql`
