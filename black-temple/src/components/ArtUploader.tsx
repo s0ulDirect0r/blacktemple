@@ -4,6 +4,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
+import Image from 'next/image';
 
 // Separate the file upload UI into its own component
 function FileUploadZone({ 
@@ -157,11 +158,14 @@ export default function ArtUploader() {
         <div className="mt-4 space-y-6">
           <div>
             <h2 className="text-lg font-semibold mb-2">Preview:</h2>
-            <div className="relative aspect-video w-full overflow-hidden rounded-lg">
-              <img
+            <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-black">
+              <Image
                 src={preview}
                 alt="Preview"
-                className="object-contain w-full h-full"
+                fill
+                className="object-contain"
+                sizes="100vw"
+                priority
               />
             </div>
           </div>

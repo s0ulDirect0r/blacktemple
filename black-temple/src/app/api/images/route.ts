@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const projectId = searchParams.get('projectId');
     const unassignedParam = searchParams.get('unassigned');
     const limitParam = searchParams.get('limit');
+    const offsetParam = searchParams.get('offset');
 
     let limit: number | undefined;
     if (limitParam !== null) {
@@ -15,14 +16,24 @@ export async function GET(request: Request) {
         limit = parsed;
       }
     }
+
+    let offset: number | undefined;
+    if (offsetParam !== null) {
+      const parsedOffset = Number.parseInt(offsetParam, 10);
+      if (!Number.isNaN(parsedOffset)) {
+        offset = parsedOffset;
+      }
+    }
+
     const normalizedProjectId = unassignedParam === 'true' ? 'unassigned' : projectId;
 
-    const images = await getGalleryImages({
+    const { images, hasMore } = await getGalleryImages({
       projectId: normalizedProjectId,
       limit,
+      offset,
     });
 
-    return NextResponse.json({ images });
+    return NextResponse.json({ images, hasMore });
   } catch (error) {
     console.error('Failed to fetch images:', error);
     return NextResponse.json(

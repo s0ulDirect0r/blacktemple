@@ -4,7 +4,7 @@ import { getGalleryImages, getGalleryProjects, getProjectCountSummary } from "@/
 import { GALLERY_PAGE_SIZE } from "@/constants/gallery";
 
 export default async function Home() {
-  const [images, projects, projectCounts] = await Promise.all([
+  const [initialGallery, projects, projectCounts] = await Promise.all([
     getGalleryImages({ limit: GALLERY_PAGE_SIZE }),
     getGalleryProjects(),
     getProjectCountSummary(),
@@ -12,9 +12,10 @@ export default async function Home() {
 
   return (
     <GalleryProvider
-      initialImages={images}
+      initialImages={initialGallery.images}
       initialProjects={projects}
       initialProjectCounts={projectCounts}
+      initialHasMore={initialGallery.hasMore}
     >
       <main className="min-h-screen">
         <ArtGallery />

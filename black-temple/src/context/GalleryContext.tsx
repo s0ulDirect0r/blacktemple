@@ -17,6 +17,12 @@ interface GalleryContextType {
   fetchImages: (options?: FetchImagesOptions) => Promise<void>;
   projectCounts: ProjectCountSummary;
   refreshProjectCounts: () => Promise<void>;
+  hasMoreImages: boolean;
+}
+
+interface GalleryApiResponse {
+  images: ArtworkImage[];
+  hasMore?: boolean;
 }
 
 const GalleryContext = createContext<GalleryContextType | undefined>(undefined);
@@ -24,6 +30,8 @@ const GalleryContext = createContext<GalleryContextType | undefined>(undefined);
 interface FetchImagesOptions {
   projectId?: string | null;
   limit?: number;
+  offset?: number;
+  mode?: 'replace' | 'append';
 }
 
 interface GalleryProviderProps {
@@ -31,6 +39,7 @@ interface GalleryProviderProps {
   initialImages?: ArtworkImage[];
   initialProjects?: Project[];
   initialProjectCounts?: ProjectCountSummary;
+  initialHasMore?: boolean;
 }
 
 const defaultProjectCounts: ProjectCountSummary = {
@@ -44,6 +53,7 @@ export function GalleryProvider({
   initialImages = [],
   initialProjects = [],
   initialProjectCounts = defaultProjectCounts,
+  initialHasMore = false,
 }: GalleryProviderProps) {
   const [images, setImages] = useState<ArtworkImage[]>(() => [...initialImages]);
   const [projects, setProjects] = useState<Project[]>(() => [...initialProjects]);
@@ -53,6 +63,7 @@ export function GalleryProvider({
     unassigned: initialProjectCounts.unassigned,
     total: initialProjectCounts.total,
   }));
+  const [hasMoreImages, setHasMoreImages] = useState<boolean>(initialHasMore);
 
   const refreshProjectCounts = useCallback(async () => {
     try {
@@ -89,7 +100,9 @@ export function GalleryProvider({
 
   const fetchImages = useCallback(async (options: FetchImagesOptions = {}) => {
     const targetProjectId = options.projectId ?? selectedProjectId;
+    const mode = options.mode ?? 'replace';
     const params = new URLSearchParams();
+
     if (targetProjectId === 'unassigned') {
       params.append('unassigned', 'true');
     } else if (targetProjectId) {
@@ -100,13 +113,47 @@ export function GalleryProvider({
       params.append('limit', String(options.limit));
     }
 
+    if (typeof options.offset === 'number' && options.offset > 0) {
+      params.append('offset', String(Math.floor(options.offset)));
+    }
+
     try {
       const query = params.toString();
       const response = await fetch(`/api/images${query ? `?${query}` : ''}`);
       if (response.ok) {
-        const data = await response.json();
-        setImages(data.images ?? data);
-        refreshProjectCounts();
+        const data = await response.json() as GalleryApiResponse | ArtworkImage[];
+
+        let fetchedImages: ArtworkImage[] = [];
+        let hasMore = false;
+
+        if (Array.isArray(data)) {
+          fetchedImages = data;
+        } else {
+          fetchedImages = data.images;
+          hasMore = Boolean(data.hasMore);
+        }
+
+        setHasMoreImages(hasMore);
+
+        if (mode === 'append') {
+          setImages(prev => {
+            if (fetchedImages.length === 0) {
+              return prev;
+            }
+            const existingIds = new Set(prev.map(img => img.id));
+            const nextImages = fetchedImages.filter(img => !existingIds.has(img.id));
+            if (nextImages.length === 0) {
+              return prev;
+            }
+            return [...prev, ...nextImages];
+          });
+        } else {
+          setImages(fetchedImages);
+        }
+
+        if (mode !== 'append') {
+          refreshProjectCounts();
+        }
       }
     } catch (error) {
       console.error('Failed to fetch images:', error);
@@ -126,6 +173,7 @@ export function GalleryProvider({
     fetchImages,
     projectCounts,
     refreshProjectCounts,
+    hasMoreImages,
   }), [
     images,
     projects,
@@ -136,6 +184,7 @@ export function GalleryProvider({
     fetchImages,
     projectCounts,
     refreshProjectCounts,
+    hasMoreImages,
   ]);
 
   return (

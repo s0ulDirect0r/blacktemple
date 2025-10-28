@@ -10,8 +10,9 @@ import Image from 'next/image';
 const SKELETON_PLACEHOLDERS = 6;
 
 export default function ArtGallery() {
-  const { images, fetchImages, selectedProjectId } = useGallery();
+  const { images, fetchImages, selectedProjectId, hasMoreImages } = useGallery();
   const [isLoading, setIsLoading] = useState(images.length === 0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const isFirstRenderRef = useRef(true);
 
   useEffect(() => {
@@ -25,8 +26,9 @@ export default function ArtGallery() {
 
     const load = async () => {
       setIsLoading(true);
+      setIsLoadingMore(false);
       try {
-        await fetchImages({ limit: GALLERY_PAGE_SIZE });
+        await fetchImages({ limit: GALLERY_PAGE_SIZE, mode: 'replace' });
       } finally {
         if (!cancelled) {
           setIsLoading(false);
@@ -40,6 +42,22 @@ export default function ArtGallery() {
       cancelled = true;
     };
   }, [fetchImages]);
+
+
+  const handleLoadMore = async () => {
+    if (isLoadingMore) {
+      return;
+    }
+
+    setIsLoadingMore(true);
+    try {
+      await fetchImages({ limit: GALLERY_PAGE_SIZE, offset: images.length, mode: 'append' });
+    } catch (error) {
+      console.error('Failed to load more images:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   return (
     <div className="relative min-h-screen bg-black">
@@ -77,9 +95,10 @@ export default function ArtGallery() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {images.map((image) => (
-              <Link
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {images.map((image) => (
+                <Link
                 key={image.id}
                 href={`/artwork/${image.id}`}
                 className="group relative aspect-video overflow-hidden rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-all hover:shadow-lg hover:shadow-black/20"
@@ -116,9 +135,23 @@ export default function ArtGallery() {
                     )}
                   </div>
                 </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+
+            {hasMoreImages && (
+              <div className="mt-10 flex justify-center">
+                <button
+                  type="button"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                  className="px-6 py-2 rounded-full border border-zinc-700 text-zinc-200 hover:border-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoadingMore ? 'Loading...' : 'Load More'}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

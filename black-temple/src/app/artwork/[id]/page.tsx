@@ -6,6 +6,7 @@ import { ArtworkImage, Project } from '@/types/artwork';
 import { FiArrowLeft, FiTag, FiFolder } from 'react-icons/fi';
 import Link from 'next/link';
 import { use } from 'react';
+import Image from 'next/image';
 
 export default function ArtworkPage({ params }: { params: Promise<{ id: string }> }) {
   // Unwrap the params Promise using React.use()
@@ -91,11 +92,16 @@ export default function ArtworkPage({ params }: { params: Promise<{ id: string }
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image */}
           <div className="bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800">
-            <img 
-              src={artwork.url} 
-              alt={artwork.metadata.title}
-              className="w-full h-auto object-contain"
-            />
+            <div className="relative w-full aspect-[4/3] sm:aspect-video bg-black">
+              <Image
+                src={artwork.url}
+                alt={artwork.metadata.title}
+                fill
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
+              />
+            </div>
           </div>
 
           {/* Metadata */}

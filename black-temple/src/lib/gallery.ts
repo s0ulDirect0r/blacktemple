@@ -27,6 +27,11 @@ interface ProjectCountRow {
   name: string;
   image_count: string | number;
 }
+
+interface GalleryImagesResult {
+  images: ArtworkImage[];
+  hasMore: boolean;
+}
 function mapRowToArtwork(row: ArtworkRow): ArtworkImage {
   return {
     id: row.id,
@@ -45,10 +50,12 @@ function mapRowToArtwork(row: ArtworkRow): ArtworkImage {
 export async function getGalleryImages({
   projectId = null,
   limit,
+  offset = 0,
 }: {
   projectId?: string | null;
   limit?: number;
-} = {}): Promise<ArtworkImage[]> {
+  offset?: number;
+} = {}): Promise<GalleryImagesResult> {
   const whereClause =
     projectId === 'unassigned'
       ? sql`WHERE project_id IS NULL`
@@ -56,18 +63,27 @@ export async function getGalleryImages({
       ? sql`WHERE project_id = ${projectId}`
       : sql``;
 
+  const normalizedOffset = typeof offset === 'number' && offset > 0 ? Math.floor(offset) : 0;
+
   let effectiveLimit: number | undefined;
+  let detectRemaining = false;
+
   if (typeof limit === 'number' && !Number.isNaN(limit)) {
     if (limit <= 0) {
       effectiveLimit = undefined;
     } else {
       effectiveLimit = Math.min(limit, 60);
+      detectRemaining = true;
     }
   } else {
     effectiveLimit = GALLERY_PAGE_SIZE;
+    detectRemaining = true;
   }
 
-  const limitClause = typeof effectiveLimit === 'number' ? sql`LIMIT ${effectiveLimit}` : sql``;
+  const queryLimit = detectRemaining && typeof effectiveLimit === 'number' ? effectiveLimit + 1 : effectiveLimit;
+
+  const limitClause = typeof queryLimit === 'number' ? sql`LIMIT ${queryLimit}` : sql``;
+  const offsetClause = normalizedOffset > 0 ? sql`OFFSET ${normalizedOffset}` : sql``;
 
   const rows = await sql`
     SELECT 
@@ -82,10 +98,22 @@ export async function getGalleryImages({
     FROM artworks
     ${whereClause}
     ORDER BY created_at DESC
-    ${limitClause};
+    ${limitClause}
+    ${offsetClause};
   `;
 
-  return rows.map(mapRowToArtwork);
+  let hasMore = false;
+  let processedRows = rows;
+
+  if (detectRemaining && typeof effectiveLimit === 'number' && rows.length > effectiveLimit) {
+    hasMore = true;
+    processedRows = rows.slice(0, effectiveLimit);
+  }
+
+  return {
+    images: processedRows.map(mapRowToArtwork),
+    hasMore,
+  };
 }
 
 export async function getGalleryProjects(): Promise<Project[]> {

@@ -9,7 +9,8 @@
     "lint": "next lint",
     "migrate": "tsx scripts/migrate.ts",
     "migrate-blobs": "tsx scripts/migrate-blobs.ts",
-    "verify-schema": "tsx scripts/verify-schema.ts"
+    "verify-schema": "tsx scripts/verify-schema.ts",
+    "test": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
