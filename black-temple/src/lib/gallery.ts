@@ -56,12 +56,26 @@ export async function getGalleryImages({
   limit?: number;
   offset?: number;
 } = {}): Promise<GalleryImagesResult> {
-  const whereClause =
-    projectId === 'unassigned'
-      ? sql`WHERE project_id IS NULL`
-      : projectId
-      ? sql`WHERE project_id = ${projectId}`
-      : sql``;
+  const params: (string | number)[] = [];
+  const clauses: string[] = [
+    `SELECT 
+      id,
+      url,
+      title,
+      description,
+      project_id,
+      tags,
+      created_at,
+      updated_at
+    FROM artworks`,
+  ];
+
+  if (projectId === 'unassigned') {
+    clauses.push('WHERE project_id IS NULL');
+  } else if (projectId) {
+    params.push(projectId);
+    clauses.push(`WHERE project_id = $${params.length}`);
+  }
 
   const normalizedOffset = typeof offset === 'number' && offset > 0 ? Math.floor(offset) : 0;
 
@@ -82,28 +96,23 @@ export async function getGalleryImages({
 
   const queryLimit = detectRemaining && typeof effectiveLimit === 'number' ? effectiveLimit + 1 : effectiveLimit;
 
-  const limitClause = typeof queryLimit === 'number' ? sql`LIMIT ${queryLimit}` : sql``;
-  const offsetClause = normalizedOffset > 0 ? sql`OFFSET ${normalizedOffset}` : sql``;
+  clauses.push('ORDER BY created_at DESC');
 
-  const rows = await sql`
-    SELECT 
-      id,
-      url,
-      title,
-      description,
-      project_id,
-      tags,
-      created_at,
-      updated_at
-    FROM artworks
-    ${whereClause}
-    ORDER BY created_at DESC
-    ${limitClause}
-    ${offsetClause};
-  `;
+  if (typeof queryLimit === 'number') {
+    params.push(queryLimit);
+    clauses.push(`LIMIT $${params.length}`);
+  }
+
+  if (normalizedOffset > 0) {
+    params.push(normalizedOffset);
+    clauses.push(`OFFSET $${params.length}`);
+  }
+
+  const query = clauses.join('\n');
+  const rows = (await sql(query, params)) as ArtworkRow[];
 
   let hasMore = false;
-  let processedRows = rows;
+  let processedRows: ArtworkRow[] = rows;
 
   if (detectRemaining && typeof effectiveLimit === 'number' && rows.length > effectiveLimit) {
     hasMore = true;
@@ -117,13 +126,13 @@ export async function getGalleryImages({
 }
 
 export async function getGalleryProjects(): Promise<Project[]> {
-  const rows = await sql`
+  const rows = (await sql`
     SELECT id, name, description, created_at
     FROM projects
     ORDER BY name;
-  `;
+  `) as ProjectRow[];
 
-  return rows.map((row: ProjectRow) => ({
+  return rows.map((row) => ({
     id: row.id,
     name: row.name,
     description: row.description ?? undefined,
@@ -154,13 +163,17 @@ export async function getProjectCountSummary(): Promise<ProjectCountSummary> {
     `,
   ]);
 
+  const projectCountRows = projectCounts as ProjectCountRow[];
+  const unassignedRows = unassignedCount as Array<{ count: string | number }>;
+  const totalRows = totalCount as Array<{ count: string | number }>;
+
   return {
-    projects: projectCounts.map((p: ProjectCountRow) => ({
+    projects: projectCountRows.map((p) => ({
       id: p.id,
       name: p.name,
       count: Number(p.image_count),
     })),
-    unassigned: Number(unassignedCount[0]?.count ?? 0),
-    total: Number(totalCount[0]?.count ?? 0),
+    unassigned: Number(unassignedRows[0]?.count ?? 0),
+    total: Number(totalRows[0]?.count ?? 0),
   };
 }
