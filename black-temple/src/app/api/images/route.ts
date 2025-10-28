@@ -1,36 +1,39 @@
 import { NextResponse } from 'next/server';
-import { sql } from '@/lib/db';
+import { getGalleryImages } from '@/lib/gallery';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get('projectId');
+    const unassignedParam = searchParams.get('unassigned');
+    const limitParam = searchParams.get('limit');
+    const offsetParam = searchParams.get('offset');
 
-    const result = projectId 
-      ? await sql`
-          SELECT * FROM artworks 
-          WHERE project_id = ${projectId}
-          ORDER BY created_at DESC;
-        `
-      : await sql`
-          SELECT * FROM artworks 
-          ORDER BY created_at DESC;
-        `;
-    
-    const images = result.map(row => ({
-      id: row.id,
-      url: row.url,
-      metadata: {
-        title: row.title,
-        description: row.description,
-        projectId: row.project_id,
-        tags: row.tags,
-        created_at: row.created_at,
-        updated_at: row.updated_at
+    let limit: number | undefined;
+    if (limitParam !== null) {
+      const parsed = Number.parseInt(limitParam, 10);
+      if (!Number.isNaN(parsed)) {
+        limit = parsed;
       }
-    }));
+    }
 
-    return NextResponse.json(images);
+    let offset: number | undefined;
+    if (offsetParam !== null) {
+      const parsedOffset = Number.parseInt(offsetParam, 10);
+      if (!Number.isNaN(parsedOffset)) {
+        offset = parsedOffset;
+      }
+    }
+
+    const normalizedProjectId = unassignedParam === 'true' ? 'unassigned' : projectId;
+
+    const { images, hasMore } = await getGalleryImages({
+      projectId: normalizedProjectId,
+      limit,
+      offset,
+    });
+
+    return NextResponse.json({ images, hasMore });
   } catch (error) {
     console.error('Failed to fetch images:', error);
     return NextResponse.json(

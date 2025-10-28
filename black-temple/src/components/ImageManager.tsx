@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import Image from 'next/image';
 import { useGallery } from '@/context/GalleryContext';
 import { ArtworkImage, ArtworkMetadata } from '@/types/artwork';
 import ArtworkMetadataForm from './ArtworkMetadataForm';
@@ -24,7 +25,7 @@ export default function ImageManager() {
 
   useEffect(() => {
     fetchProjects();
-    fetchImages();
+    fetchImages({ limit: 0 });
     refreshProjectCounts();
   }, [fetchProjects, fetchImages, refreshProjectCounts]);
 
@@ -143,10 +144,12 @@ export default function ImageManager() {
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-24 h-24 relative rounded-md overflow-hidden flex-shrink-0 bg-zinc-800">
-                        <img
+                        <Image
                           src={image.url}
                           alt={image.metadata.title}
-                          className="object-cover w-full h-full"
+                          fill
+                          className="object-cover"
+                          sizes="96px"
                         />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -222,10 +225,12 @@ export default function ImageManager() {
               
               <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 <div className="aspect-video w-full relative rounded-lg overflow-hidden bg-zinc-800">
-                  <img
+                  <Image
                     src={selectedImage.url}
                     alt={selectedImage.metadata.title}
-                    className="object-contain w-full h-full"
+                    fill
+                    className="object-contain"
+                    sizes="(max-width: 1024px) 50vw, 100vw"
                   />
                 </div>
 
