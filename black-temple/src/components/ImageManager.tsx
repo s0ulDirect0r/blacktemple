@@ -24,7 +24,7 @@ export default function ImageManager() {
 
   useEffect(() => {
     fetchProjects();
-    fetchImages();
+    fetchImages({ limit: 0 });
     refreshProjectCounts();
   }, [fetchProjects, fetchImages, refreshProjectCounts]);
 

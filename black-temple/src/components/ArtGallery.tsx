@@ -1,39 +1,45 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
+import { GALLERY_PAGE_SIZE } from '@/constants/gallery';
 import ProjectFilter from './ProjectFilter';
 import Link from 'next/link';
+import Image from 'next/image';
+
+const SKELETON_PLACEHOLDERS = 6;
 
 export default function ArtGallery() {
-  const { images, setImages, selectedProjectId, refreshProjectCounts } = useGallery();
-  const [isLoading, setIsLoading] = useState(true);
+  const { images, fetchImages, selectedProjectId } = useGallery();
+  const [isLoading, setIsLoading] = useState(images.length === 0);
+  const isFirstRenderRef = useRef(true);
 
   useEffect(() => {
-    const fetchImages = async () => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const load = async () => {
       setIsLoading(true);
       try {
-        const url = selectedProjectId 
-          ? `/api/images?projectId=${selectedProjectId}`
-          : '/api/images';
-        
-        const response = await fetch(url);
-        if (response.ok) {
-          const data = await response.json();
-          setImages(data);
-          
-          // Refresh project counts after loading images
-          refreshProjectCounts();
-        }
-      } catch (error) {
-        console.error('Failed to fetch images:', error);
+        await fetchImages({ limit: GALLERY_PAGE_SIZE });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchImages();
-  }, [selectedProjectId, setImages, refreshProjectCounts]);
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [fetchImages]);
 
   return (
     <div className="relative min-h-screen bg-black">
@@ -49,7 +55,7 @@ export default function ArtGallery() {
         {isLoading ? (
           <div className="py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, index) => (
+              {[...Array(SKELETON_PLACEHOLDERS)].map((_, index) => (
                 <div 
                   key={index} 
                   className="aspect-video rounded-lg bg-zinc-900 border border-zinc-800 animate-pulse"
@@ -78,10 +84,13 @@ export default function ArtGallery() {
                 href={`/artwork/${image.id}`}
                 className="group relative aspect-video overflow-hidden rounded-lg bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-all hover:shadow-lg hover:shadow-black/20"
               >
-                <img
+                <Image
                   src={image.url}
                   alt={image.metadata.title}
-                  className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -114,4 +123,4 @@ export default function ArtGallery() {
       </main>
     </div>
   );
-} 
+}

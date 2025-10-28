@@ -1,38 +1,45 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { FiMenu, FiX, FiFolder, FiImage } from 'react-icons/fi';
 
 export default function ProjectFilter() {
   const { 
     projects, 
-    setProjects, 
     selectedProjectId, 
     setSelectedProjectId,
     projectCounts,
-    refreshProjectCounts
+    refreshProjectCounts,
+    fetchProjects,
   } = useGallery();
   const [isOpen, setIsOpen] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  const hasFetchedProjects = useRef(projects.length > 0);
+  const hasFetchedCounts = useRef(
+    projectCounts.total > 0 || projectCounts.projects.length > 0 || projectCounts.unassigned > 0
+  );
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch('/api/projects');
-        if (response.ok) {
-          const data = await response.json();
-          setProjects(data);
-        }
-      } catch (error) {
-        console.error('Failed to fetch projects:', error);
-      }
-    };
+    if (hasFetchedProjects.current) {
+      return;
+    }
 
-    fetchProjects();
-  }, [setProjects]);
+    hasFetchedProjects.current = true;
+    fetchProjects().catch(() => {
+      hasFetchedProjects.current = false;
+    });
+  }, [fetchProjects]);
 
   useEffect(() => {
-    refreshProjectCounts();
+    if (hasFetchedCounts.current) {
+      return;
+    }
+
+    hasFetchedCounts.current = true;
+    refreshProjectCounts().catch(() => {
+      hasFetchedCounts.current = false;
+    });
   }, [refreshProjectCounts]);
 
   const getProjectCount = (projectId: string | null): number => {
@@ -67,6 +74,7 @@ export default function ProjectFilter() {
         className={`fixed top-0 left-0 h-full w-72 bg-zinc-900 border-r border-zinc-800 z-50 transform transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        aria-busy={isPending}
       >
         <div className="h-full flex flex-col">
           <div className="p-6 border-b border-zinc-800">
@@ -78,7 +86,7 @@ export default function ProjectFilter() {
               {/* All Projects */}
               <button
                 onClick={() => {
-                  setSelectedProjectId(null);
+                  startTransition(() => setSelectedProjectId(null));
                   setIsOpen(false);
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
@@ -99,7 +107,7 @@ export default function ProjectFilter() {
               {/* Unassigned */}
               <button
                 onClick={() => {
-                  setSelectedProjectId('unassigned');
+                  startTransition(() => setSelectedProjectId('unassigned'));
                   setIsOpen(false);
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
@@ -122,7 +130,7 @@ export default function ProjectFilter() {
                 <button
                   key={project.id}
                   onClick={() => {
-                    setSelectedProjectId(project.id);
+                    startTransition(() => setSelectedProjectId(project.id));
                     setIsOpen(false);
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors ${
