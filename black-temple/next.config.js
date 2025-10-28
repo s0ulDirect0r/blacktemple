@@ -1,8 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['zp7hauqhmxup1nll.public.blob.vercel-storage.com'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'zp7hauqhmxup1nll.public.blob.vercel-storage.com',
+      },
+    ],
+  },
+  turbopack: {
+    root: __dirname,
   },
 };
 
-module.exports = nextConfig; 
+module.exports = nextConfig;

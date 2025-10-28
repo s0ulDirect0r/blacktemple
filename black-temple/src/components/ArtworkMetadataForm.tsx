@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { Project } from '@/types/artwork';
 
 interface ArtworkMetadataFormProps {
@@ -36,10 +36,16 @@ export default function ArtworkMetadataForm({
   const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
-    setMetadata(prev => ({
-      ...prev,
-      ...initialMetadata
-    }));
+    if (!initialMetadata) {
+      return;
+    }
+
+    startTransition(() => {
+      setMetadata(prev => ({
+        ...prev,
+        ...initialMetadata
+      }));
+    });
   }, [initialMetadata]);
 
   const handleAddTag = () => {

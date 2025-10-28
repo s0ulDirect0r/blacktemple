@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getAllProjects } from '@/lib/mdx';
 import { FiGithub, FiExternalLink, FiCode } from 'react-icons/fi';
 
@@ -26,11 +27,13 @@ export default function ProjectsPage() {
                 >
                   {/* Project image */}
                   {project.imageUrl ? (
-                    <div className="aspect-video bg-zinc-800 overflow-hidden">
-                      <img
+                    <div className="aspect-video bg-zinc-800 overflow-hidden relative">
+                      <Image
                         src={project.imageUrl}
                         alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   ) : (
