@@ -1,0 +1,52 @@
+---
+title: "Sun Simulator"
+description: "Real-time 3D visualization of stellar evolution from nebula collapse to black hole, featuring gravitational physics and 100k+ particle systems."
+techStack: ["Three.js", "TypeScript", "WebGL", "Vite", "GLSL Shaders"]
+repoUrl: "https://github.com/s0ulDirect0r/sun-simulator"
+demoUrl: "https://sun-simulator.blacktemple.art/"
+imageUrl: "/images/sun-simulator-preview.png"
+featured: true
+---
+
+# Sun Simulator
+
+An interactive 3D simulation of stellar lifecycle, from the gravitational collapse of a molecular cloud through main sequence stability, red giant expansion, supernova explosion, and the formation of a black hole with gravitational lensing effects.
+
+## Features
+
+- **Nebula Collapse**: 100,000+ particles coalescing under simplified gravitational physics with dynamic velocity and acceleration
+- **Stellar Evolution**: Smooth transitions through main sequence, red giant, and supernova phases with volumetric layering and custom corona effects
+- **Supernova Event**: Explosive particle ejection with velocity-based coloring, shockwave expansion, and dramatic camera choreography
+- **Black Hole Formation**: Real-time gravitational lensing using custom fragment shaders with accretion disk particle system
+- **Interactive Camera**: Smooth orbital controls with phase-specific positioning and zoom
+
+## Technical Highlights
+
+Built with modern graphics programming techniques:
+
+- **Three.js** for 3D scene management and WebGL abstraction
+- **Custom GLSL shaders** for gravitational lensing post-processing effects
+- **Particle systems** optimized for 100k+ simultaneous particles with BufferGeometry
+- **Simplex noise** for procedural nebula generation and stellar surface detail
+- **Physics simulation** with simplified n-body gravity for visual drama over accuracy
+- **Post-processing pipeline** with bloom, glow, and custom lens effects
+
+## What I Learned
+
+Building this project taught me:
+
+1. Advanced Three.js techniques (particle systems, custom materials, post-processing)
+2. GLSL shader programming for visual effects (gravitational lensing, volumetrics)
+3. Real-time performance optimization (particle culling, LOD, efficient updates)
+4. Physics simulation basics (gravitational acceleration, velocity integration)
+5. Animation choreography (camera transitions, particle behavior synchronization)
+6. Complex state management for multi-phase simulations
+
+## Performance Considerations
+
+- Maintains 60 FPS with 100,000 particles on modern hardware
+- Uses BufferGeometry and instancing for efficient GPU utilization
+- Implements particle recycling during phase transitions
+- Optimized shader uniforms and minimal state changes per frame
+
+This project demonstrates both technical graphics programming skill and creative visual design, balancing scientific inspiration with cinematic impact.
