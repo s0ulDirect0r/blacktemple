@@ -19,7 +19,7 @@ export default function ProjectsPage() {
               <p>No projects yet. Check back soon!</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {projects.map((project) => (
                 <article
                   key={project.slug}
@@ -32,7 +32,7 @@ export default function ProjectsPage() {
                         src={project.imageUrl}
                         alt={project.title}
                         fill
-                        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                        sizes="(min-width: 768px) 50vw, 100vw"
                         className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
@@ -44,11 +44,11 @@ export default function ProjectsPage() {
 
                   {/* Project content */}
                   <div className="p-6">
-                    <h2 className="text-xl font-bold mb-2 group-hover:text-zinc-300 transition-colors">
+                    <h2 className="text-2xl font-bold mb-3 group-hover:text-zinc-300 transition-colors">
                       {project.title}
                     </h2>
 
-                    <p className="text-zinc-400 text-sm mb-4 line-clamp-2">
+                    <p className="text-zinc-400 mb-4">
                       {project.description}
                     </p>
 
