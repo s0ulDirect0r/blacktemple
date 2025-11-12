@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { GALLERY_PAGE_SIZE } from '@/constants/gallery';
-import ProjectFilter from './ProjectFilter';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -60,16 +59,8 @@ export default function ArtGallery() {
   };
 
   return (
-    <div className="relative min-h-screen bg-black">
-      <ProjectFilter />
-      <header className="relative z-10 px-4 md:px-8 pt-6 pb-12 flex items-center">
-        <div className="w-16" />
-        <h1 className="text-5xl font-bold text-white flex-1 text-center tracking-wide">
-          The Black Temple
-        </h1>
-      </header>
-      
-      <main className="px-4 md:px-8 pb-16">
+    <div className="relative min-h-screen">
+      <main className="pb-16">
         {isLoading ? (
           <div className="py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
