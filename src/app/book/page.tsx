@@ -3,19 +3,20 @@ import Image from 'next/image';
 
 export default function BookPage() {
   return (
-    <div className="min-h-screen text-white">
-      <div className="container mx-auto px-4 py-12">
+    <div className="text-white">
+      <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
+          <div className="grid md:grid-cols-2 gap-8">
             {/* Book cover */}
             <div className="flex justify-center md:justify-end">
               <div className="w-full max-w-sm">
-                <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-2xl">
+                <div className="relative rounded overflow-hidden shadow-2xl border-2 border-gray-900">
                   <Image
-                    src="https://zp7hauqhmxup1nll.public.blob.vercel-storage.com/Untitled_Artwork%2045.jpg"
+                    src="https://zp7hauqhmxup1nll.public.blob.vercel-storage.com/Untitled_Artwork%2057.jpg"
                     alt="An Infinite Heart by Matthew D. Huff"
-                    fill
-                    className="object-cover"
+                    width={600}
+                    height={900}
+                    className="w-full h-auto"
                     priority
                   />
                 </div>
@@ -23,16 +24,16 @@ export default function BookPage() {
             </div>
 
             {/* Book details */}
-            <div className="flex flex-col justify-center">
-              <h1 className="text-4xl font-bold mb-2">
+            <div className="flex flex-col justify-between max-w-lg">
+              <h1 className="text-4xl font-bold">
                 An Infinite Heart
               </h1>
 
-              <p className="text-lg text-zinc-400 mb-6">
+              <p className="text-lg text-zinc-400">
                 by Matthew D. Huff
               </p>
 
-              <div className="prose prose-invert prose-zinc max-w-none mb-8">
+              <div className="prose prose-invert prose-zinc max-w-none mb-16 space-y-6 text-base leading-relaxed">
                 <p>
                   A man by the name of Logos Mateus finds himself having nightmares and experiencing
                   intense swells of emotion that disturb the people around him, his energy attracting
@@ -42,12 +43,6 @@ export default function BookPage() {
                   Where will Logos&apos; journey to understand himself take him? How far up the mysterious
                   World Tree, Big Drizzle, will he reach? How far deep into the mystery of the heart will
                   he penetrate? Just how weird is it all going to get?
-                </p>
-                <p>
-                  <em>An Infinite Heart</em> is a novel the author wrote in 2019 and 2020. Though he did
-                  attempt to plan out the narrative, it took on a life of its own, and it became this deep
-                  intense adventure in soulmaking for him, where he sat down every day and channelled this
-                  story about Logos&apos; quest to open his heart and connect with the mysteries of the Universe.
                 </p>
               </div>
 
@@ -67,6 +62,21 @@ export default function BookPage() {
                       Amazon
                     </div>
                     <div className="text-sm text-zinc-500">Kindle & Paperback</div>
+                  </div>
+                </a>
+
+                <a
+                  href="https://4106066624980.gumroad.com/l/aninfiniteheart"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-3 px-6 py-3 bg-zinc-900 border border-zinc-800 rounded-lg hover:border-zinc-600 transition-colors group"
+                >
+                  <FiExternalLink className="w-5 h-5 text-pink-500" />
+                  <div className="flex-1">
+                    <div className="font-medium group-hover:text-zinc-300 transition-colors">
+                      Gumroad
+                    </div>
+                    <div className="text-sm text-zinc-500">Digital Download</div>
                   </div>
                 </a>
               </div>
