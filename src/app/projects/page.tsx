@@ -9,10 +9,7 @@ export default function ProjectsPage() {
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-12">
         <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Projects</h1>
-          <p className="text-xl text-zinc-400 mb-12">
-            Things I&apos;ve built while learning to code.
-          </p>
+          <h1 className="text-4xl font-bold mb-12">Projects</h1>
 
           {projects.length === 0 ? (
             <div className="text-center py-12 text-zinc-500">

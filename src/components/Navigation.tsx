@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiImage, FiEdit3, FiCode, FiBook, FiSettings } from 'react-icons/fi';
+import { FiImage, FiEdit3, FiCode, FiBook, FiFileText, FiSettings } from 'react-icons/fi';
 
 export default function Navigation() {
   const pathname = usePathname();
@@ -12,6 +12,7 @@ export default function Navigation() {
     { href: '/writing', label: 'Writing', icon: FiEdit3 },
     { href: '/projects', label: 'Projects', icon: FiCode },
     { href: '/book', label: 'Book', icon: FiBook },
+    { href: '/resume', label: 'Resume', icon: FiFileText },
     { href: '/admin', label: 'Admin', icon: FiSettings },
   ];
 

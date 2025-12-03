@@ -11,6 +11,7 @@ export default function SimpleNav() {
     { href: '/writing', label: 'Writing' },
     { href: '/projects', label: 'Projects' },
     { href: '/book', label: 'Book' },
+    { href: '/resume', label: 'Resume' },
   ];
 
   return (
