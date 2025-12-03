@@ -9,7 +9,7 @@ export default function Navigation() {
 
   const links = [
     { href: '/', label: 'Gallery', icon: FiImage },
-    { href: '/writing', label: 'Writing', icon: FiEdit3 },
+    { href: 'https://souldirection.substack.com', label: 'Writing', icon: FiEdit3, external: true },
     { href: '/projects', label: 'Projects', icon: FiCode },
     { href: '/book', label: 'Book', icon: FiBook },
     { href: '/resume', label: 'Resume', icon: FiFileText },
@@ -27,20 +27,36 @@ export default function Navigation() {
 
           {/* Navigation links */}
           <div className="flex items-center space-x-1">
-            {links.map(({ href, label, icon: Icon }) => {
-              const isActive = pathname === href || (href !== '/' && pathname?.startsWith(href));
+            {links.map(({ href, label, icon: Icon, external }) => {
+              const isActive = !external && (pathname === href || (href !== '/' && pathname?.startsWith(href)));
+              const className = `
+                flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
+                ${isActive
+                  ? 'bg-zinc-800 text-white'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }
+              `;
+
+              if (external) {
+                return (
+                  <a
+                    key={href}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={className}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{label}</span>
+                  </a>
+                );
+              }
 
               return (
                 <Link
                   key={href}
                   href={href}
-                  className={`
-                    flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors
-                    ${isActive
-                      ? 'bg-zinc-800 text-white'
-                      : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
-                    }
-                  `}
+                  className={className}
                 >
                   <Icon className="w-4 h-4" />
                   <span className="hidden sm:inline">{label}</span>
