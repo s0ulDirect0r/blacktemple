@@ -2,6 +2,7 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Suspense } from 'react';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import StarField from '@/components/three/StarField';
 import TempleText from '@/components/three/TempleText';
 import SceneSetup from '@/components/three/SceneSetup';
@@ -24,6 +25,14 @@ export default function SpaceLanding() {
           <NavLinks />
           <UnknownMachine />
         </Suspense>
+        <EffectComposer>
+          <Bloom
+            intensity={0.5}
+            luminanceThreshold={0.95}
+            luminanceSmoothing={0.3}
+            mipmapBlur
+          />
+        </EffectComposer>
       </Canvas>
     </div>
   );
