@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import SpaceLanding from '@/components/three/SpaceLanding';
 
 export default function Home() {
-  redirect('/projects');
+  return <SpaceLanding />;
 }
