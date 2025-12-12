@@ -9,6 +9,11 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const isHome = pathname === '/';
 
+  // On home page, render only the 3D scene (no header/nav)
+  if (isHome) {
+    return <main>{children}</main>;
+  }
+
   return (
     <>
       <header className="text-center pt-6 pb-2">
@@ -23,7 +28,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
           />
         </Link>
       </header>
-      {!isHome && <SimpleNav />}
+      <SimpleNav />
       <main>{children}</main>
     </>
   );
