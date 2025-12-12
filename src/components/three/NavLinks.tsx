@@ -4,6 +4,9 @@ import { Text } from '@react-three/drei';
 import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 
+// Press Start 2P - classic 8-bit pixel font
+const PIXEL_FONT = '/fonts/PressStart2P.ttf';
+
 interface NavLink {
   label: string;
   href: string;
@@ -59,8 +62,9 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
     <Text
       ref={setMeshRef}
       position={position}
-      fontSize={0.4}
-      letterSpacing={0.08}
+      font={PIXEL_FONT}
+      fontSize={0.72}
+      letterSpacing={0.02}
       textAlign="center"
       anchorX="center"
       anchorY="middle"
@@ -69,32 +73,38 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
       onPointerOut={handlePointerOut}
     >
       {link.label.toUpperCase()}
-      <meshStandardMaterial
-        color={hovered ? '#ffffff' : '#888888'}
-        emissive={hovered ? '#333333' : '#000000'}
-        metalness={0.2}
-        roughness={0.8}
+      <meshBasicMaterial
+        color={hovered ? '#ffffff' : '#bbbbbb'}
+        toneMapped={false}
+        opacity={hovered ? 1 : 0.85}
+        transparent
       />
     </Text>
   );
 }
 
 export default function NavLinks() {
-  // Calculate positions to spread links evenly
-  const totalWidth = 12;
-  const spacing = totalWidth / (links.length - 1);
-  const startX = -totalWidth / 2;
+  // Arrange links in a 5-point star pattern around the title
+  const radius = 5;
 
   return (
-    <group position={[0, -2, 0]}>
-      {links.map((link, index) => (
-        <NavLinkText
-          key={link.href}
-          link={link}
-          position={[startX + index * spacing, 0, 0]}
-          index={index}
-        />
-      ))}
+    <group position={[0, 0, 0]}>
+      {links.map((link, index) => {
+        // 5 points of a star, starting from top and going clockwise
+        // Top, upper-right, lower-right, lower-left, upper-left
+        const angle = (Math.PI / 2) - (index * (2 * Math.PI / 5));
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius - 1.5;
+
+        return (
+          <NavLinkText
+            key={link.href}
+            link={link}
+            position={[x, y, 0]}
+            index={index}
+          />
+        );
+      })}
     </group>
   );
 }

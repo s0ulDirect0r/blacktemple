@@ -3,6 +3,9 @@ import { useFrame } from '@react-three/fiber';
 import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
+// Press Start 2P - classic 8-bit pixel font
+const PIXEL_FONT = '/fonts/PressStart2P.ttf';
+
 interface TempleTextProps {
   onClick?: () => void;
 }
@@ -11,10 +14,12 @@ export default function TempleText({ onClick }: TempleTextProps) {
   const textRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
+  const baseY = 6; // Position near top of canvas
+
   // Subtle floating animation
   useFrame((state) => {
     if (textRef.current) {
-      textRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
+      textRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
     }
   });
 
@@ -36,10 +41,11 @@ export default function TempleText({ onClick }: TempleTextProps) {
   return (
     <Text
       ref={textRef}
-      fontSize={1.2}
-      maxWidth={20}
-      lineHeight={1.2}
-      letterSpacing={0.15}
+      font={PIXEL_FONT}
+      fontSize={1.5}
+      maxWidth={40}
+      lineHeight={1.4}
+      letterSpacing={0.05}
       textAlign="center"
       anchorX="center"
       anchorY="middle"
@@ -48,11 +54,11 @@ export default function TempleText({ onClick }: TempleTextProps) {
       onPointerOut={handlePointerOut}
     >
       THE BLACK TEMPLE
-      <meshStandardMaterial
-        color={hovered ? '#ffffff' : '#e0e0e0'}
-        emissive={hovered ? '#404040' : '#1a1a1a'}
-        metalness={0.2}
-        roughness={0.8}
+      <meshBasicMaterial
+        color={hovered ? '#ffffff' : '#eeeeee'}
+        toneMapped={false}
+        opacity={hovered ? 1 : 0.9}
+        transparent
       />
     </Text>
   );
