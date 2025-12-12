@@ -96,8 +96,9 @@ varying float vAlpha;
 void main() {
   vColor = aColor;
 
-  // Base swirl rotation around Y axis
-  float angle = uTime * aSpeed + aPhase;
+  // Breathing swirl speed - varies over time
+  float breathe = 1.0 + sin(uTime * 0.4) * 0.3 + sin(uTime * 0.17) * 0.2;
+  float angle = uTime * aSpeed * breathe + aPhase;
 
   // Convert to spherical-ish coordinates for swirling
   float x = position.x;
@@ -110,12 +111,16 @@ void main() {
   float newX = x * cosA - z * sinA;
   float newZ = x * sinA + z * cosA;
 
+  // Breathing noise intensity
+  float noiseBreath = 0.15 + sin(uTime * 0.5 + aPhase) * 0.1 + sin(uTime * 0.23) * 0.05;
+
   // Apply noise displacement for organic movement
   vec3 noiseInput = vec3(newX * 2.0, y * 2.0, newZ * 2.0 + uTime * 0.3);
-  float noiseVal = snoise(noiseInput) * 0.15;
+  float noiseVal = snoise(noiseInput) * noiseBreath;
 
-  // Secondary noise for vertical movement
-  float verticalNoise = snoise(vec3(newX * 1.5, uTime * 0.5, newZ * 1.5)) * 0.1;
+  // Secondary noise for vertical movement (also breathing)
+  float verticalBreath = 0.1 + sin(uTime * 0.35) * 0.08;
+  float verticalNoise = snoise(vec3(newX * 1.5, uTime * 0.5, newZ * 1.5)) * verticalBreath;
 
   // Construct final position
   vec3 newPos = vec3(newX, y + verticalNoise, newZ);
@@ -124,8 +129,10 @@ void main() {
   vec3 radialDir = normalize(newPos);
   newPos += radialDir * noiseVal * uIntensity;
 
-  // Pulse effect
-  float pulse = 1.0 + sin(uTime * 2.0 + aPhase) * 0.05 * uIntensity;
+  // Layered pulse effect for organic breathing
+  float pulse1 = sin(uTime * 0.6 + aPhase) * 0.08;
+  float pulse2 = sin(uTime * 1.1 + aPhase * 0.5) * 0.04;
+  float pulse = 1.0 + (pulse1 + pulse2) * uIntensity;
   newPos *= pulse;
 
   vec4 mvPosition = modelViewMatrix * vec4(newPos, 1.0);
@@ -136,8 +143,9 @@ void main() {
   float size = baseSize * uIntensity;
   gl_PointSize = size * (300.0 / -mvPosition.z);
 
-  // Higher alpha for better coverage
-  vAlpha = 0.95;
+  // Breathing alpha for shimmer effect
+  float alphaBreath = sin(uTime * 0.8 + aPhase * 2.0) * 0.15 + sin(uTime * 1.7 + aPhase) * 0.1;
+  vAlpha = 0.85 + alphaBreath;
 }
 `;
 

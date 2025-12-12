@@ -1,7 +1,6 @@
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useCursor } from '@react-three/drei';
-import * as THREE from 'three';
 import CoreStar from './CoreStar';
 import CoronaParticles from './CoronaParticles';
 import SurfaceActivity from './SurfaceActivity';
@@ -29,37 +28,18 @@ export default function UnknownMachine({ position = [0, -0.8, 0] }: UnknownMachi
 
   useCursor(hovered, 'pointer', 'default');
 
-  const lastPointer = useRef({ x: 0, y: 0 });
-  const pointerStaleTime = useRef(0);
-
+  // Organic pulsing intensity using layered sine waves
   useFrame((state) => {
-    const pointer = state.pointer;
-    const time = state.clock.elapsedTime;
+    const t = state.clock.elapsedTime;
 
-    // Detect if pointer has moved
-    const pointerMoved =
-      Math.abs(pointer.x - lastPointer.current.x) > 0.001 ||
-      Math.abs(pointer.y - lastPointer.current.y) > 0.001;
+    // Layer multiple frequencies for pseudo-random feel
+    const slow = Math.sin(t * 0.3) * 0.3;
+    const medium = Math.sin(t * 0.7 + 1.5) * 0.2;
+    const fast = Math.sin(t * 1.3 + 3.0) * 0.1;
+    const veryFast = Math.sin(t * 2.1 + 0.5) * 0.05;
 
-    if (pointerMoved) {
-      lastPointer.current = { x: pointer.x, y: pointer.y };
-      pointerStaleTime.current = time;
-    }
-
-    // If pointer hasn't moved for 0.5s, assume mouse left canvas
-    const timeSinceMove = time - pointerStaleTime.current;
-    const isStale = timeSinceMove > 0.5;
-
-    // Calculate base intensity from pointer distance
-    const distance = Math.sqrt(pointer.x ** 2 + pointer.y ** 2);
-    const pointerIntensity = 1 + (1 - Math.min(distance, 1)) * 0.8;
-
-    // If stale, lerp back to base intensity of 1.0
-    if (isStale) {
-      intensityRef.current = THREE.MathUtils.lerp(intensityRef.current, 1.0, 0.02);
-    } else {
-      intensityRef.current = pointerIntensity;
-    }
+    // Base of 1.0, ranging roughly 0.65 to 1.65
+    intensityRef.current = 1.0 + slow + medium + fast + veryFast;
   });
 
   return (
