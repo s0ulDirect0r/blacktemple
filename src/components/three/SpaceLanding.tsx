@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import StarField from './StarField';
 import TempleText from './TempleText';
 import SceneSetup from './SceneSetup';
+import NavLinks from './NavLinks';
 
 export default function SpaceLanding() {
   return (
@@ -19,6 +20,7 @@ export default function SpaceLanding() {
           <SceneSetup />
           <StarField />
           <TempleText />
+          <NavLinks />
         </Suspense>
       </Canvas>
     </div>
