@@ -6,6 +6,7 @@ import StarField from './StarField';
 import TempleText from './TempleText';
 import SceneSetup from './SceneSetup';
 import NavLinks from './NavLinks';
+import UnknownMachine from './UnknownMachine';
 
 export default function SpaceLanding() {
   return (
@@ -21,6 +22,7 @@ export default function SpaceLanding() {
           <StarField />
           <TempleText />
           <NavLinks />
+          <UnknownMachine />
         </Suspense>
       </Canvas>
     </div>
