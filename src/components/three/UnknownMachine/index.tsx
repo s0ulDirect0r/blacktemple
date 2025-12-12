@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useCursor } from '@react-three/drei';
+import * as THREE from 'three';
 import CoreStar from './CoreStar';
 import CoronaParticles from './CoronaParticles';
 import SurfaceActivity from './SurfaceActivity';
