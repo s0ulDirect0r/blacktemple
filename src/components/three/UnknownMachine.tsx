@@ -121,7 +121,7 @@ export default function UnknownMachine() {
   return (
     <group
       ref={groupRef}
-      position={[0, 0, 0]}
+      position={[0, -0.8, 0]}
       onClick={handleClick}
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}

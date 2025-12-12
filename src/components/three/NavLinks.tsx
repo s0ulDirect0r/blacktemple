@@ -14,11 +14,12 @@ interface NavLink {
 }
 
 const links: NavLink[] = [
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'Writing', href: 'https://souldirection.substack.com', external: true },
   { label: 'Projects', href: '/projects' },
-  { label: 'Book', href: '/book' },
+  { label: 'Gallery', href: '/gallery' },
   { label: 'Resume', href: '/resume' },
+  { label: 'About Me', href: '/about' },
+  { label: 'Book', href: '/book' },
+  { label: 'Writing', href: 'https://souldirection.substack.com', external: true },
 ];
 
 interface NavLinkTextProps {
@@ -84,17 +85,16 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
 }
 
 export default function NavLinks() {
-  // Arrange links in a 5-point star pattern around the title
+  // Arrange links in a 6-point star pattern around the title
   const radius = 5;
 
   return (
     <group position={[0, 0, 0]}>
       {links.map((link, index) => {
-        // 5 points of a star, starting from top and going clockwise
-        // Top, upper-right, lower-right, lower-left, upper-left
-        const angle = (Math.PI / 2) - (index * (2 * Math.PI / 5));
+        // 6 points of a star, starting from top and going clockwise
+        const angle = (Math.PI / 2) - (index * (2 * Math.PI / 6));
         const x = Math.cos(angle) * radius;
-        const y = Math.sin(angle) * radius - 1.5;
+        const y = Math.sin(angle) * radius - 0.8;
 
         return (
           <NavLinkText
