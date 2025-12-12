@@ -1,5 +1,6 @@
 import { useRef, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 
 const RAINBOW_COLORS = [
@@ -54,11 +55,20 @@ export default function UnknownMachine() {
   const coreRef = useRef<THREE.Mesh>(null);
   const glowRef = useRef<THREE.Sprite>(null);
   const raysRef = useRef<THREE.Group>(null);
+  const innerGlowRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  const [intensity, setIntensity] = useState(1);
+  const intensityRef = useRef(1);
+
+  useCursor(hovered, 'pointer', 'default');
 
   useFrame((state) => {
     const time = state.clock.elapsedTime;
+
+    // Calculate intensity
+    const pointer = state.pointer;
+    const distance = Math.sqrt(pointer.x ** 2 + pointer.y ** 2);
+    const proximityIntensity = 1 + (1 - Math.min(distance, 1)) * 0.8;
+    intensityRef.current = hovered ? 1.5 : proximityIntensity;
 
     // Pulse the core
     if (coreRef.current) {
@@ -66,37 +76,25 @@ export default function UnknownMachine() {
       coreRef.current.scale.setScalar(pulse);
     }
 
-    // Pulse the glow
+    // Pulse the glow and update opacity
     if (glowRef.current) {
       const glowPulse = 1 + Math.sin(time * 2) * 0.2;
-      glowRef.current.scale.setScalar(3 * glowPulse * intensity);
+      glowRef.current.scale.setScalar(3 * glowPulse * intensityRef.current);
+      const spriteMaterial = glowRef.current.material as THREE.SpriteMaterial;
+      spriteMaterial.opacity = 0.6 * intensityRef.current;
+    }
+
+    // Update inner glow opacity
+    if (innerGlowRef.current) {
+      const material = innerGlowRef.current.material as THREE.MeshBasicMaterial;
+      material.opacity = 0.4 * intensityRef.current;
     }
 
     // Rotate rays
     if (raysRef.current) {
       raysRef.current.rotation.z += 0.008;
     }
-
-    // Mouse proximity detection
-    const pointer = state.pointer;
-    const distance = Math.sqrt(pointer.x ** 2 + pointer.y ** 2);
-    const proximityIntensity = 1 + (1 - Math.min(distance, 1)) * 0.8;
-    setIntensity(hovered ? 1.5 : proximityIntensity);
   });
-
-  const handleClick = () => {
-    console.log('UNKNOWN Machine activated');
-  };
-
-  const handlePointerOver = () => {
-    setHovered(true);
-    document.body.style.cursor = 'pointer';
-  };
-
-  const handlePointerOut = () => {
-    setHovered(false);
-    document.body.style.cursor = 'default';
-  };
 
   // Create a radial gradient texture for the glow
   const glowTexture = useMemo(() => {
@@ -122,9 +120,8 @@ export default function UnknownMachine() {
     <group
       ref={groupRef}
       position={[0, -0.8, 0]}
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
     >
       {/* Bright core */}
       <mesh ref={coreRef}>
@@ -133,12 +130,12 @@ export default function UnknownMachine() {
       </mesh>
 
       {/* Inner glow sphere */}
-      <mesh>
+      <mesh ref={innerGlowRef}>
         <sphereGeometry args={[0.4, 32, 32]} />
         <meshBasicMaterial
           color="#aaccff"
           transparent
-          opacity={0.4 * intensity}
+          opacity={0.4}
           blending={THREE.AdditiveBlending}
         />
       </mesh>
@@ -148,7 +145,7 @@ export default function UnknownMachine() {
         <spriteMaterial
           map={glowTexture}
           transparent
-          opacity={0.6 * intensity}
+          opacity={0.6}
           blending={THREE.AdditiveBlending}
         />
       </sprite>
@@ -160,7 +157,7 @@ export default function UnknownMachine() {
             key={color}
             color={color}
             angle={(i * Math.PI * 2) / RAINBOW_COLORS.length}
-            intensity={intensity}
+            intensity={1}
           />
         ))}
       </group>

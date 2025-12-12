@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Press Start 2P - classic 8-bit pixel font
@@ -14,6 +14,8 @@ export default function TempleText({ onClick }: TempleTextProps) {
   const textRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
 
+  useCursor(hovered, 'pointer', 'default');
+
   const baseY = 6; // Position near top of canvas
 
   // Subtle floating animation
@@ -22,21 +24,6 @@ export default function TempleText({ onClick }: TempleTextProps) {
       textRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
     }
   });
-
-  const handleClick = () => {
-    console.log('The Black Temple clicked');
-    onClick?.();
-  };
-
-  const handlePointerOver = () => {
-    setHovered(true);
-    document.body.style.cursor = 'pointer';
-  };
-
-  const handlePointerOut = () => {
-    setHovered(false);
-    document.body.style.cursor = 'default';
-  };
 
   return (
     <Text
@@ -49,9 +36,9 @@ export default function TempleText({ onClick }: TempleTextProps) {
       textAlign="center"
       anchorX="center"
       anchorY="middle"
-      onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
+      onClick={onClick}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
     >
       THE BLACK TEMPLE
       <meshBasicMaterial

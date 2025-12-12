@@ -2,11 +2,11 @@
 
 import { Canvas } from '@react-three/fiber';
 import { Suspense } from 'react';
-import StarField from './StarField';
-import TempleText from './TempleText';
-import SceneSetup from './SceneSetup';
-import NavLinks from './NavLinks';
-import UnknownMachine from './UnknownMachine';
+import StarField from '@/components/three/StarField';
+import TempleText from '@/components/three/TempleText';
+import SceneSetup from '@/components/three/SceneSetup';
+import NavLinks from '@/components/three/NavLinks';
+import UnknownMachine from '@/components/three/UnknownMachine';
 
 export default function SpaceLanding() {
   return (

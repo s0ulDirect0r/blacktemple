@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Text } from '@react-three/drei';
+import { Text, useCursor } from '@react-three/drei';
 import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
 
@@ -33,6 +33,8 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
   const [hovered, setHovered] = useState(false);
   const [meshRef, setMeshRef] = useState<THREE.Mesh | null>(null);
 
+  useCursor(hovered, 'pointer', 'default');
+
   // Staggered floating animation
   useFrame((state) => {
     if (meshRef) {
@@ -49,16 +51,6 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
     }
   };
 
-  const handlePointerOver = () => {
-    setHovered(true);
-    document.body.style.cursor = 'pointer';
-  };
-
-  const handlePointerOut = () => {
-    setHovered(false);
-    document.body.style.cursor = 'default';
-  };
-
   return (
     <Text
       ref={setMeshRef}
@@ -70,8 +62,8 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
       anchorX="center"
       anchorY="middle"
       onClick={handleClick}
-      onPointerOver={handlePointerOver}
-      onPointerOut={handlePointerOut}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
     >
       {link.label.toUpperCase()}
       <meshBasicMaterial
