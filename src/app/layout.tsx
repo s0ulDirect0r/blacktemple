@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "The Black Temple",
-  description: "A curated gallery of digital artwork",
+  description: "enter the digital temple of dopeness",
 };
 
 export default function RootLayout({
