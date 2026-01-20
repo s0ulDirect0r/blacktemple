@@ -13,17 +13,20 @@ interface TempleTextProps {
 export default function TempleText({ onClick }: TempleTextProps) {
   const textRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
-  const { size } = useThree();
+  const { viewport } = useThree();
 
   useCursor(hovered, 'pointer', 'default');
 
-  // Fluid responsive scaling
-  // fontSize scales from ~0.9 at 375px to ~1.5 at 1400px
-  const fontSize = Math.min(1.5, Math.max(0.9, size.width / 500));
-  // Only wrap on narrow mobile screens (< 500px), otherwise no wrapping
-  const maxWidth = size.width < 500 ? 8 : 100;
-  // baseY adjusts for wrapped text on smaller screens
-  const baseY = size.width < 500 ? 6.6 : 6;
+  // Use aspect ratio to detect portrait vs landscape orientation
+  const aspect = viewport.width / viewport.height;
+  const isPortrait = aspect < 1;
+
+  // Font size: 5% of viewport width, capped at reasonable range
+  const fontSize = Math.min(1.5, Math.max(0.8, viewport.width * 0.05));
+  // Wrap text on portrait screens to fit within view
+  const maxWidth = isPortrait ? viewport.width * 0.85 : 100;
+  // Position title at 35% from top of visible area
+  const baseY = viewport.height * 0.35;
 
   // Subtle floating animation
   useFrame((state) => {

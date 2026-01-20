@@ -90,17 +90,19 @@ function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
 }
 
 export default function NavLinks() {
-  const { size } = useThree();
+  const { viewport } = useThree();
 
-  // Use column layout for narrow screens, star pattern for wider
-  const useColumnLayout = size.width < 500;
+  // Use aspect ratio to detect portrait vs landscape orientation
+  const aspect = viewport.width / viewport.height;
+  const isPortrait = aspect < 1;
 
-  // Fluid scaling for font size: ~0.6 at 375px to ~0.72 at 1400px
-  const fontSize = Math.min(0.72, Math.max(0.6, size.width / 1000));
+  // Font size: 2.5% of viewport width, capped at reasonable range
+  const fontSize = Math.min(0.72, Math.max(0.4, viewport.width * 0.025));
 
-  if (useColumnLayout) {
-    // Narrow screens: Column layout - links above and below the machine
-    const verticalSpacing = Math.max(0.9, size.width / 400);
+  if (isPortrait) {
+    // Portrait: Column layout - links above and below the machine
+    // Spacing is 8% of viewport height
+    const verticalSpacing = Math.max(0.9, viewport.height * 0.08);
     const aboveStartY = 3.2;
     const belowStartY = -2.8;
 
@@ -131,8 +133,8 @@ export default function NavLinks() {
   }
 
   // Wider screens: 6-point star pattern around the machine
-  // Fluid radius: ~3 at 500px to ~5 at 1400px
-  const radius = Math.min(5, Math.max(3, size.width / 280));
+  // Star radius is 20% of viewport width, capped at reasonable sizes
+  const radius = Math.min(5, Math.max(3, viewport.width * 0.2));
 
   return (
     <group position={[0, 0, 0]}>
