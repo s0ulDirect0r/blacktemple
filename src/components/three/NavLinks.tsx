@@ -101,10 +101,14 @@ export default function NavLinks() {
 
   if (isPortrait) {
     // Portrait: Column layout - links above and below the machine
-    // Spacing is 8% of viewport height
-    const verticalSpacing = Math.max(0.9, viewport.height * 0.08);
-    const aboveStartY = 3.2;
-    const belowStartY = -2.8;
+    // Spacing is 6% of viewport height, minimum 1.0 for readability
+    const verticalSpacing = Math.max(1.0, viewport.height * 0.06);
+    // Machine is centered at y=0, glow extends ~3 units.
+    // Above group: bottom link (Gallery) at y=2, just above machine
+    const aboveBottomY = 2.0;
+    const aboveStartY = aboveBottomY + (linksAbove.length - 1) * verticalSpacing;
+    // Below group: top link (Book) at y=-4, below the machine glow
+    const belowStartY = -4.0;
 
     return (
       <group position={[0, 0, 0]}>
