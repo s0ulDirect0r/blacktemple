@@ -3,7 +3,7 @@
 export default function AboutZoneContent() {
   return (
     <div className="max-w-3xl mx-auto text-white">
-      <h1 className="text-4xl font-bold mb-8 text-center">About Me</h1>
+      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl mb-8 text-center">About Me</h1>
 
       <div className="prose prose-invert prose-zinc max-w-none space-y-6 text-lg leading-relaxed">
         <p>

@@ -25,7 +25,7 @@ export default function BookZoneContent() {
 
         {/* Book details */}
         <div className="flex flex-col justify-between max-w-lg">
-          <h1 className="text-4xl font-bold">An Infinite Heart</h1>
+          <h1 className="font-pixel text-base sm:text-lg md:text-xl">An Infinite Heart</h1>
 
           <p className="text-lg text-zinc-400 mt-2">by Matthew D. Huff</p>
 

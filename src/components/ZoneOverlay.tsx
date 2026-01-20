@@ -1,6 +1,7 @@
 'use client';
 
 import { useNavigation } from '@/context/NavigationContext';
+import ZoneNavBar from './ZoneNavBar';
 import GalleryZoneContent from './zones/GalleryZoneContent';
 import BookZoneContent from './zones/BookZoneContent';
 import ProjectsZoneContent from './zones/ProjectsZoneContent';
@@ -21,30 +22,37 @@ export default function ZoneOverlay() {
   const isVisible = !isTransitioning;
 
   return (
-    <div
-      className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none"
-      style={{
-        transition: 'opacity 0.5s ease-in-out',
-        opacity: isVisible ? 1 : 0,
-      }}
-    >
+    <>
+      {/* Navigation bar at top */}
+      <ZoneNavBar />
+
+      {/* Zone content panel */}
       <div
-        className="pointer-events-auto w-[90vw] max-w-6xl h-[85vh] overflow-auto"
+        className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none"
         style={{
-          background: 'rgba(0, 0, 0, 0.9)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          borderRadius: '16px',
-          padding: '32px',
+          paddingTop: '60px', // Account for nav bar height
+          transition: 'opacity 0.5s ease-in-out',
+          opacity: isVisible ? 1 : 0,
         }}
       >
-        {targetZone === 'gallery' && <GalleryZoneContent />}
-        {targetZone === 'book' && <BookZoneContent />}
-        {targetZone === 'projects' && <ProjectsZoneContent />}
-        {targetZone === 'resume' && <ResumeZoneContent />}
-        {targetZone === 'about' && <AboutZoneContent />}
+        <div
+          className="pointer-events-auto w-[90vw] max-w-6xl h-[calc(85vh-30px)] overflow-auto"
+          style={{
+            background: 'rgba(0, 0, 0, 0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '32px',
+          }}
+        >
+          {targetZone === 'gallery' && <GalleryZoneContent />}
+          {targetZone === 'book' && <BookZoneContent />}
+          {targetZone === 'projects' && <ProjectsZoneContent />}
+          {targetZone === 'resume' && <ResumeZoneContent />}
+          {targetZone === 'about' && <AboutZoneContent />}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

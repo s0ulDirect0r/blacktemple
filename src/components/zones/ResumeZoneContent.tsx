@@ -14,7 +14,7 @@ export default function ResumeZoneContent() {
     <div className="max-w-4xl mx-auto text-white">
       {/* Header */}
       <header className="text-center mb-12">
-        <h1 className="text-5xl font-bold mb-4">Matthew D. Huff</h1>
+        <h1 className="font-pixel text-lg sm:text-xl md:text-2xl mb-4">Matthew D. Huff</h1>
         <div className="flex flex-wrap justify-center items-center gap-4 text-zinc-400 text-sm">
           <span className="flex items-center gap-1">
             <FiMapPin className="w-4 h-4" />
