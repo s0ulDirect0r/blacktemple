@@ -63,7 +63,7 @@ export default function ArtGallery() {
       <main className="pb-16">
         {isLoading ? (
           <div className="py-16">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {[...Array(SKELETON_PLACEHOLDERS)].map((_, index) => (
                 <div 
                   key={index} 
@@ -87,7 +87,7 @@ export default function ArtGallery() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {images.map((image) => (
                 <Link
                 key={image.id}

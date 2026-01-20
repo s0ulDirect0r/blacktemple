@@ -13,7 +13,7 @@ export default function ResumeZoneContent() {
   return (
     <div className="max-w-4xl mx-auto text-white">
       {/* Header */}
-      <header className="text-center mb-12">
+      <header className="text-center mb-8 sm:mb-12">
         <h1 className="font-pixel text-lg sm:text-xl md:text-2xl mb-4">Matthew D. Huff</h1>
         <div className="flex flex-wrap justify-center items-center gap-4 text-zinc-400 text-sm">
           <span className="flex items-center gap-1">
@@ -55,14 +55,14 @@ export default function ResumeZoneContent() {
       </header>
 
       {/* Experience Section */}
-      <section className="mb-12">
+      <section className="mb-8 sm:mb-12">
         <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-zinc-800">
           Experience
         </h2>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Landings */}
-          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
                 <h3 className="text-xl font-semibold">Software Engineer</h3>
@@ -106,7 +106,7 @@ export default function ResumeZoneContent() {
           </article>
 
           {/* Scrimmage */}
-          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
                 <h3 className="text-xl font-semibold">Freelance</h3>
@@ -129,7 +129,7 @@ export default function ResumeZoneContent() {
           </article>
 
           {/* SquareFoot */}
-          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
                 <h3 className="text-xl font-semibold">Software Engineer</h3>
@@ -165,7 +165,7 @@ export default function ResumeZoneContent() {
           </article>
 
           {/* Butterfly.ai */}
-          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
                 <h3 className="text-xl font-semibold">Software Engineer</h3>
@@ -194,7 +194,7 @@ export default function ResumeZoneContent() {
           </article>
 
           {/* Goldbean */}
-          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
                 <h3 className="text-xl font-semibold">Software Engineer</h3>
@@ -225,17 +225,17 @@ export default function ResumeZoneContent() {
       </section>
 
       {/* Recent Projects Section */}
-      <section className="mb-12">
+      <section className="mb-8 sm:mb-12">
         <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-zinc-800">
           Recent Projects
         </h2>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
           <a
             href="https://sun-simulator.blacktemple.art"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors group"
+            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-600 transition-colors group"
           >
             <div className="flex items-center gap-2 mb-2">
               <h3 className="text-lg font-semibold group-hover:text-zinc-300 transition-colors">
@@ -253,7 +253,7 @@ export default function ResumeZoneContent() {
             href="https://one-must-imagine-sisyphus-tappy-smoky.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors group"
+            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-600 transition-colors group"
           >
             <div className="flex items-center gap-2 mb-2">
               <h3 className="text-lg font-semibold group-hover:text-zinc-300 transition-colors">

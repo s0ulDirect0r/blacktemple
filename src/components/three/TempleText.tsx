@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -13,10 +13,17 @@ interface TempleTextProps {
 export default function TempleText({ onClick }: TempleTextProps) {
   const textRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const { size } = useThree();
 
   useCursor(hovered, 'pointer', 'default');
 
-  const baseY = 6; // Position near top of canvas
+  // Scale font size based on viewport width for true responsiveness
+  const isMobile = size.width < 640;
+  // Scale fontSize: ~35% bigger than original
+  const fontSize = isMobile ? Math.max(0.54, size.width / 555) : 1.5;
+  // Constrain maxWidth on mobile to force wrapping if needed
+  const maxWidth = isMobile ? 8 : 40;
+  const baseY = isMobile ? 6.6 : 6; // Position near top of canvas
 
   // Subtle floating animation
   useFrame((state) => {
@@ -29,8 +36,8 @@ export default function TempleText({ onClick }: TempleTextProps) {
     <Text
       ref={textRef}
       font={PIXEL_FONT}
-      fontSize={1.5}
-      maxWidth={40}
+      fontSize={fontSize}
+      maxWidth={maxWidth}
       lineHeight={1.4}
       letterSpacing={0.05}
       textAlign="center"

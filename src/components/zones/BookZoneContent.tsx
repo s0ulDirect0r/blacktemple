@@ -6,7 +6,7 @@ import { FiExternalLink } from 'react-icons/fi';
 export default function BookZoneContent() {
   return (
     <div className="max-w-4xl mx-auto text-white">
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
         {/* Book cover */}
         <div className="flex justify-center md:justify-end">
           <div className="w-full max-w-sm">

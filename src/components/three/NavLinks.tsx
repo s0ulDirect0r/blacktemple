@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 import { useNavigation } from '@/context/NavigationContext';
@@ -18,22 +18,30 @@ interface NavLink {
   externalUrl?: string;
 }
 
-const links: NavLink[] = [
+// Links split into above/below machine groups for mobile layout
+const linksAbove: NavLink[] = [
   { label: 'Projects', zoneId: 'projects' },
+  { label: 'Writing', zoneId: null, external: true, externalUrl: 'https://souldirection.substack.com' },
   { label: 'Gallery', zoneId: 'gallery' },
+];
+
+const linksBelow: NavLink[] = [
+  { label: 'Book', zoneId: 'book' },
   { label: 'Resume', zoneId: 'resume' },
   { label: 'About Me', zoneId: 'about' },
-  { label: 'Book', zoneId: 'book' },
-  { label: 'Writing', zoneId: null, external: true, externalUrl: 'https://souldirection.substack.com' },
 ];
+
+// All links combined for desktop star pattern
+const allLinks: NavLink[] = [...linksAbove, ...linksBelow];
 
 interface NavLinkTextProps {
   link: NavLink;
   position: [number, number, number];
   index: number;
+  fontSize: number;
 }
 
-function NavLinkText({ link, position, index }: NavLinkTextProps) {
+function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
   const { navigateToZone } = useNavigation();
   const [hovered, setHovered] = useState(false);
   const [meshRef, setMeshRef] = useState<THREE.Mesh | null>(null);
@@ -61,7 +69,7 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
       ref={setMeshRef}
       position={position}
       font={PIXEL_FONT}
-      fontSize={0.72}
+      fontSize={fontSize}
       letterSpacing={0.02}
       textAlign="center"
       anchorX="center"
@@ -82,12 +90,49 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
 }
 
 export default function NavLinks() {
-  // Arrange links in a 6-point star pattern around the title
+  const { size } = useThree();
+  const isMobile = size.width < 640;
+
+  const fontSize = isMobile ? 0.42 : 0.72;
+
+  if (isMobile) {
+    // Mobile: Column layout - links above and below the machine
+    const verticalSpacing = 1.1;
+    const aboveStartY = 3.2; // Start position for links above machine
+    const belowStartY = -2.8; // Start position for links below machine
+
+    return (
+      <group position={[0, 0, 0]}>
+        {/* Links above the machine */}
+        {linksAbove.map((link, index) => (
+          <NavLinkText
+            key={link.label}
+            link={link}
+            position={[0, aboveStartY - index * verticalSpacing, 0]}
+            index={index}
+            fontSize={fontSize}
+          />
+        ))}
+        {/* Links below the machine */}
+        {linksBelow.map((link, index) => (
+          <NavLinkText
+            key={link.label}
+            link={link}
+            position={[0, belowStartY - index * verticalSpacing, 0]}
+            index={index + linksAbove.length}
+            fontSize={fontSize}
+          />
+        ))}
+      </group>
+    );
+  }
+
+  // Desktop: 6-point star pattern around the title
   const radius = 5;
 
   return (
     <group position={[0, 0, 0]}>
-      {links.map((link, index) => {
+      {allLinks.map((link, index) => {
         // 6 points of a star, starting from top and going clockwise
         const angle = (Math.PI / 2) - (index * (2 * Math.PI / 6));
         const x = Math.cos(angle) * radius;
@@ -99,6 +144,7 @@ export default function NavLinks() {
             link={link}
             position={[x, y, 0]}
             index={index}
+            fontSize={fontSize}
           />
         );
       })}
