@@ -1,25 +1,30 @@
 import { useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
-import { useRouter } from 'next/navigation';
 import * as THREE from 'three';
+import { useNavigation } from '@/context/NavigationContext';
+import { ZoneId } from '@/constants/zones';
+
+// Three.js requires direct mutation of mesh properties - this is the standard pattern
+/* eslint-disable react-hooks/immutability */
 
 // Press Start 2P - classic 8-bit pixel font
 const PIXEL_FONT = '/fonts/PressStart2P.ttf';
 
 interface NavLink {
   label: string;
-  href: string;
+  zoneId: ZoneId | null;
   external?: boolean;
+  externalUrl?: string;
 }
 
 const links: NavLink[] = [
-  { label: 'Projects', href: '/projects' },
-  { label: 'Gallery', href: '/gallery' },
-  { label: 'Resume', href: '/resume' },
-  { label: 'About Me', href: '/about' },
-  { label: 'Book', href: '/book' },
-  { label: 'Writing', href: 'https://souldirection.substack.com', external: true },
+  { label: 'Projects', zoneId: 'projects' },
+  { label: 'Gallery', zoneId: 'gallery' },
+  { label: 'Resume', zoneId: 'resume' },
+  { label: 'About Me', zoneId: 'about' },
+  { label: 'Book', zoneId: 'book' },
+  { label: 'Writing', zoneId: null, external: true, externalUrl: 'https://souldirection.substack.com' },
 ];
 
 interface NavLinkTextProps {
@@ -29,7 +34,7 @@ interface NavLinkTextProps {
 }
 
 function NavLinkText({ link, position, index }: NavLinkTextProps) {
-  const router = useRouter();
+  const { navigateToZone } = useNavigation();
   const [hovered, setHovered] = useState(false);
   const [meshRef, setMeshRef] = useState<THREE.Mesh | null>(null);
 
@@ -44,10 +49,10 @@ function NavLinkText({ link, position, index }: NavLinkTextProps) {
   });
 
   const handleClick = () => {
-    if (link.external) {
-      window.open(link.href, '_blank', 'noopener,noreferrer');
-    } else {
-      router.push(link.href);
+    if (link.external && link.externalUrl) {
+      window.open(link.externalUrl, '_blank', 'noopener,noreferrer');
+    } else if (link.zoneId) {
+      navigateToZone(link.zoneId);
     }
   };
 
@@ -90,7 +95,7 @@ export default function NavLinks() {
 
         return (
           <NavLinkText
-            key={link.href}
+            key={link.label}
             link={link}
             position={[x, y, 0]}
             index={index}
