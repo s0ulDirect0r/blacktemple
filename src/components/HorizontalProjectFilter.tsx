@@ -61,11 +61,11 @@ export default function HorizontalProjectFilter() {
 
   return (
     <div className="mb-8 flex justify-center" aria-busy={isPending}>
-      <div className="flex flex-wrap items-center justify-center gap-2 max-w-4xl">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-4xl">
         {/* All Projects */}
         <button
           onClick={() => startTransition(() => setSelectedProjectId(null))}
-          className={`px-4 py-2 text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
+          className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
             !selectedProjectId
               ? 'bg-white text-black'
               : 'text-white hover:bg-white hover:text-black'
@@ -77,7 +77,7 @@ export default function HorizontalProjectFilter() {
         {/* Unassigned */}
         <button
           onClick={() => startTransition(() => setSelectedProjectId('unassigned'))}
-          className={`px-4 py-2 text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
+          className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
             selectedProjectId === 'unassigned'
               ? 'bg-white text-black'
               : 'text-white hover:bg-white hover:text-black'
@@ -91,7 +91,7 @@ export default function HorizontalProjectFilter() {
           <button
             key={project.id}
             onClick={() => startTransition(() => setSelectedProjectId(project.id))}
-            className={`px-4 py-2 text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
+            className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs whitespace-nowrap transition-all border-2 border-white rounded-full font-black ${
               selectedProjectId === project.id
                 ? 'bg-white text-black'
                 : 'text-white hover:bg-white hover:text-black'

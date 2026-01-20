@@ -38,7 +38,7 @@ export default function ProjectsZoneContent() {
 
   return (
     <div className="max-w-6xl mx-auto text-white">
-      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-12">Projects</h1>
+      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-6 sm:mb-12">Projects</h1>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
@@ -49,7 +49,7 @@ export default function ProjectsZoneContent() {
           <p>No projects yet. Check back soon!</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
           {projects.map((project) => (
             <article
               key={project.slug}
@@ -73,7 +73,7 @@ export default function ProjectsZoneContent() {
               )}
 
               {/* Project content */}
-              <div className="p-6">
+              <div className="p-4 sm:p-6">
                 <h2 className="text-2xl font-bold mb-3 group-hover:text-zinc-300 transition-colors">
                   {project.title}
                 </h2>

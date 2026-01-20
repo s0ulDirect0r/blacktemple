@@ -5,12 +5,12 @@ import Image from "next/image";
 export default function AboutZoneContent() {
   return (
     <div className="max-w-3xl mx-auto text-white">
-      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl mb-8 text-center">
+      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl mb-6 sm:mb-8 text-center">
         About Me
       </h1>
 
       {/* Profile photo */}
-      <div className="flex justify-center mb-8">
+      <div className="flex justify-center mb-6 sm:mb-8">
         <div className="relative w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 rounded-full overflow-hidden border-2 border-zinc-700">
           <Image
             src="https://zp7hauqhmxup1nll.public.blob.vercel-storage.com/_ADS3423.jpeg"

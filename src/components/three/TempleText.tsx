@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
 
@@ -13,10 +13,20 @@ interface TempleTextProps {
 export default function TempleText({ onClick }: TempleTextProps) {
   const textRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  const { viewport } = useThree();
 
   useCursor(hovered, 'pointer', 'default');
 
-  const baseY = 6; // Position near top of canvas
+  // Use aspect ratio to detect portrait vs landscape orientation
+  const aspect = viewport.width / viewport.height;
+  const isPortrait = aspect < 1;
+
+  // Font size: 5% of viewport width, capped at reasonable range
+  const fontSize = Math.min(1.5, Math.max(0.8, viewport.width * 0.05));
+  // Wrap text on portrait screens to fit within view
+  const maxWidth = isPortrait ? viewport.width * 0.85 : 100;
+  // Position title at 35% from top of visible area
+  const baseY = viewport.height * 0.35;
 
   // Subtle floating animation
   useFrame((state) => {
@@ -29,8 +39,8 @@ export default function TempleText({ onClick }: TempleTextProps) {
     <Text
       ref={textRef}
       font={PIXEL_FONT}
-      fontSize={1.5}
-      maxWidth={40}
+      fontSize={fontSize}
+      maxWidth={maxWidth}
       lineHeight={1.4}
       letterSpacing={0.05}
       textAlign="center"

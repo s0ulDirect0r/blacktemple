@@ -42,14 +42,13 @@ export default function ZoneOverlay() {
         }}
       >
         <div
-          className="pointer-events-auto w-[90vw] max-w-6xl h-[calc(85vh-30px)] overflow-auto"
+          className="pointer-events-auto w-[95vw] sm:w-[90vw] max-w-6xl h-[calc(90vh-50px)] sm:h-[calc(85vh-30px)] overflow-auto p-4 sm:p-6 md:p-8"
           style={{
             background: 'rgba(0, 0, 0, 0.9)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             borderRadius: '16px',
-            padding: '32px',
           }}
         >
           {displayZone === 'gallery' && <GalleryZoneContent />}
