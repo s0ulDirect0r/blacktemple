@@ -97,5 +97,5 @@ export function getZoneLookAt(zoneId: ZoneId): Vector3 {
 // Camera transition speed (lower = slower, smoother)
 export const CAMERA_LERP_SPEED = 0.03;
 
-// Distance threshold to consider camera "arrived" at zone
-export const ARRIVAL_THRESHOLD = 0.1;
+// Distance threshold to consider camera "arrived" at zone (higher = appears sooner)
+export const ARRIVAL_THRESHOLD = 2.0;

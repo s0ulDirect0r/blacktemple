@@ -11,20 +11,26 @@ import AboutZoneContent from './zones/AboutZoneContent';
 // Renders zone content as HTML overlays (outside the Canvas)
 // This provides better styling control and avoids 3D transform issues
 export default function ZoneOverlay() {
-  const { targetZone, isTransitioning } = useNavigation();
+  const { currentZone, targetZone, isTransitioning } = useNavigation();
 
-  // Don't show overlay for home zone
-  if (targetZone === 'home') {
+  // Don't show overlay when at home or transitioning to home
+  if (currentZone === 'home' && targetZone === 'home') {
     return null;
   }
 
-  // Fade in when arriving at zone, fade out when leaving
-  const isVisible = !isTransitioning;
+  // Show nav bar when not at home (either currently or navigating away)
+  const showNavBar = targetZone !== 'home' || currentZone !== 'home';
+
+  // Fade in when arrived at a non-home zone, fade out when leaving or going to home
+  const isVisible = !isTransitioning && currentZone !== 'home';
+
+  // Render content based on where we ARE, not where we're going
+  const displayZone = currentZone;
 
   return (
     <>
       {/* Navigation bar at top */}
-      <ZoneNavBar />
+      {showNavBar && <ZoneNavBar />}
 
       {/* Zone content panel */}
       <div
@@ -46,11 +52,11 @@ export default function ZoneOverlay() {
             padding: '32px',
           }}
         >
-          {targetZone === 'gallery' && <GalleryZoneContent />}
-          {targetZone === 'book' && <BookZoneContent />}
-          {targetZone === 'projects' && <ProjectsZoneContent />}
-          {targetZone === 'resume' && <ResumeZoneContent />}
-          {targetZone === 'about' && <AboutZoneContent />}
+          {displayZone === 'gallery' && <GalleryZoneContent />}
+          {displayZone === 'book' && <BookZoneContent />}
+          {displayZone === 'projects' && <ProjectsZoneContent />}
+          {displayZone === 'resume' && <ResumeZoneContent />}
+          {displayZone === 'about' && <AboutZoneContent />}
         </div>
       </div>
     </>
