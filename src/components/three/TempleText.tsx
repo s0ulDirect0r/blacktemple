@@ -17,13 +17,13 @@ export default function TempleText({ onClick }: TempleTextProps) {
 
   useCursor(hovered, 'pointer', 'default');
 
-  // Scale font size based on viewport width for true responsiveness
-  const isMobile = size.width < 640;
-  // Scale fontSize: ~35% bigger than original
-  const fontSize = isMobile ? Math.max(0.54, size.width / 555) : 1.5;
-  // Constrain maxWidth on mobile to force wrapping if needed
-  const maxWidth = isMobile ? 8 : 40;
-  const baseY = isMobile ? 6.6 : 6; // Position near top of canvas
+  // Fluid responsive scaling
+  // fontSize scales from ~0.9 at 375px to ~1.5 at 1400px
+  const fontSize = Math.min(1.5, Math.max(0.9, size.width / 500));
+  // Only wrap on narrow mobile screens (< 500px), otherwise no wrapping
+  const maxWidth = size.width < 500 ? 8 : 100;
+  // baseY adjusts for wrapped text on smaller screens
+  const baseY = size.width < 500 ? 6.6 : 6;
 
   // Subtle floating animation
   useFrame((state) => {

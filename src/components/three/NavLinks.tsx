@@ -91,15 +91,18 @@ function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
 
 export default function NavLinks() {
   const { size } = useThree();
-  const isMobile = size.width < 640;
 
-  const fontSize = isMobile ? 0.42 : 0.72;
+  // Use column layout for narrow screens, star pattern for wider
+  const useColumnLayout = size.width < 500;
 
-  if (isMobile) {
-    // Mobile: Column layout - links above and below the machine
-    const verticalSpacing = 1.1;
-    const aboveStartY = 3.2; // Start position for links above machine
-    const belowStartY = -2.8; // Start position for links below machine
+  // Fluid scaling for font size: ~0.6 at 375px to ~0.72 at 1400px
+  const fontSize = Math.min(0.72, Math.max(0.6, size.width / 1000));
+
+  if (useColumnLayout) {
+    // Narrow screens: Column layout - links above and below the machine
+    const verticalSpacing = Math.max(0.9, size.width / 400);
+    const aboveStartY = 3.2;
+    const belowStartY = -2.8;
 
     return (
       <group position={[0, 0, 0]}>
@@ -127,8 +130,9 @@ export default function NavLinks() {
     );
   }
 
-  // Desktop: 6-point star pattern around the title
-  const radius = 5;
+  // Wider screens: 6-point star pattern around the machine
+  // Fluid radius: ~3 at 500px to ~5 at 1400px
+  const radius = Math.min(5, Math.max(3, size.width / 280));
 
   return (
     <group position={[0, 0, 0]}>
