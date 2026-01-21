@@ -20,6 +20,7 @@ export interface ProjectMetadata {
   repoUrl?: string;
   demoUrl?: string;
   imageUrl?: string;
+  images?: string[];
   featured?: boolean;
   slug: string;
 }
@@ -110,6 +111,7 @@ export function getAllProjects(): ProjectMetadata[] {
         repoUrl: data.repoUrl,
         demoUrl: data.demoUrl,
         imageUrl: data.imageUrl,
+        images: data.images || [],
         featured: data.featured || false,
       } as ProjectMetadata;
     });
@@ -142,6 +144,7 @@ export function getProjectBySlug(slug: string): Project | null {
       repoUrl: data.repoUrl,
       demoUrl: data.demoUrl,
       imageUrl: data.imageUrl,
+      images: data.images || [],
       featured: data.featured || false,
     },
     content,
