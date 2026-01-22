@@ -7,7 +7,7 @@ import { GalleryProvider } from '@/context/GalleryContext';
 export default function GalleryZoneContent() {
   return (
     <GalleryProvider>
-      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-6 text-white">Gallery</h1>
+      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-6 text-white">Art</h1>
       <HorizontalProjectFilter />
       <ArtGallery />
     </GalleryProvider>

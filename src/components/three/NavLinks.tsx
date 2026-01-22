@@ -29,9 +29,9 @@ interface NavLink {
 
 // Links split into above/below machine groups for mobile layout
 const linksAbove: NavLink[] = [
-  { label: 'Projects', zoneId: 'projects' },
+  { label: 'Code', zoneId: 'projects' },
   { label: 'Writing', zoneId: null, external: true, externalUrl: 'https://souldirection.substack.com' },
-  { label: 'Gallery', zoneId: 'gallery' },
+  { label: 'Art', zoneId: 'gallery' },
 ];
 
 const linksBelow: NavLink[] = [

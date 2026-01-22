@@ -35,7 +35,7 @@ export const ZONES: Record<ZoneId, ZoneDefinition> = {
     cameraPos: [25, 0, 12],
     lookAt: [25, 0, 0],
     path: '/gallery',
-    label: 'Gallery',
+    label: 'Art',
   },
   book: {
     id: 'book',
@@ -49,7 +49,7 @@ export const ZONES: Record<ZoneId, ZoneDefinition> = {
     cameraPos: [0, 20, 12],
     lookAt: [0, 20, 0],
     path: '/projects',
-    label: 'Projects',
+    label: 'Code',
   },
   resume: {
     id: 'resume',

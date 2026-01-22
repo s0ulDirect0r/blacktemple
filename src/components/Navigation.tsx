@@ -8,9 +8,9 @@ export default function Navigation() {
   const pathname = usePathname();
 
   const links = [
-    { href: '/', label: 'Gallery', icon: FiImage },
+    { href: '/', label: 'Art', icon: FiImage },
     { href: 'https://souldirection.substack.com', label: 'Writing', icon: FiEdit3, external: true },
-    { href: '/projects', label: 'Projects', icon: FiCode },
+    { href: '/projects', label: 'Code', icon: FiCode },
     { href: '/book', label: 'Book', icon: FiBook },
     { href: '/resume', label: 'Resume', icon: FiFileText },
     { href: '/admin', label: 'Admin', icon: FiSettings },

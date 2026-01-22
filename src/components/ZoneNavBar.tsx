@@ -6,8 +6,8 @@ import { ZoneId } from '@/constants/zones';
 // Nav links in display order
 const navLinks: { id: ZoneId | 'home'; label: string }[] = [
   { id: 'home', label: 'Home' },
-  { id: 'projects', label: 'Projects' },
-  { id: 'gallery', label: 'Gallery' },
+  { id: 'projects', label: 'Code' },
+  { id: 'gallery', label: 'Art' },
   { id: 'book', label: 'Book' },
   { id: 'resume', label: 'Resume' },
   { id: 'about', label: 'About' },

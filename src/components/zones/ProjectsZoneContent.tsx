@@ -100,7 +100,7 @@ export default function ProjectsZoneContent() {
 
   return (
     <div className="max-w-6xl mx-auto text-white">
-      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-6 sm:mb-12">Projects</h1>
+      <h1 className="font-pixel text-lg sm:text-xl md:text-2xl text-center mb-6 sm:mb-12">Code</h1>
 
       {isLoading ? (
         <div className="flex justify-center py-12">
