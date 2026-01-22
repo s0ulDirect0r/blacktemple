@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
@@ -10,6 +10,15 @@ import { ZoneId } from '@/constants/zones';
 
 // Press Start 2P - classic 8-bit pixel font
 const PIXEL_FONT = '/fonts/PressStart2P.ttf';
+
+// Home camera constants (from LayoutContent.tsx camera config)
+const HOME_CAMERA_Z = 15;
+const HOME_CAMERA_FOV = 60;
+
+// Calculate the visible world-space dimensions at z=0 when camera is at home position
+// Formula: visibleHeight = 2 * tan(FOV/2) * distance
+const HOME_VISIBLE_HEIGHT =
+  2 * Math.tan((HOME_CAMERA_FOV * Math.PI) / 180 / 2) * HOME_CAMERA_Z;
 
 interface NavLink {
   label: string;
@@ -90,19 +99,35 @@ function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
 }
 
 export default function NavLinks() {
-  const { viewport } = useThree();
+  // Use `size` (canvas pixel dimensions) for responsive sizing
+  // Canvas size stays constant regardless of camera position/movement
+  const { size } = useThree();
 
-  // Use aspect ratio to detect portrait vs landscape orientation
-  const aspect = viewport.width / viewport.height;
-  const isPortrait = aspect < 1;
+  // Memoize layout calculations based on canvas size (stable during camera movement)
+  const { fontSize, isPortrait, homeVisibleWidth, homeVisibleHeight } = useMemo(() => {
+    const aspect = size.width / size.height;
+    const isPortraitMode = aspect < 1;
 
-  // Font size: 2.5% of viewport width, capped at reasonable range
-  const fontSize = Math.min(0.72, Math.max(0.4, viewport.width * 0.025));
+    // Calculate home viewport dimensions from fixed home camera position
+    const visibleWidth = HOME_VISIBLE_HEIGHT * aspect;
+
+    // Scale factor: convert pixel-based sizing intent to world units
+    // Use a reference width (1920px) to normalize sizing across screen sizes
+    const scaleFactor = Math.min(size.width, 1920) / 1920;
+
+    return {
+      // Font size: base of 0.715 world units, scaled by screen size, capped
+      fontSize: Math.min(0.94, Math.max(0.52, 0.715 * scaleFactor)),
+      isPortrait: isPortraitMode,
+      homeVisibleWidth: visibleWidth,
+      homeVisibleHeight: HOME_VISIBLE_HEIGHT,
+    };
+  }, [size.width, size.height]);
 
   if (isPortrait) {
     // Portrait: Column layout - links above and below the machine
-    // Spacing is 6% of viewport height, minimum 1.0 for readability
-    const verticalSpacing = Math.max(1.0, viewport.height * 0.06);
+    // Spacing is 6% of home visible height, minimum 1.0 for readability
+    const verticalSpacing = Math.max(1.0, homeVisibleHeight * 0.06);
     // Machine is centered at y=0, glow extends ~3 units.
     // Above group: bottom link (Gallery) at y=2, just above machine
     const aboveBottomY = 2.0;
@@ -137,8 +162,8 @@ export default function NavLinks() {
   }
 
   // Wider screens: 6-point star pattern around the machine
-  // Star radius is 20% of viewport width, capped at reasonable sizes
-  const radius = Math.min(5, Math.max(3, viewport.width * 0.2));
+  // Star radius is 20% of home visible width, capped at reasonable sizes
+  const radius = Math.min(5, Math.max(3, homeVisibleWidth * 0.2));
 
   return (
     <group position={[0, 0, 0]}>

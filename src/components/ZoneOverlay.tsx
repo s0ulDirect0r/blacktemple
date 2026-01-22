@@ -21,6 +21,9 @@ export default function ZoneOverlay() {
   // Show nav bar when not at home (either currently or navigating away)
   const showNavBar = targetZone !== 'home' || currentZone !== 'home';
 
+  // Fade out nav bar immediately when heading to home
+  const navBarVisible = targetZone !== 'home';
+
   // Fade in when arrived at a non-home zone, fade out when leaving or going to home
   const isVisible = !isTransitioning && currentZone !== 'home';
 
@@ -29,8 +32,18 @@ export default function ZoneOverlay() {
 
   return (
     <>
-      {/* Navigation bar at top */}
-      {showNavBar && <ZoneNavBar />}
+      {/* Navigation bar at top - fades out when heading to home */}
+      {showNavBar && (
+        <div
+          style={{
+            transition: 'opacity 0.3s ease-out',
+            opacity: navBarVisible ? 1 : 0,
+            pointerEvents: navBarVisible ? 'auto' : 'none',
+          }}
+        >
+          <ZoneNavBar />
+        </div>
+      )}
 
       {/* Zone content panel */}
       <div
