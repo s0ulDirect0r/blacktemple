@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGallery } from '@/context/GalleryContext';
 import { GALLERY_PAGE_SIZE } from '@/constants/gallery';
 import Link from 'next/link';
@@ -10,17 +10,10 @@ const SKELETON_PLACEHOLDERS = 6;
 
 export default function ArtGallery() {
   const { images, fetchImages, selectedProjectId, hasMoreImages } = useGallery();
-  const [isLoading, setIsLoading] = useState(images.length === 0);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
-  const isFirstRenderRef = useRef(true);
 
   useEffect(() => {
-    if (isFirstRenderRef.current) {
-      isFirstRenderRef.current = false;
-      setIsLoading(false);
-      return;
-    }
-
     let cancelled = false;
 
     const load = async () => {
