@@ -78,78 +78,61 @@ export default function ArtworkPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-8">
-        {/* Back button */}
-        <button 
+    <div className="min-h-screen bg-black text-white flex flex-col">
+      {/* Image — dominates the viewport */}
+      <div className="relative w-full" style={{ height: '80vh' }}>
+        <button
           onClick={handleBack}
-          className="flex items-center space-x-2 mb-8 text-zinc-400 hover:text-white transition-colors"
+          className="absolute top-4 left-4 z-10 flex items-center space-x-2 px-3 py-2 bg-black/60 backdrop-blur-sm rounded-lg text-zinc-300 hover:text-white hover:bg-black/80 transition-colors"
         >
           <FiArrowLeft />
           <span>Back to Gallery</span>
         </button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Image */}
-          <div className="bg-zinc-900 rounded-lg overflow-hidden border border-zinc-800">
-            <div className="relative w-full aspect-[4/3] sm:aspect-video bg-black">
-              <Image
-                src={artwork.url}
-                alt={artwork.metadata.title}
-                fill
-                className="object-contain"
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                priority
-              />
-            </div>
-          </div>
+        <Image
+          src={artwork.url}
+          alt={artwork.metadata.title}
+          fill
+          className="object-contain"
+          sizes="100vw"
+          priority
+        />
+      </div>
 
-          {/* Metadata */}
-          <div className="bg-zinc-900 rounded-lg border border-zinc-800 p-6">
-            <h1 className="text-3xl font-bold mb-4">{artwork.metadata.title}</h1>
-            
-            {artwork.metadata.description && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-2 text-zinc-300">Description</h2>
-                <p className="text-zinc-400 whitespace-pre-line">{artwork.metadata.description}</p>
-              </div>
-            )}
+      {/* Metadata — centered strip below */}
+      <div className="px-6 md:px-12 lg:px-20 py-8 flex flex-col items-center text-center">
+        <h1 className="text-3xl font-bold mb-3">{artwork.metadata.title}</h1>
 
-            {artwork.metadata.projectId && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-2 text-zinc-300">Project</h2>
-                <Link 
-                  href={`/?project=${artwork.metadata.projectId}`}
-                  className="inline-flex items-center space-x-2 px-3 py-1 bg-zinc-800 rounded-lg text-zinc-300 hover:bg-zinc-700 transition-colors"
-                >
-                  <FiFolder />
-                  <span>{project ? project.name : 'Loading project...'}</span>
-                </Link>
-              </div>
-            )}
+        {artwork.metadata.description && (
+          <p className="text-zinc-400 whitespace-pre-line mb-4 max-w-3xl">{artwork.metadata.description}</p>
+        )}
 
-            {artwork.metadata.tags && artwork.metadata.tags.length > 0 && (
-              <div>
-                <h2 className="text-xl font-semibold mb-2 text-zinc-300">Tags</h2>
-                <div className="flex flex-wrap gap-2">
-                  {artwork.metadata.tags.map(tag => (
-                    <span 
-                      key={tag}
-                      className="inline-flex items-center space-x-1 px-3 py-1 bg-zinc-800 rounded-full text-zinc-300"
-                    >
-                      <FiTag size={14} />
-                      <span>{tag}</span>
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
+        <div className="flex flex-wrap justify-center items-center gap-3 text-sm">
+          {artwork.metadata.projectId && (
+            <Link
+              href={`/?project=${artwork.metadata.projectId}`}
+              className="inline-flex items-center space-x-2 px-3 py-1 bg-zinc-800 rounded-lg text-zinc-300 hover:bg-zinc-700 transition-colors"
+            >
+              <FiFolder />
+              <span>{project ? project.name : 'Loading project...'}</span>
+            </Link>
+          )}
 
-            <div className="mt-8 text-sm text-zinc-500">
-              <p>Created: {new Date(artwork.metadata.created_at).toLocaleDateString()}</p>
-              <p>Last updated: {new Date(artwork.metadata.updated_at).toLocaleDateString()}</p>
-            </div>
-          </div>
+          {artwork.metadata.tags && artwork.metadata.tags.length > 0 && (
+            artwork.metadata.tags.map(tag => (
+              <span
+                key={tag}
+                className="inline-flex items-center space-x-1 px-3 py-1 bg-zinc-800 rounded-full text-zinc-300"
+              >
+                <FiTag size={14} />
+                <span>{tag}</span>
+              </span>
+            ))
+          )}
+
+          <span className="text-zinc-600">
+            {new Date(artwork.metadata.created_at).toLocaleDateString()}
+          </span>
         </div>
       </div>
     </div>
