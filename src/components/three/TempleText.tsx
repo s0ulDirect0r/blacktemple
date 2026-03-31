@@ -42,9 +42,10 @@ export default function TempleText({ onClick }: TempleTextProps) {
 
     return {
       // Font size: base of 1.56 world units, scaled by screen size, capped
-      fontSize: Math.min(1.95, Math.max(1.04, 1.56 * scaleFactor)),
+      // On narrow mobile screens (<480px), allow smaller font to fit on fewer lines
+      fontSize: Math.min(1.95, Math.max(size.width < 480 ? 0.72 : 1.04, 1.56 * scaleFactor)),
       // Wrap text on portrait screens using calculated home viewport
-      maxWidth: isPortrait ? homeVisibleWidth * 0.85 : 100,
+      maxWidth: isPortrait ? homeVisibleWidth * 0.95 : 100,
       // Position title at 35% from top of visible area using fixed home height
       baseY: HOME_VISIBLE_HEIGHT * 0.35,
     };
