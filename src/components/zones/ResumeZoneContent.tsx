@@ -4,7 +4,6 @@ import {
   FiMail,
   FiPhone,
   FiMapPin,
-  FiExternalLink,
   FiGithub,
   FiLinkedin,
 } from 'react-icons/fi';
@@ -92,14 +91,61 @@ export default function ResumeZoneContent() {
                 <span className="text-zinc-600">•</span>
                 <span>
                   Developed pipeline in Express.js to persist property evaluations to
-                  Google Cloud SQL and restructured existing database schemas.
+                  Google Cloud SQL and restructured existing database schemas to ensure
+                  clarity and consistency in data handling across the application.
                 </span>
               </li>
               <li className="flex gap-2">
                 <span className="text-zinc-600">•</span>
                 <span>
                   Increased developer velocity by resolving 800+ TypeScript and ESLint
-                  warnings and errors.
+                  warnings and errors, documenting onboarding steps for new developers,
+                  and adding precommit code validation hooks.
+                </span>
+              </li>
+            </ul>
+          </article>
+
+          {/* Independent Artist */}
+          <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
+              <div>
+                <h3 className="text-xl font-semibold">Independent Artist</h3>
+                <p className="text-zinc-400">Multiple Countries</p>
+              </div>
+              <span className="text-zinc-500 text-sm mt-1 sm:mt-0">
+                2021-2025
+              </span>
+            </div>
+            <ul className="space-y-2 text-zinc-300 text-sm">
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>
+                  Created and shared over 200 pieces of digital art and 11 short
+                  stories via Twitter/X.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>
+                  Wrote, edited, designed, self-published, and sold over 100 copies of
+                  an original fictional novel titled{' '}
+                  <a
+                    href="https://a.co/d/02ZNaiuC"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="italic underline hover:text-white transition-colors"
+                  >
+                    An Infinite Heart
+                  </a>
+                  .
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>
+                  Earned thousands of dollars making commissioned artwork for
+                  individuals based on their desires.
                 </span>
               </li>
             </ul>
@@ -109,7 +155,7 @@ export default function ResumeZoneContent() {
           <article className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
               <div>
-                <h3 className="text-xl font-semibold">Freelance</h3>
+                <h3 className="text-xl font-semibold">Contract Software Engineer</h3>
                 <p className="text-zinc-400">Scrimmage</p>
               </div>
               <span className="text-zinc-500 text-sm mt-1 sm:mt-0">
@@ -144,7 +190,8 @@ export default function ResumeZoneContent() {
                 <span className="text-zinc-600">•</span>
                 <span>
                   Collaborated closely with commercial real-estate brokers to inform
-                  product road-map.
+                  product road-map in support of key metrics including conversation
+                  rate and deal volume.
                 </span>
               </li>
               <li className="flex gap-2">
@@ -160,6 +207,10 @@ export default function ResumeZoneContent() {
                   Developed GraphQL queries and interfaces to support commercial
                   property search across states.
                 </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>Maintained and debugged the Ruby on Rails backend.</span>
               </li>
             </ul>
           </article>
@@ -186,8 +237,23 @@ export default function ResumeZoneContent() {
               <li className="flex gap-2">
                 <span className="text-zinc-600">•</span>
                 <span>
+                  Supported timely and consistent user participation by scheduling
+                  reminder emails using cron jobs.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>
                   Improved dashboard load times and responsiveness by identifying
-                  performance bottlenecks and implementing optimizations.
+                  performance bottlenecks and implementing optimizations, making it
+                  easier for leadership to understand the product&apos;s operating
+                  profile and determine product direction.
+                </span>
+              </li>
+              <li className="flex gap-2">
+                <span className="text-zinc-600">•</span>
+                <span>
+                  Managed application deployments to AWS and Google Cloud Platform.
                 </span>
               </li>
             </ul>
@@ -209,62 +275,20 @@ export default function ResumeZoneContent() {
                 <span className="text-zinc-600">•</span>
                 <span>
                   Rearchitected Node.js microservice configuration to support
-                  white-label deployments.
+                  white-label deployments, thereby unlocking new customer segments for
+                  the business.
                 </span>
               </li>
               <li className="flex gap-2">
                 <span className="text-zinc-600">•</span>
                 <span>
                   Implemented a gift subscription payment system, allowing GoldBean to
-                  gain market share.
+                  gain market share by encouraging users to invite their friends and
+                  family onto the platform.
                 </span>
               </li>
             </ul>
           </article>
-        </div>
-      </section>
-
-      {/* Recent Projects Section */}
-      <section className="mb-8 sm:mb-12">
-        <h2 className="text-2xl font-bold mb-6 pb-2 border-b border-zinc-800">
-          Recent Projects
-        </h2>
-
-        <div className="grid gap-4 sm:gap-6 md:grid-cols-2">
-          <a
-            href="https://sun-simulator.blacktemple.art"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-600 transition-colors group"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold group-hover:text-zinc-300 transition-colors">
-                Sun Simulator
-              </h3>
-              <FiExternalLink className="w-4 h-4 text-zinc-500" />
-            </div>
-            <p className="text-zinc-400 text-sm">
-              Built using Three.js and Vite to creatively simulate the life cycle
-              of a star.
-            </p>
-          </a>
-
-          <a
-            href="https://one-must-imagine-sisyphus-tappy-smoky.vercel.app/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 sm:p-6 hover:border-zinc-600 transition-colors group"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-lg font-semibold group-hover:text-zinc-300 transition-colors">
-                One Must Imagine Sisyphus Tappy
-              </h3>
-              <FiExternalLink className="w-4 h-4 text-zinc-500" />
-            </div>
-            <p className="text-zinc-400 text-sm">
-              Hackathon rhythm game inspired by Crypt of the NecroDancer.
-            </p>
-          </a>
         </div>
       </section>
     </div>
