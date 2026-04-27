@@ -20,8 +20,8 @@ const pressStart2P = Press_Start_2P({
 });
 
 export const metadata: Metadata = {
-  title: "The Black Temple",
-  description: "enter the digital temple of dopeness",
+  title: "MATTHEW D. HUFF",
+  description: "welcome to my digital temple",
 };
 
 export default function RootLayout({

@@ -1,10 +1,10 @@
-import { useRef, useState, useMemo } from 'react';
-import { useFrame, useThree } from '@react-three/fiber';
-import { Text, useCursor } from '@react-three/drei';
-import * as THREE from 'three';
+import { useRef, useState, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Text, useCursor } from "@react-three/drei";
+import * as THREE from "three";
 
 // Press Start 2P - classic 8-bit pixel font
-const PIXEL_FONT = '/fonts/PressStart2P.ttf';
+const PIXEL_FONT = "/fonts/PressStart2P.ttf";
 
 // Home camera constants (from LayoutContent.tsx camera config)
 const HOME_CAMERA_Z = 15;
@@ -26,7 +26,7 @@ export default function TempleText({ onClick }: TempleTextProps) {
   // Canvas size stays constant regardless of camera position/movement
   const { size } = useThree();
 
-  useCursor(hovered, 'pointer', 'default');
+  useCursor(hovered, "pointer", "default");
 
   // Memoize layout calculations based on canvas size (stable during camera movement)
   const { fontSize, maxWidth, baseY } = useMemo(() => {
@@ -43,7 +43,10 @@ export default function TempleText({ onClick }: TempleTextProps) {
     return {
       // Font size: base of 1.56 world units, scaled by screen size, capped
       // On narrow mobile screens (<480px), allow smaller font to fit on fewer lines
-      fontSize: Math.min(1.95, Math.max(size.width < 480 ? 0.72 : 1.04, 1.56 * scaleFactor)),
+      fontSize: Math.min(
+        1.95,
+        Math.max(size.width < 480 ? 0.72 : 1.04, 1.56 * scaleFactor),
+      ),
       // Wrap text on portrait screens using calculated home viewport
       maxWidth: isPortrait ? homeVisibleWidth * 0.95 : 100,
       // Position title at 35% from top of visible area using fixed home height
@@ -54,7 +57,8 @@ export default function TempleText({ onClick }: TempleTextProps) {
   // Subtle floating animation
   useFrame((state) => {
     if (textRef.current) {
-      textRef.current.position.y = baseY + Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
+      textRef.current.position.y =
+        baseY + Math.sin(state.clock.elapsedTime * 0.5) * 0.15;
     }
   });
 
@@ -73,9 +77,9 @@ export default function TempleText({ onClick }: TempleTextProps) {
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
     >
-      THE BLACK TEMPLE
+      MATTHEW D. HUFF
       <meshBasicMaterial
-        color={hovered ? '#ffffff' : '#eeeeee'}
+        color={hovered ? "#ffffff" : "#eeeeee"}
         toneMapped={false}
         opacity={hovered ? 1 : 0.9}
         transparent
