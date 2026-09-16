@@ -9,9 +9,10 @@ interface FictionProps {
   index: string;
   book: PortfolioBook;
   stories: PortfolioStory[];
+  extras?: { label: string; href: string }[];
 }
 
-export default function Fiction({ index, book, stories }: FictionProps) {
+export default function Fiction({ index, book, stories, extras = [] }: FictionProps) {
   const excerpt = book.excerpt && book.excerpt.paragraphs.length > 0 ? book.excerpt : null;
 
   return (
@@ -99,6 +100,24 @@ export default function Fiction({ index, book, stories }: FictionProps) {
                 ))}
               </ul>
             </div>
+          </Reveal>
+        )}
+
+        {extras.length > 0 && (
+          <Reveal>
+            <ul className="mt-10 space-y-2 text-base text-zinc-400 sm:mt-14 sm:text-lg">
+              {extras.map((extra) => (
+                <li key={extra.href}>
+                  Also:{' '}
+                  <Link
+                    href={extra.href}
+                    className="text-white underline decoration-zinc-600 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  >
+                    {extra.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </Reveal>
         )}
       </div>
