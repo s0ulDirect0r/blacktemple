@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Black Temple is a Next.js 16 portfolio/art gallery application featuring:
 - Digital artwork gallery with project categorization
-- MDX-based blog/writing section
+- MDX-based short fiction section (`/writing`)
 - Project showcase
 - Admin authentication for content management
 - PostgreSQL database (Neon) for artwork/project metadata
@@ -62,7 +62,7 @@ Note: Must source `.env` before blob commands to access `BLOB_READ_WRITE_TOKEN`.
   - `admin/` - Admin dashboard for content management
   - `artwork/[id]/` - Individual artwork detail pages
   - `projects/` - Project showcase page
-  - `writing/` - Blog/writing section
+  - `writing/` - Short fiction index and story pages
   - `api/` - REST API endpoints
 
 ### API Routes
@@ -88,10 +88,11 @@ Note: Must source `.env` before blob commands to access `BLOB_READ_WRITE_TOKEN`.
 
 ### Content Management
 
-- **MDX Files**: `content/posts/*.mdx` and `content/projects/*.mdx`
+- **MDX Files**: `content/stories/*.mdx` and `content/projects/*.mdx`
   - Parsed with `gray-matter` for frontmatter
   - Rendered with `next-mdx-remote`
-  - Posts sorted by date, projects by featured status
+  - Stories sorted by frontmatter `order`, projects by featured status
+  - Story illustrations live in Vercel Blob under `stories/<slug>/`; upload with `npx tsx scripts/upload-story-images.ts`
 
 - **Database-backed Images**: Stored in `artworks` table
   - URLs point to Vercel Blob storage

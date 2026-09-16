@@ -103,7 +103,32 @@ export const portfolio: PortfolioContent = {
 
   selectedArt: [],
 
-  stories: [],
+  stories: [
+    {
+      title: 'Poesis',
+      slug: 'poesis',
+      excerpt:
+        'One hundred poems in one hundred tweets: a magic-wielding, poetic space pirate captain and his crew sail the SS Poesis to a planet called Akasha in search of the source of creative power.',
+    },
+    {
+      title: 'Blood Drunk',
+      slug: 'blood-drunk',
+      excerpt:
+        'Xeriax could feel it in his bones. He\u2019s going to die today. A wild toothy smile cuts a path across his face. His blood boils and churns and his muscles tighten and flex of their own accord.',
+    },
+    {
+      title: 'Soulheist 777, Part 1',
+      slug: 'soulheist-777-part-1',
+      excerpt:
+        'Somewhere in the Sol System, a man, a woman, and their ship have made a decision. A decision that will either doom their souls for all eternity or permanently engrave their names in the blockchain of history as legends who outsmarted the gods.',
+    },
+    {
+      title: 'Synner',
+      slug: 'synner',
+      excerpt:
+        'The man in the green suit sighs. This deal is going no where. The man in the blue suit shakes his head. He feels the same way.',
+    },
+  ],
 
   book: {
     title: 'An Infinite Heart',

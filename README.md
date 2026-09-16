@@ -14,7 +14,7 @@ It isn't a page with a nav bar. The site is a single 3D scene: a starfield with 
 | --- | --- |
 | **Code** | Project showcase, MDX-backed, filterable |
 | **Art** | Digital artwork gallery with project categorization and infinite scroll |
-| **Writing** | MDX blog |
+| **Writing** | Short fiction: stories, a poem cycle, and two illustrated pieces, as MDX |
 | **Résumé** | Current résumé |
 | **Book** | *An Infinite Heart* |
 | **About me** | Bio |
@@ -36,10 +36,10 @@ src/
   lib/
     db.ts         # Neon Postgres client
     gallery.ts    # Gallery data layer
-    mdx.ts        # MDX parsing for posts + projects
+    mdx.ts        # MDX parsing for stories + projects
 ```
 
-**Content comes from two places.** Writing and projects are MDX files in `content/posts/` and `content/projects/`, parsed with `gray-matter` and rendered via `next-mdx-remote`. Artwork is database-backed — rows in `artworks` and `projects` on Neon Postgres, with the images themselves in Vercel Blob.
+**Content comes from two places.** Stories and projects are MDX files in `content/stories/` and `content/projects/`, parsed with `gray-matter` and rendered via `next-mdx-remote`. Story illustrations are uploaded to Vercel Blob with `scripts/upload-story-images.ts`. Artwork is database-backed — rows in `artworks` and `projects` on Neon Postgres, with the images themselves in Vercel Blob.
 
 **Admin is JWT-gated.** `/admin` sits behind a `jose`-verified token and handles uploads and metadata editing without a CMS.
 
