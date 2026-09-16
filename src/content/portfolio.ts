@@ -6,6 +6,9 @@
  * components in src/components/portfolio/.
  */
 
+import { bookExcerpt, type BookExcerpt } from './book';
+import { formatDuration, tracks } from './music';
+
 export interface PortfolioHero {
   name: string;
   role: string;
@@ -34,8 +37,8 @@ export interface PortfolioBook {
   /** Blurb, one string per paragraph. */
   blurb: string[];
   links: PortfolioLink[];
-  /** Optional excerpt. Paragraph breaks are blank lines. null hides the block. */
-  excerpt: string | null;
+  /** Optional excerpt (label plus paragraphs). null hides the block. */
+  excerpt: BookExcerpt | null;
 }
 
 export interface PortfolioGameImage {
@@ -116,7 +119,7 @@ export const portfolio: PortfolioContent = {
       { label: 'Amazon', href: 'https://a.co/d/fDa0kC9', note: 'Kindle & paperback' },
       { label: 'Gumroad', href: 'https://4106066624980.gumroad.com/l/aninfiniteheart', note: 'Digital download' },
     ],
-    excerpt: null,
+    excerpt: bookExcerpt,
   },
 
   games: [
@@ -152,7 +155,11 @@ export const portfolio: PortfolioContent = {
     },
   ],
 
-  music: [],
+  music: tracks.map((track) => ({
+    title: track.title,
+    src: track.src,
+    duration: formatDuration(track.duration),
+  })),
 
   contact: {
     email: 'matthewhuff89@gmail.com',
