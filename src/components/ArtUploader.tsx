@@ -133,6 +133,8 @@ export default function ArtUploader() {
       addImage({
         id: data.id,
         url: data.url,
+        width: data.width,
+        height: data.height,
         metadata: metadata,
       });
 

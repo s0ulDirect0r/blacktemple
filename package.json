@@ -10,8 +10,9 @@
     "migrate": "tsx scripts/migrate.ts",
     "migrate-blobs": "tsx scripts/migrate-blobs.ts",
     "verify-schema": "tsx scripts/verify-schema.ts",
-    "test": "tsx --test tests/**/*.test.ts",
-    "import-artworks": "tsx scripts/import-artworks.ts"
+    "backfill-dimensions": "tsx scripts/backfill-dimensions.ts",
+    "import-artworks": "tsx scripts/import-artworks.ts",
+    "test": "tsx --test tests/**/*.test.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

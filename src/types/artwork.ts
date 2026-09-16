@@ -18,5 +18,7 @@ export interface ArtworkMetadata {
 export interface ArtworkImage {
   id: string;
   url: string;  // single URL field
+  width?: number;   // native pixel width (nullable in DB; backfilled)
+  height?: number;  // native pixel height
   metadata: ArtworkMetadata;
 } 

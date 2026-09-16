@@ -34,3 +34,22 @@ body {
     letter-spacing: 0.05em;
   }
 }
+
+@keyframes lightbox-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lightbox-enter {
+  animation: lightbox-enter 160ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lightbox-enter {
+    animation: none;
+  }
+}

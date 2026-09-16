@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { sql } from '@/lib/db';
+import { getArtworkById, mapRowToArtwork, ArtworkRow } from '@/lib/gallery';
 import { ArtworkMetadata } from '@/types/artwork';
 
 // Simple auth verification
@@ -31,30 +32,14 @@ export async function GET(
     const { id } = await params;
     
     // Fetch the image from the database
-    const result = await sql`
-      SELECT * FROM artworks
-      WHERE id = ${id}
-    `;
-    
+    const image = await getArtworkById(id);
+
     // Handle not found case
-    if (result.length === 0) {
+    if (!image) {
       return NextResponse.json({ error: 'Image not found' }, { status: 404 });
     }
-    
-    // Return the image data
-    const image = result[0];
-    return NextResponse.json({
-      id: image.id,
-      url: image.url,
-      metadata: {
-        title: image.title,
-        description: image.description,
-        projectId: image.project_id,
-        tags: image.tags,
-        created_at: image.created_at,
-        updated_at: image.updated_at
-      }
-    });
+
+    return NextResponse.json(image);
   } catch (error) {
     console.error('Failed to fetch image:', error);
     return NextResponse.json({ error: 'Failed to fetch image' }, { status: 500 });
@@ -102,18 +87,7 @@ export async function PATCH(
     }
     
     // 6. Return the updated image
-    return NextResponse.json({
-      id: result[0].id,
-      url: result[0].url,
-      metadata: {
-        title: result[0].title,
-        description: result[0].description,
-        projectId: result[0].project_id,
-        tags: result[0].tags,
-        created_at: result[0].created_at,
-        updated_at: result[0].updated_at,
-      }
-    });
+    return NextResponse.json(mapRowToArtwork(result[0] as ArtworkRow));
   } catch (error) {
     console.error('Failed to update image:', error);
     return NextResponse.json({ error: 'Failed to update image' }, { status: 500 });
