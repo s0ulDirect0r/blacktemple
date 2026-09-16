@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getPostBySlug, getAllPosts } from '@/lib/mdx';
+import { SITE_NAME, pageMetadata } from '@/lib/site';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { FiArrowLeft, FiCalendar, FiTag } from 'react-icons/fi';
@@ -14,6 +16,29 @@ export async function generateStaticParams() {
   return posts.map((post) => ({
     slug: post.slug,
   }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
+
+  if (!post) {
+    return { title: 'Post not found', robots: { index: false, follow: true } };
+  }
+
+  const { title, excerpt, date, tags } = post.metadata;
+
+  return pageMetadata({
+    title,
+    description: excerpt || `${title} — writing by ${SITE_NAME}.`,
+    path: `/writing/${slug}`,
+    openGraph: {
+      type: 'article',
+      publishedTime: date ? new Date(date).toISOString() : undefined,
+      authors: [SITE_NAME],
+      tags,
+    },
+  });
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {

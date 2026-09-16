@@ -1,6 +1,9 @@
 import { getAllPosts } from '@/lib/mdx';
+import { PAGE_META, pageMetadata } from '@/lib/site';
 import Link from 'next/link';
 import { FiCalendar, FiTag } from 'react-icons/fi';
+
+export const metadata = pageMetadata({ ...PAGE_META.writing, path: '/writing' });
 
 export default function WritingPage() {
   const posts = getAllPosts();

@@ -125,6 +125,25 @@ export async function getGalleryImages({
   };
 }
 
+/**
+ * Fetch a single artwork by its numeric id. Returns null when the id is not a
+ * positive integer or no row matches, so callers can 404 cleanly.
+ */
+export async function getArtworkById(id: string): Promise<ArtworkImage | null> {
+  if (!/^\d+$/.test(id)) {
+    return null;
+  }
+
+  const rows = (await sql`
+    SELECT id, url, title, description, project_id, tags, created_at, updated_at
+    FROM artworks
+    WHERE id = ${Number(id)}
+    LIMIT 1;
+  `) as ArtworkRow[];
+
+  return rows.length > 0 ? mapRowToArtwork(rows[0]) : null;
+}
+
 export async function getGalleryProjects(): Promise<Project[]> {
   const rows = (await sql`
     SELECT id, name, description, created_at
