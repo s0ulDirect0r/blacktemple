@@ -56,8 +56,8 @@ function ThreeScene() {
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // /portfolio is a standalone single-scroll page: no 3D scene, no zone overlay.
-  if (pathname.startsWith('/portfolio')) {
+  // /portfolio and /spidernomicon are standalone pages: no 3D scene, no zone overlay.
+  if (pathname.startsWith('/portfolio') || pathname.startsWith('/spidernomicon')) {
     return <>{children}</>;
   }
 

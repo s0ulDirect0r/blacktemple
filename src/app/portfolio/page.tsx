@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function PortfolioPage() {
   const { hero: heroArtwork, paintings } = await getPortfolioArt();
-  const { hero, book, stories, games, music, contact } = portfolio;
+  const { hero, book, stories, extras, games, music, contact } = portfolio;
 
   const hasMusic = music.length > 0;
   const sections = [
@@ -65,7 +65,7 @@ export default async function PortfolioPage() {
       <main className="space-y-24 pb-24 sm:space-y-32 sm:pb-32 lg:space-y-40">
         <Hero hero={hero} artwork={heroArtwork} />
         <Paintings index="01" paintings={paintings} />
-        <Fiction index="02" book={book} stories={stories} />
+        <Fiction index="02" book={book} stories={stories} extras={extras} />
         <Games index="03" games={games} />
         {hasMusic && <Music index="04" tracks={music} />}
       </main>

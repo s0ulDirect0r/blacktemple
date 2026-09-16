@@ -80,6 +80,8 @@ export interface PortfolioContent {
   selectedArt: string[];
   /** Rendered only when non-empty. */
   stories: PortfolioStory[];
+  /** One-line "Also:" links under the stories, e.g. to the Spidernomicon. */
+  extras?: { label: string; href: string }[];
   book: PortfolioBook;
   games: PortfolioGame[];
   /** Rendered only when non-empty. */
@@ -104,6 +106,8 @@ export const portfolio: PortfolioContent = {
   selectedArt: [],
 
   stories: [],
+
+  extras: [{ label: 'The Spidernomicon, a lexicon of 100 invented runes', href: '/spidernomicon' }],
 
   book: {
     title: 'An Infinite Heart',
