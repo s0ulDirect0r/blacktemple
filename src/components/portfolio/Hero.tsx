@@ -15,9 +15,6 @@ export default function Hero({ hero, cabinet }: HeroProps) {
   return (
     <section id="top" aria-labelledby="hero-name" className="bg-black">
       <div className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 sm:pt-20 lg:pt-24">
-        <p className="mb-5 text-[11px] uppercase tracking-[0.22em] text-zinc-500 sm:text-xs">
-          Portfolio · {hero.location}
-        </p>
         <h1
           id="hero-name"
           className="font-pixel text-[26px] leading-[1.3] text-white sm:text-4xl sm:leading-[1.25] lg:text-5xl lg:leading-[1.2]"

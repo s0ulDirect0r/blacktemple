@@ -57,9 +57,15 @@ function ThreeScene() {
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // /portfolio, /music and /spidernomicon are standalone pages: no 3D scene, no
-  // zone overlay. They still get the site bar, in flow above the page.
-  if (pathname.startsWith('/portfolio') || pathname.startsWith('/music') || pathname.startsWith('/spidernomicon')) {
+  // /portfolio is the emailed, self-contained page: it has its own section nav,
+  // so the site bar stays off it. Its footer links back into the site.
+  if (pathname.startsWith('/portfolio')) {
+    return <>{children}</>;
+  }
+
+  // /music and /spidernomicon are standalone pages: no 3D scene, no zone
+  // overlay. They still get the site bar, in flow above the page.
+  if (pathname.startsWith('/music') || pathname.startsWith('/spidernomicon')) {
     return (
       <>
         <ZoneNavBar placement="inline" />
