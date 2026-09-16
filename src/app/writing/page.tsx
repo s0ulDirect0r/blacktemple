@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { getStories } from '@/lib/mdx';
-import WritingHeader from '@/components/writing/WritingHeader';
 import StoryMeta from '@/components/writing/StoryMeta';
 
 const DESCRIPTION =
@@ -29,8 +28,6 @@ export default function WritingPage() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100">
-      <WritingHeader atIndex />
-
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16">
         <h1 className="font-pixel text-lg leading-none text-white sm:text-2xl">Writing</h1>
 

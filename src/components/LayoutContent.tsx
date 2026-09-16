@@ -12,6 +12,7 @@ import UnknownMachine from '@/components/three/UnknownMachine';
 import CameraController from '@/components/three/CameraController';
 import SceneSetup from '@/components/three/SceneSetup';
 import ZoneOverlay from '@/components/ZoneOverlay';
+import ZoneNavBar from '@/components/ZoneNavBar';
 
 function SceneContent() {
   const { navigateToZone } = useNavigation();
@@ -56,10 +57,20 @@ function ThreeScene() {
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  // /portfolio, /music and /spidernomicon are standalone pages: no 3D scene, no zone overlay.
+  // /portfolio, /music and /spidernomicon are standalone pages: no 3D scene, no
+  // zone overlay. They still get the site bar, in flow above the page.
   if (pathname.startsWith('/portfolio') || pathname.startsWith('/music') || pathname.startsWith('/spidernomicon')) {
-    return <>{children}</>;
+    return (
+      <>
+        <ZoneNavBar placement="inline" />
+        {children}
+      </>
+    );
   }
+
+  // The writing pages are documents rendered over the scene, not zones, so
+  // ZoneOverlay shows no bar for them; render it in flow above the page.
+  const showInlineBar = pathname.startsWith('/writing');
 
   return (
     <NavigationProvider>
@@ -72,6 +83,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
       {/* Page content (for routes that still render content) */}
       <main className="relative z-10 pointer-events-none">
         <div className="pointer-events-auto">
+          {showInlineBar && <ZoneNavBar placement="inline" />}
           {children}
         </div>
       </main>

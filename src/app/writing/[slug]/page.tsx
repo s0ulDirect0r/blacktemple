@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { MDXRemote } from 'next-mdx-remote/rsc';
 import { getStories, getStory } from '@/lib/mdx';
-import WritingHeader from '@/components/writing/WritingHeader';
 import StoryMeta from '@/components/writing/StoryMeta';
 import StorySequence from '@/components/writing/StorySequence';
 
@@ -80,8 +79,6 @@ export default async function StoryPage({ params }: StoryPageProps) {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100">
-      <WritingHeader />
-
       <main className="mx-auto max-w-3xl px-4 pb-24 pt-10 sm:px-6 sm:pb-32 sm:pt-14">
         <article>
           <header>

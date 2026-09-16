@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function AboutZoneContent() {
   return (
@@ -29,29 +30,39 @@ export default function AboutZoneContent() {
         </p>
 
         <p>
-          I'm always looking for the dopest and most challenging projects I can
-          find for my current level. My project "godcell" is an example of that,
+          I&apos;m always looking for the dopest and most challenging projects I can
+          find for my current level. My project &quot;godcell&quot; is an example of that,
           using LLMs, Three.js, ECS, and other technologies to build a wild
-          evolutionary survival multiplayer game. I'm a bit eclectic in my
-          tastes on that note! I'm as likely to get locked in building out a
+          evolutionary survival multiplayer game. I&apos;m a bit eclectic in my
+          tastes on that note! I&apos;m as likely to get locked in building out a
           front end, setting up an API, building a test suite, as I am to get
           pilled on multiplayer games and sun simulators!
         </p>
 
         <p>
-          I'm a bit of a wanderer in search of the perfect synthesis of
+          I&apos;m a bit of a wanderer in search of the perfect synthesis of
           knowledge, creativity, and wisdom. To that end, I practice the fine
           crafts of software engineering, meditation, digital painting, and as
-          of late I've been having quite an intense mathematics arc!
+          of late I&apos;ve been having quite an intense mathematics arc!
         </p>
 
         <p>
-          I'm currently looking for full time opportunities as a product
+          I&apos;m currently looking for full time opportunities as a product
           engineer, to continue walking the path of service through helping
           companies complete their missions using my creativity and intellect.
         </p>
 
         <p></p>
+
+        <p className="text-base text-zinc-500">
+          Looking for the short version?{" "}
+          <Link
+            href="/portfolio"
+            className="text-zinc-300 underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-white hover:decoration-zinc-400"
+          >
+            Portfolio →
+          </Link>
+        </p>
 
         <div className="mt-12 pt-8 border-t border-zinc-800">
           <h2 className="text-2xl font-bold mb-4">Get in Touch</h2>

@@ -7,9 +7,11 @@ import Reveal from './Reveal';
 interface PaintingsProps {
   index: string;
   paintings: PortfolioPainting[];
+  /** One-line "Also:" links after the grid, e.g. to the Spidernomicon. */
+  extras?: { label: string; href: string }[];
 }
 
-export default function Paintings({ index, paintings }: PaintingsProps) {
+export default function Paintings({ index, paintings, extras = [] }: PaintingsProps) {
   return (
     <section id="paintings" aria-labelledby="paintings-heading" className="scroll-mt-14 sm:scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -52,6 +54,24 @@ export default function Paintings({ index, paintings }: PaintingsProps) {
                         {painting.title}
                       </figcaption>
                     </figure>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+        )}
+
+        {extras.length > 0 && (
+          <Reveal>
+            <ul className="mt-10 space-y-2 text-base text-zinc-400 sm:mt-14 sm:text-lg">
+              {extras.map((extra) => (
+                <li key={extra.href}>
+                  Also:{' '}
+                  <Link
+                    href={extra.href}
+                    className="text-white underline decoration-zinc-600 underline-offset-[6px] transition-colors hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                  >
+                    {extra.label}
                   </Link>
                 </li>
               ))}

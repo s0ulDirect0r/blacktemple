@@ -83,6 +83,13 @@ export function pathToZoneId(pathname: string): ZoneId {
   return 'home';
 }
 
+// True when the pathname belongs to a zone (home or one of the camera zones),
+// as opposed to a document route such as /writing that renders over the scene.
+export function isZonePath(pathname: string): boolean {
+  if (pathname === '/') return true;
+  return Object.values(ZONES).some((zone) => zone.path !== '/' && pathname.startsWith(zone.path));
+}
+
 // Helper to get Vector3 from zone position tuple
 export function getZoneCameraPosition(zoneId: ZoneId): Vector3 {
   const zone = ZONES[zoneId];

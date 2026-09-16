@@ -83,7 +83,7 @@ export interface PortfolioContent {
   selectedArt: string[];
   /** Rendered only when non-empty. */
   stories: PortfolioStory[];
-  /** One-line "Also:" links under the stories, e.g. to the Spidernomicon. */
+  /** One-line "Also:" links after the paintings, e.g. to the Spidernomicon. */
   extras?: { label: string; href: string }[];
   book: PortfolioBook;
   games: PortfolioGame[];

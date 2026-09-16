@@ -129,3 +129,13 @@ export function useNavigation() {
   }
   return context;
 }
+
+/**
+ * Like useNavigation, but returns undefined instead of throwing when no
+ * NavigationProvider is mounted (the standalone pages: /portfolio, /music,
+ * /spidernomicon). Lets shared chrome such as ZoneNavBar fall back to plain
+ * route navigation there.
+ */
+export function useOptionalNavigation() {
+  return useContext(NavigationContext);
+}

@@ -64,8 +64,8 @@ export default async function PortfolioPage() {
 
       <main className="space-y-24 pb-24 sm:space-y-32 sm:pb-32 lg:space-y-40">
         <Hero hero={hero} artwork={heroArtwork} />
-        <Paintings index="01" paintings={paintings} />
-        <Fiction index="02" book={book} stories={stories} extras={extras} />
+        <Paintings index="01" paintings={paintings} extras={extras} />
+        <Fiction index="02" book={book} stories={stories} />
         <Games index="03" games={games} />
         {hasMusic && <Music index="04" tracks={music} />}
       </main>

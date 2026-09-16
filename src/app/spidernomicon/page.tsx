@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { runes, sorceries, THREAD_URL } from '@/content/spidernomicon';
 import Spidernomicon from '@/components/spidernomicon/Spidernomicon';
 
@@ -29,21 +28,6 @@ export const metadata: Metadata = {
 export default function SpidernomiconPage() {
   return (
     <div className="min-h-screen bg-black font-[family-name:var(--font-geist-sans)] text-zinc-100 antialiased">
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-4 pt-5 sm:px-6 sm:pt-6">
-        <Link
-          href="/"
-          className="font-pixel text-[9px] text-zinc-400 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:text-[10px]"
-        >
-          Matthew D. Huff
-        </Link>
-        <Link
-          href="/portfolio"
-          className="text-[10px] uppercase tracking-[0.16em] text-zinc-500 transition-colors hover:text-white focus-visible:text-white focus-visible:outline-none sm:text-xs"
-        >
-          Portfolio
-        </Link>
-      </header>
-
       <main className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 sm:pb-32">
         {/* Opening */}
         <section aria-labelledby="spidernomicon-title" className="pb-10 pt-20 sm:pb-16 sm:pt-32 lg:pt-40">

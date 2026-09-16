@@ -12,7 +12,9 @@ export default function PortfolioNav({ name, sections }: PortfolioNavProps) {
     .toUpperCase();
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-md">
+    // Sticky, not fixed: the site bar sits above this in flow, and this pins to
+    // the top once the page scrolls past it.
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-md">
       <nav
         aria-label="Portfolio sections"
         className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4 sm:h-14 sm:px-6"
