@@ -4,13 +4,15 @@ import { ArtworkImage, Project } from '@/types/artwork';
 import { ProjectCountSummary } from '@/types/gallery';
 
 
-interface ArtworkRow {
+export interface ArtworkRow {
   id: string;
   url: string;
   title: string;
   description: string | null;
   project_id: string | null;
   tags: string[] | null;
+  width: number | null;
+  height: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -32,10 +34,12 @@ interface GalleryImagesResult {
   images: ArtworkImage[];
   hasMore: boolean;
 }
-function mapRowToArtwork(row: ArtworkRow): ArtworkImage {
+export function mapRowToArtwork(row: ArtworkRow): ArtworkImage {
   return {
     id: row.id,
     url: row.url,
+    width: row.width ?? undefined,
+    height: row.height ?? undefined,
     metadata: {
       title: row.title,
       description: row.description ?? undefined,
@@ -65,6 +69,8 @@ export async function getGalleryImages({
       description,
       project_id,
       tags,
+      width,
+      height,
       created_at,
       updated_at
     FROM artworks`,
@@ -123,6 +129,16 @@ export async function getGalleryImages({
     images: processedRows.map(mapRowToArtwork),
     hasMore,
   };
+}
+
+export async function getArtworkById(id: string): Promise<ArtworkImage | null> {
+  const rows = (await sql`
+    SELECT id, url, title, description, project_id, tags, width, height, created_at, updated_at
+    FROM artworks
+    WHERE id = ${id}
+  `) as ArtworkRow[];
+
+  return rows.length > 0 ? mapRowToArtwork(rows[0]) : null;
 }
 
 export async function getGalleryProjects(): Promise<Project[]> {

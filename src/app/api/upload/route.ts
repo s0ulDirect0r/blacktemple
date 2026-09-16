@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { sql } from '@/lib/db';
 import { jwtVerify } from 'jose';
+import { imageSize } from 'image-size';
 import { ArtworkMetadata } from '@/types/artwork';
 
 async function verifyAuth(request: Request) {
@@ -41,10 +42,26 @@ export async function POST(request: Request) {
       );
     }
 
+    // Read the file once: measure its pixel dimensions and upload the same bytes.
+    const bytes = Buffer.from(await file.arrayBuffer());
+
+    let width: number | null = null;
+    let height: number | null = null;
+    try {
+      const size = imageSize(bytes);
+      if (size.width && size.height) {
+        width = size.width;
+        height = size.height;
+      }
+    } catch (measureError) {
+      console.warn('Could not measure image dimensions:', measureError);
+    }
+
     // Upload to Vercel Blob
-    const blob = await put(file.name, file, {
+    const blob = await put(file.name, bytes, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN!,
+      contentType: file.type || undefined,
     });
 
     // Store metadata in database
@@ -55,6 +72,8 @@ export async function POST(request: Request) {
         description,
         project_id,
         tags,
+        width,
+        height,
         created_at,
         updated_at
       ) VALUES (
@@ -63,6 +82,8 @@ export async function POST(request: Request) {
         ${metadata.description || null},
         ${metadata.projectId || null},
         ${metadata.tags || []},
+        ${width},
+        ${height},
         ${metadata.created_at},
         ${metadata.updated_at}
       )
@@ -71,7 +92,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       id: result[0].id,
-      url: blob.url
+      url: blob.url,
+      width: width ?? undefined,
+      height: height ?? undefined,
     });
   } catch (error) {
     console.error('Upload error:', error);
