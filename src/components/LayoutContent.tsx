@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense } from 'react';
+import { usePathname } from 'next/navigation';
 import { Canvas } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import { NavigationProvider, useNavigation } from '@/context/NavigationContext';
@@ -53,6 +54,13 @@ function ThreeScene() {
 }
 
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  // /portfolio is a standalone single-scroll page: no 3D scene, no zone overlay.
+  if (pathname.startsWith('/portfolio')) {
+    return <>{children}</>;
+  }
+
   return (
     <NavigationProvider>
       {/* Persistent 3D scene as background */}

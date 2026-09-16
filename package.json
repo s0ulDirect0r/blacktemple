@@ -21,6 +21,7 @@
     "cloudinary": "^2.5.1",
     "gray-matter": "^4.0.3",
     "highlight.js": "^11.11.1",
+    "image-size": "^2.0.4",
     "jose": "^6.0.8",
     "nanoid": "^5.1.2",
     "next": "^16.1.6",
