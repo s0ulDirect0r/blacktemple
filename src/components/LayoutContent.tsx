@@ -70,7 +70,8 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
 
   // The writing pages are documents rendered over the scene, not zones, so
   // ZoneOverlay shows no bar for them; render it in flow above the page.
-  const showInlineBar = pathname.startsWith('/writing');
+  const showInlineBar =
+    pathname.startsWith('/writing') || pathname.startsWith('/artwork') || pathname.startsWith('/admin');
 
   return (
     <NavigationProvider>
