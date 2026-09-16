@@ -49,7 +49,7 @@ export default async function PortfolioPage() {
 
   const hasMusic = music.length > 0;
   const sections = [
-    { id: 'paintings', label: 'Paintings' },
+    { id: 'paintings', label: 'Paintings', short: 'Art' },
     { id: 'fiction', label: 'Fiction' },
     { id: 'games', label: 'Games' },
     ...(hasMusic ? [{ id: 'music', label: 'Music' }] : []),

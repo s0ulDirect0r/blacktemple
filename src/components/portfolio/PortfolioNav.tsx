@@ -1,6 +1,7 @@
 interface PortfolioNavProps {
   name: string;
-  sections: { id: string; label: string }[];
+  /** `short` is used below the phone breakpoint so the bar never wraps or scrolls. */
+  sections: { id: string; label: string; short?: string }[];
 }
 
 export default function PortfolioNav({ name, sections }: PortfolioNavProps) {
@@ -29,14 +30,15 @@ export default function PortfolioNav({ name, sections }: PortfolioNavProps) {
           </span>
           <span className="hidden sm:inline">{name}</span>
         </a>
-        <ul className="flex min-w-0 items-center gap-3.5 overflow-x-auto whitespace-nowrap py-2 font-pixel text-[8px] uppercase text-zinc-400 [scrollbar-width:none] sm:gap-7 sm:overflow-visible sm:text-[11px] md:gap-9 md:text-[13px]">
+        <ul className="flex min-w-0 items-center gap-3.5 whitespace-nowrap font-pixel text-[8px] uppercase text-zinc-400 sm:gap-7 sm:text-[11px] md:gap-9 md:text-[13px]">
           {sections.map((section) => (
             <li key={section.id}>
               <a
                 href={`#${section.id}`}
                 className="inline-block transition-all duration-200 hover:scale-110 hover:text-white focus-visible:text-white focus-visible:outline-none"
               >
-                {section.label}
+                <span className="sm:hidden">{section.short ?? section.label}</span>
+                <span className="hidden sm:inline">{section.label}</span>
               </a>
             </li>
           ))}
