@@ -20,7 +20,8 @@ export default function PortfolioNav({ name, sections }: PortfolioNavProps) {
         className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4 sm:h-14 sm:px-6"
       >
         <a
-          href="#top"
+          href="/"
+          title="Enter the full site"
           className="font-pixel text-[9px] text-white transition-colors hover:text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:text-[11px]"
         >
           <span className="sm:hidden" aria-label={name}>
