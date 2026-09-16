@@ -12,9 +12,7 @@ interface FictionProps {
 }
 
 export default function Fiction({ index, book, stories }: FictionProps) {
-  const excerptParagraphs = book.excerpt
-    ? book.excerpt.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
-    : [];
+  const excerpt = book.excerpt && book.excerpt.paragraphs.length > 0 ? book.excerpt : null;
 
   return (
     <section id="fiction" aria-labelledby="fiction-heading" className="scroll-mt-14 sm:scroll-mt-16">
@@ -48,18 +46,26 @@ export default function Fiction({ index, book, stories }: FictionProps) {
                 ))}
               </div>
 
-              {excerptParagraphs.length > 0 && (
+              {excerpt && (
                 <div className="mt-10 border-l border-white/15 pl-5 sm:pl-7">
-                  <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500 sm:text-xs">Read an excerpt</p>
-                  <blockquote className="mt-4 space-y-4 font-serif text-base italic leading-relaxed text-zinc-200 sm:text-lg">
-                    {excerptParagraphs.map((paragraph, i) => (
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500 sm:text-xs">{excerpt.title}</p>
+                  <blockquote className="mt-4 max-w-[65ch] space-y-4 font-serif text-base leading-relaxed text-zinc-200 sm:text-lg">
+                    {excerpt.paragraphs.map((paragraph, i) => (
                       <p key={i}>{paragraph}</p>
                     ))}
                   </blockquote>
+                  <p className="mt-6 text-sm text-zinc-500">
+                    <a
+                      href="#book-links"
+                      className="underline decoration-zinc-700 underline-offset-4 transition-colors hover:text-zinc-300 hover:decoration-zinc-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                    >
+                      Read the book <span aria-hidden="true">↓</span>
+                    </a>
+                  </p>
                 </div>
               )}
 
-              <ul className="mt-10 flex flex-wrap gap-x-10 gap-y-4">
+              <ul id="book-links" className="mt-10 flex scroll-mt-20 flex-wrap gap-x-10 gap-y-4">
                 {book.links.map((link) => (
                   <li key={link.href}>
                     <ExternalLink href={link.href} className="text-base sm:text-lg">

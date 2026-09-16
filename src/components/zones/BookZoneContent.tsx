@@ -1,9 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import { FiExternalLink } from 'react-icons/fi';
+import { bookExcerpt } from '@/content/book';
 
 export default function BookZoneContent() {
+  const [prologueOpen, setPrologueOpen] = useState(false);
+
   return (
     <div className="max-w-4xl mx-auto text-white">
       <div className="grid md:grid-cols-2 gap-4 sm:gap-8">
@@ -82,6 +86,38 @@ export default function BookZoneContent() {
           </div>
         </div>
       </div>
+
+      {/* Read the prologue: collapsed by default, expands inline below the purchase links */}
+      <section
+        aria-labelledby="book-prologue-toggle"
+        className="mt-10 border-t border-white/10 pt-8 sm:mt-12"
+      >
+        <button
+          id="book-prologue-toggle"
+          type="button"
+          onClick={() => setPrologueOpen((open) => !open)}
+          aria-expanded={prologueOpen}
+          aria-controls="book-prologue"
+          className="group inline-flex items-center gap-3 text-xs uppercase tracking-[0.22em] text-zinc-300 transition-colors hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white sm:text-sm"
+        >
+          <span
+            aria-hidden="true"
+            className="flex h-6 w-6 items-center justify-center border border-white/20 font-mono text-sm leading-none transition-colors group-hover:border-white"
+          >
+            {prologueOpen ? '−' : '+'}
+          </span>
+          {prologueOpen ? 'Hide the prologue' : 'Read the prologue'}
+        </button>
+
+        <div id="book-prologue" hidden={!prologueOpen} className="mt-8 max-w-[65ch]">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-zinc-500 sm:text-xs">{bookExcerpt.title}</p>
+          <div className="mt-5 space-y-5 text-[17px] leading-[1.7] text-zinc-200">
+            {bookExcerpt.paragraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
