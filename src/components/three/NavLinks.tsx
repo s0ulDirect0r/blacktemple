@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text, useCursor } from '@react-three/drei';
 import * as THREE from 'three';
@@ -25,12 +26,14 @@ interface NavLink {
   zoneId: ZoneId | null;
   external?: boolean;
   externalUrl?: string;
+  /** Same-site route that is not a zone (rendered over the scene). */
+  href?: string;
 }
 
 // Links split into above/below machine groups for mobile layout
 const linksAbove: NavLink[] = [
   { label: 'Code', zoneId: 'projects' },
-  { label: 'Writing', zoneId: null, external: true, externalUrl: 'https://souldirection.substack.com' },
+  { label: 'Writing', zoneId: null, href: '/writing' },
   { label: 'Art', zoneId: 'gallery' },
 ];
 
@@ -52,6 +55,7 @@ interface NavLinkTextProps {
 
 function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
   const { navigateToZone } = useNavigation();
+  const router = useRouter();
   const [hovered, setHovered] = useState(false);
   const [meshRef, setMeshRef] = useState<THREE.Mesh | null>(null);
 
@@ -68,6 +72,8 @@ function NavLinkText({ link, position, index, fontSize }: NavLinkTextProps) {
   const handleClick = () => {
     if (link.external && link.externalUrl) {
       window.open(link.externalUrl, '_blank', 'noopener,noreferrer');
+    } else if (link.href) {
+      router.push(link.href);
     } else if (link.zoneId) {
       navigateToZone(link.zoneId);
     }

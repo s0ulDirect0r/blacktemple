@@ -1,71 +1,84 @@
-import { getAllPosts } from '@/lib/mdx';
-import { PAGE_META, pageMetadata } from '@/lib/site';
+import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
-import { FiCalendar, FiTag } from 'react-icons/fi';
+import { getStories } from '@/lib/mdx';
+import WritingHeader from '@/components/writing/WritingHeader';
+import StoryMeta from '@/components/writing/StoryMeta';
 
-export const metadata = pageMetadata({ ...PAGE_META.writing, path: '/writing' });
+const DESCRIPTION =
+  'Short fiction by Matthew D. Huff: stories, a poem cycle, and two illustrated pieces, first posted as Twitter threads in 2022 under 100 Anansi Stories.';
+
+export function generateMetadata(): Metadata {
+  const [first] = getStories();
+
+  return {
+    title: 'Writing',
+    description: DESCRIPTION,
+    openGraph: {
+      title: 'Writing · Matthew D. Huff',
+      description: DESCRIPTION,
+      images: first
+        ? [{ url: first.cover, width: first.coverWidth, height: first.coverHeight, alt: first.title }]
+        : undefined,
+    },
+  };
+}
 
 export default function WritingPage() {
-  const posts = getAllPosts();
+  const stories = getStories();
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">Writing</h1>
-          <p className="text-xl text-zinc-400 mb-12">
-            Thoughts on code, learning, and building things.
-          </p>
+    <div className="min-h-screen bg-black text-zinc-100">
+      <WritingHeader atIndex />
 
-          {posts.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500">
-              <p>No posts yet. Check back soon!</p>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {posts.map((post) => (
+      <main className="mx-auto max-w-3xl px-4 pb-24 pt-12 sm:px-6 sm:pb-32 sm:pt-16">
+        <h1 className="font-pixel text-lg leading-none text-white sm:text-2xl">Writing</h1>
+
+        <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-zinc-400 sm:text-xl sm:leading-relaxed">
+          In 2022 I posted fourteen tales as Twitter threads under the banner{' '}
+          <span className="text-zinc-200">100 Anansi Stories</span>; these are the fiction from that
+          run, plus two longer pieces.
+        </p>
+
+        {stories.length === 0 ? (
+          <p className="mt-16 text-zinc-500">No stories yet.</p>
+        ) : (
+          <ol className="mt-12 divide-y divide-white/10 border-t border-white/10 sm:mt-16">
+            {stories.map((story, i) => (
+              <li key={story.slug}>
                 <Link
-                  key={post.slug}
-                  href={`/writing/${post.slug}`}
-                  className="block group"
+                  href={`/writing/${story.slug}`}
+                  className="group grid gap-5 py-8 sm:grid-cols-12 sm:gap-8 sm:py-10"
                 >
-                  <article className="bg-zinc-900 border border-zinc-800 rounded-lg p-6 hover:border-zinc-600 transition-colors">
-                    <h2 className="text-2xl font-bold mb-2 group-hover:text-zinc-300 transition-colors">
-                      {post.title}
+                  <div className="sm:col-span-5">
+                    <Image
+                      src={story.cover}
+                      alt={`${story.title}, title card`}
+                      width={story.coverWidth}
+                      height={story.coverHeight}
+                      sizes="(max-width: 639px) 100vw, 320px"
+                      priority={i < 2}
+                      className="h-auto w-full max-w-full transition-opacity duration-300 group-hover:opacity-80"
+                      style={{ maxWidth: story.coverWidth }}
+                    />
+                  </div>
+
+                  <div className="sm:col-span-7">
+                    <StoryMeta story={story} />
+                    <h2 className="font-pixel mt-3 text-sm leading-[1.6] text-white transition-colors group-hover:text-zinc-300 sm:text-base">
+                      {story.title}
                     </h2>
-
-                    <div className="flex items-center space-x-4 text-sm text-zinc-500 mb-4">
-                      <div className="flex items-center space-x-1">
-                        <FiCalendar className="w-4 h-4" />
-                        <time dateTime={post.date}>
-                          {new Date(post.date).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </time>
-                      </div>
-
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex items-center space-x-1">
-                          <FiTag className="w-4 h-4" />
-                          <span>{post.tags.join(', ')}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {post.excerpt && (
-                      <p className="text-zinc-400 leading-relaxed">
-                        {post.excerpt}
-                      </p>
+                    {story.tagline && (
+                      <p className="mt-2 text-sm italic text-zinc-500">{story.tagline}</p>
                     )}
-                  </article>
+                    <p className="mt-3 text-base leading-relaxed text-zinc-400">{story.excerpt}</p>
+                  </div>
                 </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </main>
     </div>
   );
 }
