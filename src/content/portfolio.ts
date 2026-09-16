@@ -13,8 +13,32 @@ export interface PortfolioHero {
   name: string;
   role: string;
   location: string;
+  /** One sentence under the name: what the work is about. */
+  line: string;
   /** Artist statement, one string per paragraph. */
   statement: string[];
+}
+
+export interface CabinetImage {
+  src: string;
+  width: number;
+  height: number;
+}
+
+/**
+ * One tile in the hero "cabinet": one piece per medium, so a first-time visitor
+ * sees the whole practice before scrolling. `video` is an optional muted loop
+ * played on hover/focus over the poster.
+ */
+export interface CabinetTile {
+  title: string;
+  /** Medium and year, e.g. "sigil · 2025". */
+  meta: string;
+  href: string;
+  image: CabinetImage | null;
+  video?: string;
+  /** Tile without an image: a small pixel waveform (music). */
+  glyph?: 'waveform';
 }
 
 export interface PortfolioStory {
@@ -75,6 +99,8 @@ export interface PortfolioContact {
 
 export interface PortfolioContent {
   hero: PortfolioHero;
+  /** Six tiles, one per medium, shown under the name. */
+  cabinet: CabinetTile[];
   /**
    * Artwork ids (from the `artworks` table) to feature, in display order.
    * The first id becomes the hero image. An empty array means "take the
@@ -98,6 +124,7 @@ export const portfolio: PortfolioContent = {
   hero: {
     name: 'Matthew D. Huff',
     role: 'Digital painter · Software engineer · Novelist',
+    line: 'Mystery and dopeness, in paint, prose, runes, songs and games. Made in the Black Temple, in public, since 2021.',
     location: 'New York City',
     // DRAFT — artist statement, first pass. Rewrite freely; keep it first person.
     statement: [
@@ -105,6 +132,46 @@ export const portfolio: PortfolioContent = {
       'I have published a novel, An Infinite Heart, about a man whose nightmares and swells of feeling pull love and trouble into his life in equal measure. I built GODCELL, a multiplayer evolution game where you begin as a single cell and either transcend or lose everything, and a simulator that runs a star from nebula to black hole in your browser. Code, prose, and paint are one search to me, for the place where knowledge, creativity, and wisdom meet. I would like to give the paintings a year of undivided attention.',
     ],
   },
+  cabinet: [
+    {
+      title: 'Dopeness',
+      meta: 'sigil · 2025',
+      href: '#paintings',
+      image: { src: `${BLOB}/IMG_1536-uJyiI6Cs2OG3Zo3BXqzf24aizrDWId.jpeg`, width: 2560, height: 1664 },
+    },
+    {
+      title: 'Escalation',
+      meta: 'game · 2026, daily',
+      href: '#games',
+      image: { src: '/images/escalation-poster.jpg', width: 1440, height: 900 },
+      video: '/images/escalation-loop.mp4',
+    },
+    {
+      title: 'Spiderscript',
+      meta: 'rune 1 of 100 · 2022',
+      href: '/spidernomicon?rune=1',
+      image: { src: `${BLOB}/spidernomicon/rune-001.jpg`, width: 800, height: 800 },
+    },
+    {
+      title: 'An Infinite Heart',
+      meta: 'novel · 2025',
+      href: '#fiction',
+      image: { src: `${BLOB}/Untitled_Artwork%2057.jpg`, width: 1275, height: 2061 },
+    },
+    {
+      title: 'Synner',
+      meta: 'short story · 2022',
+      href: '/writing/synner',
+      image: { src: `${BLOB}/stories/synner/cover.jpg`, width: 1200, height: 675 },
+    },
+    {
+      title: 'Find the Way',
+      meta: 'song · 2025',
+      href: '#music',
+      image: null,
+      glyph: 'waveform',
+    },
+  ],
 
   selectedArt: [],
 

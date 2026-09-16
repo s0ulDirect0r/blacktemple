@@ -21,7 +21,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = `Portfolio · ${portfolio.hero.name}`;
 
   return {
-    title,
+    // The root layout's template appends the name, so the tab title is just 'Portfolio'.
+    title: 'Portfolio',
     description: DESCRIPTION,
     openGraph: {
       title,
@@ -41,8 +42,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PortfolioPage() {
-  const { hero: heroArtwork, paintings } = await getPortfolioArt();
-  const { hero, book, stories, extras, games, music, contact } = portfolio;
+  const { hero: heroArtwork, paintings: rest } = await getPortfolioArt();
+  // The cabinet replaced the single hero painting, so it returns to the grid.
+  const paintings = heroArtwork ? [heroArtwork, ...rest] : rest;
+  const { hero, cabinet, book, stories, extras, games, music, contact } = portfolio;
 
   const hasMusic = music.length > 0;
   const sections = [
@@ -63,7 +66,7 @@ export default async function PortfolioPage() {
       <PortfolioNav name={hero.name} sections={sections} />
 
       <main className="space-y-24 pb-24 sm:space-y-32 sm:pb-32 lg:space-y-40">
-        <Hero hero={hero} artwork={heroArtwork} />
+        <Hero hero={hero} cabinet={cabinet} />
         <Paintings index="01" paintings={paintings} extras={extras} />
         <Fiction index="02" book={book} stories={stories} />
         <Games index="03" games={games} />
