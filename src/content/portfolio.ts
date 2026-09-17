@@ -143,10 +143,12 @@ export const portfolio: PortfolioContent = {
   },
   cabinet: [
     {
-      title: 'Dopeness',
-      meta: 'sigil · 2025',
+      title: 'Heart',
+      meta: 'sigil · 2026',
       href: '#paintings',
-      image: { src: `${BLOB}/IMG_1536-uJyiI6Cs2OG3Zo3BXqzf24aizrDWId.jpeg`, width: 2560, height: 1664 },
+      image: { src: `${BLOB}/art/heart/heart.jpg`, width: 2560, height: 1664 },
+      // The Procreate timelapse of the piece, muted, plays on hover.
+      video: `${BLOB}/art/heart/heart-timelapse.mp4`,
     },
     {
       title: 'Escalation',
