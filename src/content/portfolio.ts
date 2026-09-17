@@ -177,6 +177,7 @@ export const portfolio: PortfolioContent = {
       meta: 'short story · 2022',
       href: '/writing/the-abyss',
       image: { src: `${BLOB}/stories/the-abyss/cover.jpg`, width: 1200, height: 675 },
+      fit: 'contain',
     },
     {
       title: 'Find the Way',

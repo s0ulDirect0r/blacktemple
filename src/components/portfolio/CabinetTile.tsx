@@ -33,7 +33,16 @@ export default function CabinetTileView({ tile }: { tile: CabinetTile }) {
       onBlur={stop}
     >
       <div className="relative aspect-[16/10] w-full bg-black">
-        {tile.image && tile.fit === 'contain' ? (
+        {tile.image && tile.fit === 'contain' && tile.image.height <= tile.image.width ? (
+          // A whole landscape piece, letterboxed on black rather than cropped.
+          <Image
+            src={tile.image.src}
+            alt={tile.title}
+            fill
+            sizes="(min-width: 1024px) 400px, 50vw"
+            className="object-contain"
+          />
+        ) : tile.image && tile.fit === 'contain' ? (
           // A whole object on a shelf (a book cover), not a crop.
           <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 py-3">
             <div
