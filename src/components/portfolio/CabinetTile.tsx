@@ -33,7 +33,23 @@ export default function CabinetTileView({ tile }: { tile: CabinetTile }) {
       onBlur={stop}
     >
       <div className="relative aspect-[16/10] w-full bg-black">
-        {tile.image ? (
+        {tile.image && tile.fit === 'contain' ? (
+          // A whole object on a shelf (a book cover), not a crop.
+          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950 py-3">
+            <div
+              className="relative h-full shadow-[6px_8px_24px_rgba(0,0,0,0.7)] transition-transform duration-300 group-hover:-translate-y-0.5"
+              style={{ aspectRatio: `${tile.image.width} / ${tile.image.height}` }}
+            >
+              <Image
+                src={tile.image.src}
+                alt={tile.title}
+                fill
+                sizes="(min-width: 1024px) 200px, 30vw"
+                className="object-cover"
+              />
+            </div>
+          </div>
+        ) : tile.image ? (
           <Image
             src={tile.image.src}
             alt={tile.title}

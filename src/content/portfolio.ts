@@ -35,6 +35,8 @@ export interface CabinetTile {
   meta: string;
   href: string;
   image: CabinetImage | null;
+  /** 'contain' shows the whole image (a book cover, a poster) instead of filling the tile. */
+  fit?: 'cover' | 'contain';
   video?: string;
   /** Tile without an image: a small pixel waveform (music). */
   glyph?: 'waveform';
@@ -168,6 +170,7 @@ export const portfolio: PortfolioContent = {
       meta: 'novel · 2025',
       href: '#fiction',
       image: { src: `${BLOB}/Untitled_Artwork%2057.jpg`, width: 1275, height: 2061 },
+      fit: 'contain',
     },
     {
       title: 'Synner',
