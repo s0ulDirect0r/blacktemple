@@ -38,6 +38,8 @@ export interface CabinetTile {
   /** 'contain' shows the whole image (a book cover, a poster) instead of filling the tile. */
   fit?: 'cover' | 'contain';
   video?: string;
+  /** Play the video on its own, muted and looping, like a GIF (still shown under reduced motion). */
+  autoplay?: boolean;
   /** Tile without an image: a small pixel waveform (music). */
   glyph?: 'waveform';
 }
@@ -160,10 +162,10 @@ export const portfolio: PortfolioContent = {
       video: '/images/escalation-loop.mp4',
     },
     {
-      title: 'Spiderscript',
-      meta: 'rune 1 of 100 · 2022',
-      href: '/spidernomicon?rune=1',
-      image: { src: `${BLOB}/spidernomicon/rune-001.jpg`, width: 800, height: 800 },
+      title: 'Sun Simulator',
+      meta: 'simulation · live',
+      href: '#games',
+      image: { src: '/images/sun-simulator-preview.png', width: 1400, height: 788 },
     },
     {
       title: 'An Infinite Heart',
@@ -180,11 +182,14 @@ export const portfolio: PortfolioContent = {
       fit: 'contain',
     },
     {
-      title: 'Find the Way',
-      meta: 'song · 2025',
-      href: '#music',
-      image: null,
-      glyph: 'waveform',
+      title: 'Flowing Desires',
+      meta: 'twenty sigils · 2023',
+      href: '/gallery',
+      image: { src: `${BLOB}/art/flowing-desires/flowing-desires.jpg`, width: 1200, height: 1200 },
+      // The collection cycling as a loop, like the GIF it came from.
+      video: `${BLOB}/art/flowing-desires/flowing-desires.mp4`,
+      autoplay: true,
+      fit: 'contain',
     },
   ],
 

@@ -73,7 +73,19 @@ export default function CabinetTileView({ tile }: { tile: CabinetTile }) {
             ))}
           </div>
         )}
-        {tile.video && (
+        {tile.video && tile.autoplay ? (
+          <video
+            src={tile.video}
+            poster={tile.image?.src}
+            muted
+            loop
+            autoPlay
+            playsInline
+            preload="metadata"
+            aria-hidden="true"
+            className={`absolute inset-0 h-full w-full motion-reduce:hidden ${tile.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
+          />
+        ) : tile.video ? (
           <video
             ref={videoRef}
             src={tile.video}
@@ -84,7 +96,7 @@ export default function CabinetTileView({ tile }: { tile: CabinetTile }) {
             aria-hidden="true"
             className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:hidden"
           />
-        )}
+        ) : null}
       </div>
       <div className="flex flex-col gap-0.5 px-3 py-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
         <span className="text-sm text-zinc-100 sm:truncate">{tile.title}</span>
