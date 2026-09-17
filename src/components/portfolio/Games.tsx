@@ -10,6 +10,27 @@ interface GamesProps {
 }
 
 function GameMedia({ game }: { game: PortfolioGame }) {
+  if (game.video) {
+    const { video } = game;
+    return (
+      <figure>
+        <div className="overflow-hidden bg-zinc-900" style={{ aspectRatio: `${video.width} / ${video.height}` }}>
+          <video
+            src={video.src}
+            poster={video.poster}
+            controls
+            playsInline
+            preload="metadata"
+            className="h-full w-full"
+          />
+        </div>
+        {video.caption && (
+          <figcaption className="mt-2 text-[11px] text-zinc-500 sm:text-xs">{video.caption}</figcaption>
+        )}
+      </figure>
+    );
+  }
+
   if (game.images.length === 1) {
     const [image] = game.images;
     return (
@@ -63,7 +84,7 @@ export default function Games({ index, games }: GamesProps) {
     <section id="games" aria-labelledby="games-heading" className="scroll-mt-14 sm:scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
-          <SectionHeading id="games-heading" index={index} title="Games" meta={`${games.length} browser projects`} />
+          <SectionHeading id="games-heading" index={index} title="Games" meta={`${games.length} games`} />
         </Reveal>
 
         <div className="divide-y divide-white/10">

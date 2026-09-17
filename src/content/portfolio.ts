@@ -71,6 +71,15 @@ export interface PortfolioGameImage {
   alt: string;
 }
 
+export interface PortfolioVideo {
+  src: string;
+  poster: string;
+  width: number;
+  height: number;
+  /** Shown under the player, e.g. the clip's own title. */
+  caption?: string;
+}
+
 export interface PortfolioGame {
   title: string;
   /** One-line pitch shown large. */
@@ -79,6 +88,8 @@ export interface PortfolioGame {
   description: string;
   tech: string[];
   images: PortfolioGameImage[];
+  /** A playable clip; when present it is the lead media and images follow it. */
+  video?: PortfolioVideo;
   links: { live?: string; repo: string };
 }
 
@@ -217,6 +228,24 @@ export const portfolio: PortfolioContent = {
   },
 
   games: [
+    {
+      title: 'Escalation',
+      pitch: 'A pixel-art war over an island. Start on foot, earn a machine, come back and prove it.',
+      description:
+        'A multiplayer island war in progress since 2025, built in plain JavaScript and canvas with an authoritative Node server. Three armies fight over five shrines through a day and night cycle; you begin vulnerable, take authored raids for bigger capabilities, and return to the shared war. Not public yet; the clip is from this week.',
+      tech: ['JavaScript', 'Canvas', 'Node.js', 'Socket.io', 'Aseprite'],
+      images: [],
+      video: {
+        src: `${BLOB}/escalation/have-i-gone-too-far.mp4`,
+        poster: `${BLOB}/escalation/have-i-gone-too-far.jpg`,
+        width: 1280,
+        height: 800,
+        caption: 'have i gone too far · gameplay, September 2026',
+      },
+      links: {
+        repo: 'https://github.com/s0ulDirect0r/escalation',
+      },
+    },
     {
       title: 'Sun Simulator',
       pitch: 'A star, from nebula collapse to black hole, running live in the browser.',
