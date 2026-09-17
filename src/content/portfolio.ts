@@ -154,9 +154,9 @@ export const portfolio: PortfolioContent = {
     },
     {
       title: 'Escalation',
-      meta: 'game · 2026, daily',
+      meta: 'game · 2026',
       href: '#games',
-      image: { src: '/images/escalation-poster.jpg', width: 1440, height: 900 },
+      image: { src: `${BLOB}/escalation/title.png`, width: 980, height: 600 },
       video: '/images/escalation-loop.mp4',
     },
     {
