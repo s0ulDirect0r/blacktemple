@@ -173,10 +173,10 @@ export const portfolio: PortfolioContent = {
       fit: 'contain',
     },
     {
-      title: 'Synner',
+      title: 'The Abyss',
       meta: 'short story · 2022',
-      href: '/writing/synner',
-      image: { src: `${BLOB}/stories/synner/cover.jpg`, width: 1200, height: 675 },
+      href: '/writing/the-abyss',
+      image: { src: `${BLOB}/stories/the-abyss/cover.jpg`, width: 1200, height: 675 },
     },
     {
       title: 'Find the Way',
