@@ -6,7 +6,6 @@ import Hero from '@/components/portfolio/Hero';
 import Paintings from '@/components/portfolio/Paintings';
 import Fiction from '@/components/portfolio/Fiction';
 import Games from '@/components/portfolio/Games';
-import Music from '@/components/portfolio/Music';
 import Contact from '@/components/portfolio/Contact';
 
 // Regenerate at most once an hour: artwork comes from the database and image
@@ -45,14 +44,12 @@ export default async function PortfolioPage() {
   const { hero: heroArtwork, paintings: rest } = await getPortfolioArt();
   // The cabinet replaced the single hero painting, so it returns to the grid.
   const paintings = heroArtwork ? [heroArtwork, ...rest] : rest;
-  const { hero, cabinet, book, stories, extras, games, music, contact } = portfolio;
+  const { hero, cabinet, book, stories, extras, games, contact } = portfolio;
 
-  const hasMusic = music.length > 0;
   const sections = [
-    { id: 'paintings', label: 'Paintings', short: 'Art' },
-    { id: 'fiction', label: 'Fiction' },
     { id: 'games', label: 'Games' },
-    ...(hasMusic ? [{ id: 'music', label: 'Music' }] : []),
+    { id: 'fiction', label: 'Fiction' },
+    { id: 'paintings', label: 'Paintings', short: 'Art' },
     { id: 'contact', label: 'Contact' },
   ];
 
@@ -67,10 +64,9 @@ export default async function PortfolioPage() {
 
       <main className="space-y-24 pb-24 sm:space-y-32 sm:pb-32 lg:space-y-40">
         <Hero hero={hero} cabinet={cabinet} />
-        <Paintings index="01" paintings={paintings} extras={extras} />
+        <Games index="01" games={games} />
         <Fiction index="02" book={book} stories={stories} />
-        <Games index="03" games={games} />
-        {hasMusic && <Music index="04" tracks={music} />}
+        <Paintings index="03" paintings={paintings} extras={extras} />
       </main>
 
       <Contact name={hero.name} contact={contact} />

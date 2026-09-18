@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { CabinetTile } from '@/content/portfolio';
+import VideoPreview from './VideoPreview';
 
 const BARS = [18, 34, 26, 44, 22, 38, 16, 30, 40, 20, 28, 36];
 
@@ -22,6 +23,17 @@ export default function CabinetTileView({ tile }: { tile: CabinetTile }) {
     v.pause();
     v.currentTime = 0;
   };
+
+  if (tile.expandedVideo) {
+    return (
+      <VideoPreview video={tile.expandedVideo} title={tile.title} aspectRatio="16 / 10" className="rounded-md border border-zinc-800 bg-zinc-950 transition-colors hover:border-zinc-600">
+        <div className="flex flex-col gap-0.5 px-3 py-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+          <span className="text-sm text-zinc-100 sm:truncate">{tile.title}</span>
+          <span className="text-[11px] text-zinc-500 sm:shrink-0">{tile.meta}</span>
+        </div>
+      </VideoPreview>
+    );
+  }
 
   return (
     <Link

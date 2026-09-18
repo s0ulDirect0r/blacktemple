@@ -3,6 +3,7 @@ import type { PortfolioGame } from '@/content/portfolio';
 import SectionHeading from './SectionHeading';
 import Reveal from './Reveal';
 import ExternalLink from './ExternalLink';
+import VideoPreview from './VideoPreview';
 
 interface GamesProps {
   index: string;
@@ -14,6 +15,7 @@ function GameMedia({ game }: { game: PortfolioGame }) {
     const { video } = game;
     return (
       <figure>
+        {video.previewSrc ? <VideoPreview video={video} title={game.title} /> : (
         <div className="overflow-hidden bg-zinc-900" style={{ aspectRatio: `${video.width} / ${video.height}` }}>
           <video
             src={video.src}
@@ -24,6 +26,7 @@ function GameMedia({ game }: { game: PortfolioGame }) {
             className="h-full w-full"
           />
         </div>
+        )}
         {video.caption && (
           <figcaption className="mt-2 text-[11px] text-zinc-500 sm:text-xs">{video.caption}</figcaption>
         )}

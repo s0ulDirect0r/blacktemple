@@ -38,6 +38,8 @@ export interface CabinetTile {
   /** 'contain' shows the whole image (a book cover, a poster) instead of filling the tile. */
   fit?: 'cover' | 'contain';
   video?: string;
+  /** Opens a larger gameplay player when this tile is clicked. */
+  expandedVideo?: PortfolioVideo;
   /** Play the video on its own, muted and looping, like a GIF (still shown under reduced motion). */
   autoplay?: boolean;
   /** Tile without an image: a small pixel waveform (music). */
@@ -77,6 +79,10 @@ export interface PortfolioGameImage {
 
 export interface PortfolioVideo {
   src: string;
+  /** Describes non-gameplay clips in the player and its accessible label. */
+  label?: string;
+  /** Short muted hover preview; the full recording opens on click. */
+  previewSrc?: string;
   poster: string;
   width: number;
   height: number;
@@ -113,7 +119,7 @@ export interface PortfolioContact {
 
 export interface PortfolioContent {
   hero: PortfolioHero;
-  /** Six tiles, one per medium, shown under the name. */
+  /** Featured work shown under the name. */
   cabinet: CabinetTile[];
   /**
    * Artwork ids (from the `artworks` table) to feature, in display order.
@@ -133,6 +139,15 @@ export interface PortfolioContent {
 }
 
 const BLOB = 'https://zp7hauqhmxup1nll.public.blob.vercel-storage.com';
+
+const godcellVideo: PortfolioVideo = {
+  src: '/images/godcell-gameplay.mp4',
+  previewSrc: '/images/godcell-hover.mp4',
+  poster: '/images/godcell-poster.jpg',
+  width: 1440,
+  height: 960,
+  caption: 'GODCELL · gameplay',
+};
 
 export const portfolio: PortfolioContent = {
   hero: {
@@ -163,32 +178,36 @@ export const portfolio: PortfolioContent = {
     },
     {
       title: 'Sun Simulator',
-      meta: 'simulation · live',
+      meta: 'simulation · 2025',
       href: '#games',
-      image: { src: '/images/sun-simulator-preview.png', width: 1400, height: 788 },
+      image: { src: '/images/sun-simulator-lifecycle-poster.jpg', width: 640, height: 400 },
+      video: '/images/sun-simulator-lifecycle.mp4',
+    },
+    {
+      title: 'GODCELL',
+      meta: 'game · 2026',
+      href: '#games',
+      image: { src: godcellVideo.poster, width: 960, height: 640 },
+      expandedVideo: godcellVideo,
+    },
+    {
+      title: 'Latent Space',
+      meta: 'game · 2026',
+      href: '#games',
+      image: { src: '/images/latent-space-gameplay-poster.jpg', width: 960, height: 540 },
+      expandedVideo: {
+        src: '/images/latent-space-gameplay.mp4',
+        previewSrc: '/images/latent-space-gameplay-hover.mp4',
+        poster: '/images/latent-space-gameplay-poster.jpg',
+        width: 1280,
+        height: 720,
+      },
     },
     {
       title: 'An Infinite Heart',
       meta: 'novel · 2025',
       href: '#fiction',
       image: { src: `${BLOB}/Untitled_Artwork%2057.jpg`, width: 1275, height: 2061 },
-      fit: 'contain',
-    },
-    {
-      title: 'The Abyss',
-      meta: 'short story · 2022',
-      href: '/writing/the-abyss',
-      image: { src: `${BLOB}/stories/the-abyss/cover.jpg`, width: 1200, height: 675 },
-      fit: 'contain',
-    },
-    {
-      title: 'Flowing Desires',
-      meta: 'twenty sigils · 2023',
-      href: '/gallery',
-      image: { src: `${BLOB}/art/flowing-desires/flowing-desires.jpg`, width: 1200, height: 1200 },
-      // The collection cycling as a loop, like the GIF it came from.
-      video: `${BLOB}/art/flowing-desires/flowing-desires.mp4`,
-      autoplay: true,
       fit: 'contain',
     },
   ],
@@ -209,10 +228,10 @@ export const portfolio: PortfolioContent = {
         'Xeriax could feel it in his bones. He\u2019s going to die today. A wild toothy smile cuts a path across his face. His blood boils and churns and his muscles tighten and flex of their own accord.',
     },
     {
-      title: 'Soulheist 777, Part 1',
-      slug: 'soulheist-777-part-1',
+      title: "Spider's Path",
+      slug: 'spiders-path',
       excerpt:
-        'Somewhere in the Sol System, a man, a woman, and their ship have made a decision. A decision that will either doom their souls for all eternity or permanently engrave their names in the blockchain of history as legends who outsmarted the gods.',
+        'one glorious day / deep in the jungle / in a cozy silk bed / a spider hatches / different from its brothers and sisters / tinted a strange black and red',
     },
     {
       title: 'Synner',
@@ -260,6 +279,14 @@ export const portfolio: PortfolioContent = {
     {
       title: 'Sun Simulator',
       pitch: 'A star, from nebula collapse to black hole, running live in the browser.',
+      video: {
+        src: '/images/sun-simulator-lifecycle.mp4',
+        previewSrc: '/images/sun-simulator-lifecycle.mp4',
+        poster: '/images/sun-simulator-lifecycle-poster.jpg',
+        width: 640,
+        height: 400,
+        caption: 'Nebula → star → red giant → supernova → black hole',
+      },
       description:
         'Real-time 3D visualization of stellar evolution: 100,000+ particles coalesce under simplified gravity, burn through main sequence and red giant phases, detonate as a supernova, and collapse into a black hole with gravitational lensing written in custom GLSL shaders.',
       tech: ['Three.js', 'TypeScript', 'WebGL', 'GLSL', 'Vite'],
@@ -267,13 +294,14 @@ export const portfolio: PortfolioContent = {
         { src: '/images/sun-simulator-preview.png', width: 1400, height: 788, alt: 'Sun Simulator: a star mid-lifecycle surrounded by a particle nebula' },
       ],
       links: {
-        live: 'https://sun-simulator.blacktemple.art/',
+        live: 'https://sun-simulator.blacktemple.dev/',
         repo: 'https://github.com/s0ulDirect0r/sun-simulator',
       },
     },
     {
       title: 'GODCELL',
       pitch: 'A real-time multiplayer evolution game. Begin as a fragile cyber-cell; transcend or die.',
+      video: godcellVideo,
       description:
         'An evolutionary survival game set in a hostile digital world. Scarcity forces competition, predation creates tension, and entropy swarms keep you moving. There are no tutorials; you learn by dying. Built on a custom entity-component-system shared between an authoritative server and a Three.js client.',
       tech: ['TypeScript', 'Three.js', 'Node.js', 'Socket.io', 'ECS'],

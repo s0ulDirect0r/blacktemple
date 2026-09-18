@@ -25,7 +25,11 @@ export default function Hero({ hero, cabinet }: HeroProps) {
           {hero.line}
         </p>
 
-        <ul className="mt-10 grid grid-cols-2 gap-3 sm:mt-14 sm:gap-4 lg:grid-cols-3" aria-label="One piece per medium">
+        <p id="hero-card-hint" className="mt-10 text-sm text-zinc-400 sm:mt-14">
+          <span className="hidden [@media(hover:hover)]:inline motion-reduce:hidden">hover for a preview. </span>
+          select a card to explore.
+        </p>
+        <ul className="mt-3 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3" aria-label="Featured work" aria-describedby="hero-card-hint">
           {cabinet.map((tile) => (
             <li key={tile.title}>
               <CabinetTileView tile={tile} />
