@@ -8,7 +8,11 @@
 export interface BookExcerpt {
   /** Short label for the excerpt, e.g. "Prologue". */
   title: string;
+  context?: string;
+  attribution?: string;
   paragraphs: string[];
+  /** Original inline emphasis, when supplied by the manuscript. */
+  formattedParagraphs?: Array<Array<{ text: string; italic?: boolean; bold?: boolean }>>;
 }
 
 export const bookExcerpt: BookExcerpt = {

@@ -57,13 +57,18 @@ export default function Fiction({ index, book, stories }: FictionProps) {
               {excerpt && (
                 <details className="group/excerpt mt-10 border-y border-white/15 py-1">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-base text-white hover:text-zinc-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white [&::-webkit-details-marker]:hidden">
-                    <span>Read an excerpt <span className="text-zinc-500">· {excerpt.title}</span></span>
+                    <span>read an excerpt <span className="text-zinc-400">· {excerpt.title}</span></span>
                     <span aria-hidden="true" className="transition-transform group-open/excerpt:rotate-180 motion-reduce:transition-none">⌄</span>
                   </summary>
                   <div className="border-l border-white/15 pb-6 pl-5 sm:pl-7">
+                  {excerpt.attribution && <p className="mt-4 text-sm text-zinc-400">{excerpt.attribution}</p>}
+                  {excerpt.context && <p className="mt-3 max-w-[65ch] text-sm leading-relaxed text-zinc-300 sm:text-base">{excerpt.context}</p>}
                   <blockquote className="mt-4 max-w-[65ch] space-y-4 font-serif text-base leading-relaxed text-zinc-200 sm:text-lg">
                     {excerpt.paragraphs.map((paragraph, i) => (
-                      <p key={i}>{paragraph}</p>
+                      <p key={i}>{excerpt.formattedParagraphs?.[i]?.map((run, j) => {
+                        const text = run.italic ? <em>{run.text}</em> : run.text;
+                        return run.bold ? <strong key={j}>{text}</strong> : <span key={j}>{text}</span>;
+                      }) ?? paragraph}</p>
                     ))}
                   </blockquote>
                   <p className="mt-6 text-sm text-zinc-500">

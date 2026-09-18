@@ -6,7 +6,8 @@
  * components in src/components/portfolio/.
  */
 
-import { bookExcerpt, type BookExcerpt } from './book';
+import type { BookExcerpt } from './book';
+import { sunderedExcerpt } from './sundered';
 import { formatDuration, tracks } from './music';
 
 export interface PortfolioHero {
@@ -158,12 +159,13 @@ export const portfolio: PortfolioContent = {
     role: 'Digital painter · Software engineer · Novelist',
     line: 'I walk the path of mystery & dopeness by creating digital and physical artifacts that stoke aliveness and curiosity.',
     statement: [
-      "I make artifacts of aliveness, curiosity, and mystery. My vow is “mystery & dopeness.” An energy, an essence flows through me and demands expression, demands to be honored. Making things is how I become a conduit for that expression.",
-      "My work happens in phases. Digital art was an arc from 2022–2024; the short stories came in 2022, too. Then I broke down, got confused, and started exploring music. After releasing my novel, An Infinite Heart, I felt the pull to do bigger things, go harder. I’d always dreamed of making games, and that was where my energy started to flow: Sun Simulator, GODCELL, and the experiments that led to Escalation.",
-      "Escalation became my playground, a place to be honest about who I am. It began as an MMO about samsara and its realms. Then I got honest with myself: I wanted to shoot guns, blow shit up, drive mechs, and wield crazy weapons. Honoring what wants expression means letting the work take me somewhere I didn’t expect—and admitting what I actually want to make.",
-      "That honesty is really fucking hard. Economic pressure, personal pressure, and shame all push against it. Writing An Infinite Heart, I had to confront my shadow over and over to honor what wanted to go into the story. I do the best I can. I have to keep making that move.",
-      "Since fall 2025, learning mathematics through Math Academy has become another part of my practice. The exercises, the structures I discover, even the marks on the page feel like art to me. I’ve started noticing curves and their derivatives in tree branches. Differentiating and integrating feel wizardly. That curiosity also led me to build Hypercalculator, a tool I now use in my own study.",
-      "My art journey has often felt like surrender. Mathematics has taught me about commitment: as it gets harder, as I experience failure and frustration, I have to consciously recommit. Both belong in my practice—following the energy when it rages through me, and choosing to return when it doesn’t.",
+      "I walk the path of mystery & dopeness by creating digital and physical artifacts that stoke aliveness and curiosity.",
+      "A big challenge of my thirties has been learning to be really fucking honest about what I want, what I like, and what I want to make. An energy, an essence flows through me and demands expression, demands to be honored. Making things is how I become a conduit for that expression.",
+      "I feel it, and I observe my behavior. What am I actually doing? What creates that surge of productive, creative energy in my body? My work happens in phases: paintings, stories, a novel, games. With Escalation, I catch myself spending whole days building, playing, tuning, and making music videos out of game clips. There’s a quality of flow that happens when I’m doing what I really want to do. That flow is a nutrient. I need it.",
+      "Honoring that isn’t easy. Economic pressure, personal pressure, and shame push against it. Writing An Infinite Heart, I had to confront my shadow over and over to honor what wanted to go into the story. I do the best I can.",
+      "What’s true for me? What’s true about the world? Those questions are part of my mathematics journey, too. I felt defeated by proofs as a kid and carried a lot of envy for people with strong math backgrounds. I decided to do something about it. Then I fell in love with mathematics.",
+      "Art has often felt like surrender. Mathematics has been commitment. I made a promise to myself to reach a certain point, and I’m getting closer. Sometimes I fall off or need a break. I ask myself: am I done, or do I need a break? Usually, I need a break. When I look inside, I still want to do it.",
+      "I’m learning to be honest about what wants expression, and what it takes to keep honoring it. Sometimes that means surrendering to the energy. Sometimes it means resting and coming back to a commitment I still care about. I keep asking what’s true, and I keep making things from what I find. That’s how I walk the path of mystery & dopeness.",
     ],
   },
   cabinet: [
@@ -279,21 +281,22 @@ export const portfolio: PortfolioContent = {
     cover: { src: `${BLOB}/Untitled_Artwork%2057.jpg`, width: 1275, height: 2061 },
     blurb: [
       'A man by the name of Logos Mateus finds himself having nightmares and experiencing intense swells of emotion that disturb the people around him, his energy attracting both a lot of love and a lot of trouble into his life.',
-      'Where will Logos’ journey to understand himself take him? How far up the mysterious World Tree, Big Drizzle, will he reach? How far deep into the mystery of the heart will he penetrate? Just how weird is it all going to get?',
+      'It’s a story of learning to love—himself, other people, even what he hates or finds disgusting in both—and unleashing the magic within him to touch others.',
+      'Where will that journey take him? How far up the mysterious World Tree, Big Drizzle, will he reach? How far deep into the mystery of the heart will he penetrate? Just how weird is it all going to get?',
     ],
     links: [
       { label: 'Amazon', href: 'https://a.co/d/fDa0kC9', note: 'Kindle & paperback' },
       { label: 'Gumroad', href: 'https://4106066624980.gumroad.com/l/aninfiniteheart', note: 'Digital download' },
     ],
-    excerpt: bookExcerpt,
+    excerpt: sunderedExcerpt,
   },
 
   games: [
     {
       title: 'Escalation',
-      pitch: 'A top-down pixel-art action game. My playground for guns, mechs, and crazy weapons.',
+      pitch: 'A top-down pixel-art arcade war playground. I’m making the game I really want to play.',
       description:
-        'I’d always dreamed of making games. With Escalation, the energy started to rage through me. It began as an MMO about samsara and its realms, then became a place to get honest about what I wanted: to shoot guns, blow shit up, drive mechs, and wield crazy weapons. It’s still taking shape. I’m following that energy and finding out what the game wants to become.',
+        'Escalation started with an MMO conceit, but playing it, I noticed I wasn’t having fun. I didn’t always want to travel around or deal with quests. Sometimes I just wanted to jump in and fight to my heart’s content. So I made Holdout: survive increasingly ridiculous waves of troopers, mechs, and frames until the battlefield is littered with blood, ash, and wrecked machines. Holdout has become where I find the fun—and where I notice what needs to change. Constantly fighting means constantly testing the weapons, watching how the enemies move, noticing a sprite that feels off or a balance problem. Then I sit down and change it. There’s still plenty of tuning to do, but I’m really enjoying playing what I’m making.',
       tech: ['JavaScript', 'Canvas', 'Node.js', 'Socket.io', 'Aseprite'],
       images: [],
       video: {
