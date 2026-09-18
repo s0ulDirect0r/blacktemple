@@ -4,6 +4,7 @@ import { getPortfolioArt } from '@/lib/portfolio';
 import PortfolioNav from '@/components/portfolio/PortfolioNav';
 import Hero from '@/components/portfolio/Hero';
 import Paintings from '@/components/portfolio/Paintings';
+import Mathematics from '@/components/portfolio/Mathematics';
 import Fiction from '@/components/portfolio/Fiction';
 import Games from '@/components/portfolio/Games';
 import Contact from '@/components/portfolio/Contact';
@@ -50,6 +51,7 @@ export default async function PortfolioPage() {
     { id: 'games', label: 'Games' },
     { id: 'fiction', label: 'Fiction' },
     { id: 'paintings', label: 'Paintings', short: 'Art' },
+    { id: 'mathematics', label: 'Math' },
     { id: 'contact', label: 'Contact' },
   ];
 
@@ -67,6 +69,7 @@ export default async function PortfolioPage() {
         <Games index="01" games={games} />
         <Fiction index="02" book={book} stories={stories} />
         <Paintings index="03" paintings={paintings} extras={extras} />
+        <Mathematics />
       </main>
 
       <Contact name={hero.name} contact={contact} />
