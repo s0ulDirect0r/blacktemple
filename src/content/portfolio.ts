@@ -156,7 +156,7 @@ export const portfolio: PortfolioContent = {
   hero: {
     name: 'Matthew D. Huff',
     role: 'Digital painter · Software engineer · Novelist',
-    line: 'Mystery and dopeness, in paint, prose, runes, songs and games. Made in the Black Temple, in public, since 2021.',
+    line: 'I walk the path of mystery & dopeness by creating digital and physical artifacts that stoke aliveness and curiosity.',
     // DRAFT — artist statement, first pass. Rewrite freely; keep it first person.
     statement: [
       'I paint on an iPad, most nights, after a day of writing software. The paintings are usually for someone: a friend, a stranger, a version of myself I am trying to reach. Many of them are blessings, titled in capitals and captioned with a prayer, and they come out of the same practice as my meditation. Sit with a feeling until it has a shape, then commit to it in color. Over the last few years that has added up to more than two hundred paintings, and I am still going.',
