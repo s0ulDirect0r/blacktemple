@@ -197,16 +197,18 @@ export const portfolio: PortfolioContent = {
       expandedVideo: godcellVideo,
     },
     {
-      title: 'Latent Space',
-      meta: 'game · 2026',
-      href: '#games',
-      image: { src: '/images/latent-space-gameplay-poster.jpg', width: 960, height: 540 },
+      title: 'Hypercalculator',
+      meta: 'application · 2026',
+      href: '#mathematics',
+      image: { src: '/images/portfolio/math/hypercalculator-demo.jpg', width: 1224, height: 822 },
       expandedVideo: {
-        src: '/images/latent-space-gameplay.mp4',
-        previewSrc: '/images/latent-space-gameplay-hover.mp4',
-        poster: '/images/latent-space-gameplay-poster.jpg',
-        width: 1280,
-        height: 720,
+        src: '/images/portfolio/math/hypercalculator-demo.mp4',
+        previewSrc: '/images/portfolio/math/hypercalculator-hover.mp4',
+        poster: '/images/portfolio/math/hypercalculator-demo.jpg',
+        width: 1224,
+        height: 822,
+        label: 'graphing demo',
+        loop: true,
       },
     },
     {
@@ -289,9 +291,9 @@ export const portfolio: PortfolioContent = {
   games: [
     {
       title: 'Escalation',
-      pitch: 'A pixel-art war over an island. Start on foot, earn a machine, come back and prove it.',
+      pitch: 'A top-down pixel-art action game. My playground for guns, mechs, and crazy weapons.',
       description:
-        'A multiplayer island war in progress since 2025, built in plain JavaScript and canvas with an authoritative Node server. Three armies fight over five shrines through a day and night cycle; you begin vulnerable, take authored raids for bigger capabilities, and return to the shared war. Not public yet; the clip is from this week.',
+        'I’d always dreamed of making games. With Escalation, the energy started to rage through me. It began as an MMO about samsara and its realms, then became a place to get honest about what I wanted: to shoot guns, blow shit up, drive mechs, and wield crazy weapons. It’s still taking shape. I’m following that energy and finding out what the game wants to become.',
       tech: ['JavaScript', 'Canvas', 'Node.js', 'Socket.io', 'Aseprite'],
       images: [],
       video: {

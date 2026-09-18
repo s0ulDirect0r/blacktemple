@@ -69,10 +69,16 @@ export default function Hero({ hero, cabinet }: HeroProps) {
               {hero.statement[0]}
             </p>
             {hero.statement.length > 1 && (
-              <details className="group border-t border-white/10 pt-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-2 text-sm text-zinc-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white [&::-webkit-details-marker]:hidden">
-                  read my artist statement
-                  <span aria-hidden="true" className="transition-transform group-open:rotate-180 motion-reduce:transition-none">⌄</span>
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md border border-zinc-600 bg-zinc-900 px-5 py-4 text-white transition-colors hover:border-zinc-400 hover:bg-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white motion-reduce:transition-none [&::-webkit-details-marker]:hidden">
+                  <span>
+                    <span className="block text-base font-semibold sm:text-lg">read my full artist statement</span>
+                    <span className="mt-1 block text-sm text-zinc-300 group-open:hidden">select to expand</span>
+                    <span className="mt-1 hidden text-sm text-zinc-300 group-open:block">select to collapse</span>
+                  </span>
+                  <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-6 w-6 shrink-0 transition-transform group-open:rotate-180 motion-reduce:transition-none">
+                    <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
                 </summary>
                 <div className="mt-6 space-y-6">
                   {hero.statement.slice(1).map((paragraph, i) => (
