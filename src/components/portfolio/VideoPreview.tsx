@@ -33,7 +33,7 @@ function ExpandedVideo({ video, title, onClose }: { video: PortfolioVideo; title
         <p className="text-sm">{title} · {video.label ?? 'Gameplay'}</p>
         <button type="button" autoFocus onClick={() => dialogRef.current?.close()} className="min-h-11 px-3 text-sm text-zinc-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" aria-label="Close video">Close ×</button>
       </div>
-      <video ref={playerRef} src={video.src} poster={video.poster} controls playsInline preload="metadata" className="max-h-[calc(90dvh-80px)] w-full bg-black object-contain" />
+      <video ref={playerRef} src={video.src} poster={video.poster} loop={video.loop} controls playsInline preload="metadata" className="max-h-[calc(90dvh-80px)] w-full bg-black object-contain" />
     </dialog>, document.body
   );
 }

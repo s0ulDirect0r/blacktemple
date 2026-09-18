@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { PortfolioPainting } from '@/lib/portfolio';
 import SectionHeading from './SectionHeading';
 import Reveal from './Reveal';
+import VideoPreview from './VideoPreview';
 
 interface PaintingsProps {
   index: string;
@@ -16,7 +17,7 @@ export default function Paintings({ index, paintings, extras = [] }: PaintingsPr
     <section id="paintings" aria-labelledby="paintings-heading" className="scroll-mt-14 sm:scroll-mt-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <Reveal>
-          <SectionHeading id="paintings-heading" index={index} title="Paintings" meta={`${paintings.length} recent, of 200+`} />
+          <SectionHeading id="paintings-heading" index={index} title="Paintings" meta={`${paintings.length} selected, of 200+`} />
         </Reveal>
 
         {paintings.length === 0 ? (
@@ -26,8 +27,13 @@ export default function Paintings({ index, paintings, extras = [] }: PaintingsPr
             <ul className="mt-8 columns-2 gap-3 sm:mt-12 sm:gap-5 md:columns-3 xl:columns-4">
               {paintings.map((painting, i) => (
                 <li key={painting.id} className="mb-3 break-inside-avoid sm:mb-5">
+                  {painting.video ? (
+                    <VideoPreview video={painting.video} title={painting.title}>
+                      <span className="block px-2 py-2 text-xs text-zinc-400">{painting.title}</span>
+                    </VideoPreview>
+                  ) : (
                   <Link
-                    href={`/artwork/${painting.id}`}
+                    href={painting.href ?? `/artwork/${painting.id}`}
                     className="group block focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
                   >
                     <figure>
@@ -55,6 +61,7 @@ export default function Paintings({ index, paintings, extras = [] }: PaintingsPr
                       </figcaption>
                     </figure>
                   </Link>
+                  )}
                 </li>
               ))}
             </ul>

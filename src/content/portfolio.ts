@@ -81,6 +81,7 @@ export interface PortfolioVideo {
   src: string;
   /** Describes non-gameplay clips in the player and its accessible label. */
   label?: string;
+  loop?: boolean;
   /** Short muted hover preview; the full recording opens on click. */
   previewSrc?: string;
   poster: string;
@@ -127,6 +128,8 @@ export interface PortfolioContent {
    * newest pieces from the database".
    */
   selectedArt: string[];
+  /** Uploaded works curated specifically for this portfolio. */
+  additionalArt: { id: string; title: string; url: string; width: number; height: number; video?: PortfolioVideo }[];
   /** Rendered only when non-empty. */
   stories: PortfolioStory[];
   /** One-line "Also:" links after the paintings, e.g. to the Spidernomicon. */
@@ -212,7 +215,30 @@ export const portfolio: PortfolioContent = {
     },
   ],
 
-  selectedArt: [],
+  selectedArt: ['19', '18', '16', '13', '12', '11', '10', '9', '8', '7', '5'],
+  additionalArt: [
+    {
+      id: 'i-miss-you', title: 'i miss you', url: '/images/portfolio/paintings/i-miss-you.jpg', width: 1600, height: 1600,
+      video: { src: '/images/portfolio/paintings/i-miss-you.mp4', previewSrc: '/images/portfolio/paintings/i-miss-you-hover.mp4', poster: '/images/portfolio/paintings/i-miss-you.jpg', width: 1600, height: 1600, label: 'animation', loop: true },
+    },
+    {
+      id: 'connection', title: 'connection', url: '/images/portfolio/paintings/connection.jpg', width: 1600, height: 1600,
+      video: { src: '/images/portfolio/paintings/connection.mp4', previewSrc: '/images/portfolio/paintings/connection-hover.mp4', poster: '/images/portfolio/paintings/connection.jpg', width: 1600, height: 1600, label: 'animation', loop: true },
+    },
+    {"id": "unknown-99987", "title": "unknown_99987", "url": "/images/portfolio/paintings/unknown-99987.jpg", "width": 1600, "height": 1600, "video": {"src": "/images/portfolio/paintings/unknown-99987.mp4", "previewSrc": "/images/portfolio/paintings/unknown-99987-hover.mp4", "poster": "/images/portfolio/paintings/unknown-99987.jpg", "width": 1600, "height": 1600, "label": "animation", "loop": true}},
+    {"id": "the-enchantress", "title": "THE ENCHANTRESS", "url": "/images/portfolio/paintings/the-enchantress.jpg", "width": 1600, "height": 900, "video": {"src": "/images/portfolio/paintings/the-enchantress.mp4", "previewSrc": "/images/portfolio/paintings/the-enchantress-hover.mp4", "poster": "/images/portfolio/paintings/the-enchantress.jpg", "width": 1600, "height": 900, "label": "animation", "loop": true}},
+    {"id": "the-erotic", "title": "THE EROTIC", "url": "/images/portfolio/paintings/the-erotic.jpg", "width": 1600, "height": 900, "video": {"src": "/images/portfolio/paintings/the-erotic.mp4", "previewSrc": "/images/portfolio/paintings/the-erotic-hover.mp4", "poster": "/images/portfolio/paintings/the-erotic.jpg", "width": 1600, "height": 900, "label": "animation", "loop": true}},
+    {"id": "hope", "title": "hope", "url": "/images/portfolio/paintings/hope.jpg", "width": 1600, "height": 1600, "video": {"src": "/images/portfolio/paintings/hope.mp4", "previewSrc": "/images/portfolio/paintings/hope-hover.mp4", "poster": "/images/portfolio/paintings/hope.jpg", "width": 1600, "height": 1600, "label": "animation", "loop": true}},
+    {"id": "golden-soul", "title": "golden soul", "url": "/images/portfolio/paintings/golden-soul.jpg", "width": 1600, "height": 1600, "video": {"src": "/images/portfolio/paintings/golden-soul.mp4", "previewSrc": "/images/portfolio/paintings/golden-soul-hover.mp4", "poster": "/images/portfolio/paintings/golden-soul.jpg", "width": 1600, "height": 1600, "label": "animation", "loop": true}},
+    {"id": "sphere", "title": "sphere", "url": "/images/portfolio/paintings/sphere.jpg", "width": 4000, "height": 4000},
+    {"id": "highfrequency", "title": "highfrequency", "url": "/images/portfolio/paintings/highfrequency.jpg", "width": 4000, "height": 4000},
+    { id: 'the-vow-sigil', title: 'THE VOW SIGIL', url: '/images/portfolio/paintings/the-vow-sigil.jpg', width: 4000, height: 4000 },
+    { id: 'untitled-1', title: 'dopeness in darkness', url: '/images/portfolio/paintings/untitled-1.jpg', width: 3000, height: 3000 },
+    { id: 'loopys-flow', title: 'LOOPY’S FLOW', url: '/images/portfolio/paintings/loopys-flow.jpg', width: 3840, height: 2160 },
+    { id: 'untitled-7', title: 'untitled', url: '/images/portfolio/paintings/untitled-7.jpg', width: 3000, height: 3000 },
+    { id: 'christins-unfolding', title: 'CHRISTIN’S UNFOLDING', url: '/images/portfolio/paintings/christins-unfolding.jpg', width: 3840, height: 2160 },
+    { id: 'untitled-3', title: 'untitled', url: '/images/portfolio/paintings/untitled-3.jpg', width: 4000, height: 4000 },
+  ],
 
   stories: [
     {

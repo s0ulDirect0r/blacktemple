@@ -1,7 +1,7 @@
 import { cache } from 'react';
 import { imageSize } from 'image-size';
-import { getGalleryImages } from '@/lib/gallery';
-import { portfolio } from '@/content/portfolio';
+import { getArtworkById, getGalleryImages } from '@/lib/gallery';
+import { portfolio, type PortfolioVideo } from '@/content/portfolio';
 import type { ArtworkImage } from '@/types/artwork';
 
 /** Number of paintings shown in the masonry (the hero is taken separately). */
@@ -14,7 +14,9 @@ export interface PortfolioPainting {
   url: string;
   width: number;
   height: number;
-  createdAt: string;
+  createdAt?: string;
+  href?: string;
+  video?: PortfolioVideo;
 }
 
 export interface PortfolioArt {
@@ -91,38 +93,52 @@ async function toPainting(image: ArtworkImage): Promise<PortfolioPainting> {
   };
 }
 
-function selectImages(images: ArtworkImage[]): ArtworkImage[] {
-  const wanted = PORTFOLIO_GALLERY_SIZE + 1; // hero + gallery
-  if (portfolio.selectedArt.length === 0) return images.slice(0, wanted);
-
-  const byId = new Map(images.map((image) => [String(image.id), image]));
-  const picked = portfolio.selectedArt
-    .map((id) => byId.get(String(id)))
-    .filter((image): image is ArtworkImage => Boolean(image));
-
-  // Top up with the newest pieces not already selected.
-  const seen = new Set(picked.map((image) => String(image.id)));
-  for (const image of images) {
-    if (picked.length >= wanted) break;
-    if (!seen.has(String(image.id))) picked.push(image);
-  }
-  return picked.slice(0, wanted);
-}
-
 /**
  * Hero + gallery paintings with measured native dimensions.
  * Deduped per request with React cache so metadata and the page share one fetch.
  * Never throws: a database or network failure renders the page without paintings.
  */
 export const getPortfolioArt = cache(async (): Promise<PortfolioArt> => {
+  const uploads: PortfolioPainting[] = portfolio.additionalArt.map((painting) => ({
+    ...painting,
+    href: painting.url,
+  }));
   try {
-    const { images } = await getGalleryImages({ limit: 60 });
-    const selected = selectImages(images);
-    const paintings = await Promise.all(selected.map(toPainting));
-    const [hero = null, ...rest] = paintings;
+    const images = portfolio.selectedArt.length
+      ? (await Promise.all(portfolio.selectedArt.map(getArtworkById)))
+          .filter((image): image is ArtworkImage => image !== null)
+      : (await getGalleryImages({ limit: PORTFOLIO_GALLERY_SIZE + 1 })).images;
+    const selected = await Promise.all(images.map(toPainting));
+    const works = [...uploads, ...selected];
+    const animations = works.filter((painting) => painting.video);
+    const stills = works.filter((painting) => !painting.video);
+    // Space animations through the sequence so CSS columns each receive a mix.
+    const all: PortfolioPainting[] = [];
+    let animationIndex = 0;
+    for (let i = 0; i < stills.length; i++) {
+      all.push(stills[i]);
+      const target = Math.floor(((i + 1) * animations.length) / stills.length);
+      while (animationIndex < target) {
+        all.push(animations[animationIndex++]);
+      }
+    }
+    if (!stills.length) all.push(...animations);
+    const anchors = ['9', '8', '7'].map((id) => all.find((painting) => String(painting.id) === id));
+    const ordered = all.filter((painting) => !['9', '8', '7'].includes(String(painting.id)));
+    // DOPENESS opens the selection, GRACE punctuates it, and CHAOS closes it.
+    if (anchors[0]) ordered.unshift(anchors[0]);
+    if (anchors[1]) ordered.splice(Math.ceil(ordered.length / 2), 0, anchors[1]);
+    if (anchors[2]) ordered.push(anchors[2]);
+    const primalIndex = ordered.findIndex((painting) => String(painting.id) === '5');
+    if (primalIndex >= 0) {
+      const [primal] = ordered.splice(primalIndex, 1);
+      ordered.splice(anchors[0] ? 1 : 0, 0, primal);
+    }
+    const [hero = null, ...rest] = ordered;
     return { hero, paintings: rest };
   } catch (error) {
     console.error('[portfolio] could not load artwork', error);
-    return { hero: null, paintings: [] };
+    const [hero = null, ...rest] = uploads;
+    return { hero, paintings: rest };
   }
 });
