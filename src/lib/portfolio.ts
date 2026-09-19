@@ -81,7 +81,9 @@ export function getImageDimensions(url: string): Promise<Dimensions> {
 }
 
 async function toPainting(image: ArtworkImage): Promise<PortfolioPainting> {
-  const { width, height } = await getImageDimensions(image.url);
+  const { width, height } = image.width && image.height
+    ? { width: image.width, height: image.height }
+    : await getImageDimensions(image.url);
   return {
     id: image.id,
     title: image.metadata.title,

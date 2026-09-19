@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import Image from 'next/image';
+import { shouldSkipMediaPreview } from '@/lib/media-preferences';
 import { createPortal } from 'react-dom';
 import type { PortfolioVideo } from '@/content/portfolio';
 
@@ -38,18 +40,20 @@ function ExpandedVideo({ video, title, onClose }: { video: PortfolioVideo; title
   );
 }
 
-export default function VideoPreview({ video, title, children, aspectRatio, className = '' }: {
+export default function VideoPreview({ video, title, children, aspectRatio, sizes = '(min-width: 1280px) 700px, (min-width: 1024px) 58vw, 100vw', className = '' }: {
   video: PortfolioVideo;
   title: string;
   children?: ReactNode;
   aspectRatio?: string;
+  sizes?: string;
   className?: string;
 }) {
   const previewRef = useRef<HTMLVideoElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const play = () => {
-    if (!open && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (video.previewSrc && !open && !shouldSkipMediaPreview()) {
       previewRef.current?.play().catch(() => {});
     }
   };
@@ -73,7 +77,8 @@ export default function VideoPreview({ video, title, children, aspectRatio, clas
         className={`group block w-full overflow-hidden bg-black text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${className}`}
       >
         <div className="relative" style={{ aspectRatio: aspectRatio ?? `${video.width} / ${video.height}` }}>
-          <video ref={previewRef} src={video.previewSrc ?? video.src} poster={video.poster} muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain" />
+          <video ref={previewRef} src={video.previewSrc ?? video.src} onPlaying={() => setPlaying(true)} onPause={() => setPlaying(false)} muted loop playsInline preload="none" aria-hidden="true" className="absolute inset-0 h-full w-full object-contain" />
+          {!playing && <Image src={video.poster} alt="" fill sizes={sizes} className="pointer-events-none object-contain" />}
           <span className="absolute bottom-3 right-3 rounded bg-black/80 px-3 py-2 text-xs text-white">Watch larger ↗</span>
         </div>
         {children}

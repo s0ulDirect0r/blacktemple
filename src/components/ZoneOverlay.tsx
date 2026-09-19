@@ -1,12 +1,13 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useNavigation } from '@/context/NavigationContext';
 import ZoneNavBar from './ZoneNavBar';
-import GalleryZoneContent from './zones/GalleryZoneContent';
-import BookZoneContent from './zones/BookZoneContent';
-import ProjectsZoneContent from './zones/ProjectsZoneContent';
-import ResumeZoneContent from './zones/ResumeZoneContent';
-import AboutZoneContent from './zones/AboutZoneContent';
+const GalleryZoneContent = dynamic(() => import('./zones/GalleryZoneContent'));
+const BookZoneContent = dynamic(() => import('./zones/BookZoneContent'));
+const ProjectsZoneContent = dynamic(() => import('./zones/ProjectsZoneContent'));
+const ResumeZoneContent = dynamic(() => import('./zones/ResumeZoneContent'));
+const AboutZoneContent = dynamic(() => import('./zones/AboutZoneContent'));
 
 // Renders zone content as HTML overlays (outside the Canvas)
 // This provides better styling control and avoids 3D transform issues

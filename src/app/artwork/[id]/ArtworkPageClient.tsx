@@ -1,5 +1,6 @@
 'use client';
 
+import { artworkDisplaySrc } from '@/lib/artwork-display';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArtworkImage, Project } from '@/types/artwork';
@@ -159,7 +160,7 @@ export default function ArtworkPageClient({ id }: { id: string }) {
             }}
           >
             <Image
-              src={artwork.url}
+              src={artworkDisplaySrc(artwork.url)}
               alt={artwork.metadata.title}
               fill
               className="object-contain"

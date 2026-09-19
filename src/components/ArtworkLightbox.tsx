@@ -1,5 +1,6 @@
 'use client';
 
+import { artworkDisplaySrc } from '@/lib/artwork-display';
 import { useCallback, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
@@ -145,7 +146,7 @@ export default function ArtworkLightbox({
         onClick={(event) => event.stopPropagation()}
       >
         <Image
-          src={item.url}
+          src={artworkDisplaySrc(item.url)}
           alt={active ? item.metadata.title : ''}
           fill
           sizes="100vw"

@@ -1,3 +1,4 @@
+import { artworkDisplaySrc } from '@/lib/artwork-display';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { PortfolioPainting } from '@/lib/portfolio';
@@ -25,10 +26,10 @@ export default function Paintings({ index, paintings, extras = [] }: PaintingsPr
         ) : (
           <Reveal delay={80}>
             <ul className="mt-8 columns-2 gap-3 sm:mt-12 sm:gap-5 md:columns-3 xl:columns-4">
-              {paintings.map((painting, i) => (
+              {paintings.map((painting) => (
                 <li key={painting.id} className="mb-3 break-inside-avoid sm:mb-5">
                   {painting.video ? (
-                    <VideoPreview video={painting.video} title={painting.title}>
+                    <VideoPreview video={painting.video} title={painting.title} sizes="(min-width: 1280px) 300px, (min-width: 768px) 33vw, 50vw">
                       <span className="block px-2 py-2 text-xs text-zinc-400">{painting.title}</span>
                     </VideoPreview>
                   ) : (
@@ -39,12 +40,12 @@ export default function Paintings({ index, paintings, extras = [] }: PaintingsPr
                     <figure>
                       <div className="relative overflow-hidden bg-zinc-900">
                         <Image
-                          src={painting.url}
+                          src={artworkDisplaySrc(painting.url)}
                           alt={painting.title}
                           width={painting.width}
                           height={painting.height}
                           sizes="(max-width: 767px) 50vw, (max-width: 1279px) 33vw, 25vw"
-                          loading={i < 4 ? 'eager' : 'lazy'}
+                          loading="lazy"
                           className="h-auto w-full transition-transform duration-700 ease-out group-hover:scale-[1.025] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                         />
                         {/* Desktop: title rises on hover */}

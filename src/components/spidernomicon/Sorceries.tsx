@@ -79,8 +79,8 @@ function SorceryCard({
           <video
             ref={videoRef}
             src={sorcery.src}
-            poster={sorcery.poster}
-            preload="metadata"
+            poster={playing ? sorcery.poster : undefined}
+            preload="none"
             playsInline
             controls={playing}
             onPlay={onPlay}

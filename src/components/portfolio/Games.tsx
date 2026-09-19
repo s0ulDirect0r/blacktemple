@@ -15,18 +15,7 @@ function GameMedia({ game }: { game: PortfolioGame }) {
     const { video } = game;
     return (
       <figure>
-        {video.previewSrc ? <VideoPreview video={video} title={game.title} /> : (
-        <div className="overflow-hidden bg-zinc-900" style={{ aspectRatio: `${video.width} / ${video.height}` }}>
-          <video
-            src={video.src}
-            poster={video.poster}
-            controls
-            playsInline
-            preload="metadata"
-            className="h-full w-full"
-          />
-        </div>
-        )}
+        <VideoPreview video={video} title={game.title} />
         {video.caption && (
           <figcaption className="mt-2 text-[11px] text-zinc-500 sm:text-xs">{video.caption}</figcaption>
         )}

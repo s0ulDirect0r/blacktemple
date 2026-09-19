@@ -1,5 +1,6 @@
 'use client';
 
+import { artworkDisplaySrc } from '@/lib/artwork-display';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -242,7 +243,7 @@ export default function ArtGallery() {
                           style={{ aspectRatio: String(knownRatio ?? PLACEHOLDER_RATIO) }}
                         >
                           <Image
-                            src={image.url}
+                            src={artworkDisplaySrc(image.url)}
                             alt={image.metadata.title}
                             fill
                             className={`${knownRatio ? 'object-cover' : 'object-contain'} transition-transform duration-300 group-hover:scale-[1.02]`}
