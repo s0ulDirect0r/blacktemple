@@ -83,3 +83,19 @@ body {
     animation: none;
   }
 }
+
+/* The portfolio comet lights up type without moving content. */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .portfolio-page [data-comet-target='true'] {
+    text-shadow: 0 0 14px rgba(196, 181, 253, .65);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .portfolio-page[data-comet-cursor='true'],
+  .portfolio-page[data-comet-cursor='true'] * {
+    /* A transparent image also handles embedded browsers that retain the
+       native arrow when given only cursor: none. */
+    cursor: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=") 0 0, none !important;
+  }
+}

@@ -1,0 +1,77 @@
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+.distant, .near {
+  position: absolute;
+  inset: -24px;
+  background-size: 720px 680px;
+  opacity: .55;
+  animation: drift 48s ease-in-out infinite alternate;
+}
+.near {
+  background-size: 940px 820px;
+  opacity: .65;
+  animation: drift 65s ease-in-out infinite alternate-reverse;
+}
+@keyframes drift {
+  from { transform: translate3d(-8px, 8px, 0); opacity: .45; }
+  to { transform: translate3d(8px, -12px, 0); opacity: .7; }
+}
+.sky[data-paused='true'] > div { animation-play-state: paused; }
+.comet {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+.comet[data-visible='true'] { opacity: 1; }
+.star, .tail {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+}
+.star { z-index: 2; }
+.tail { z-index: 1; }
+.star::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  left: -4px;
+  top: -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px 3px #fff, 0 0 16px 7px #8be9ff, 0 0 32px 12px #8766ff88;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out;
+}
+.comet[data-active='true'] .star::after {
+  transform: scale(1.4);
+  box-shadow: 0 0 8px 4px #fff, 0 0 24px 10px #8be9ff, 0 0 44px 18px #b599ff88;
+}
+.tail::after {
+  content: '';
+  position: absolute;
+  width: var(--length, 3px);
+  height: inherit;
+  top: -2px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, #9675ff99, #b9f5ff);
+  box-shadow: 0 0 9px 2px #7bdfff66;
+}
+@media (prefers-reduced-motion: reduce) {
+  .distant, .near { animation: none; }
+  .comet { display: none; }
+}
+@media (hover: none), (pointer: coarse) {
+  .comet { display: none; }
+}

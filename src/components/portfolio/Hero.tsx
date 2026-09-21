@@ -14,7 +14,7 @@ interface HeroProps {
  */
 export default function Hero({ hero, cabinet }: HeroProps) {
   return (
-    <section id="top" aria-labelledby="hero-name" className="bg-black">
+    <section id="top" aria-labelledby="hero-name">
       <div className="mx-auto max-w-7xl px-4 pt-14 sm:px-6 sm:pt-20 lg:pt-24">
         <div className="grid items-center gap-8 md:grid-cols-[minmax(0,1fr)_240px] lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-16">
           <div>
