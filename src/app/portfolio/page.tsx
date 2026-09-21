@@ -15,7 +15,7 @@ import Contact from '@/components/portfolio/Contact';
 export const revalidate = 3600;
 
 const DESCRIPTION =
-  'I make games, paintings, stories, and experiments that stoke aliveness and curiosity. Come explore.';
+  'I make games, paintings, stories, and experiments that stoke aliveness and curiosity. Enter my world.';
 
 export const metadata: Metadata = {
   title: 'Portfolio',

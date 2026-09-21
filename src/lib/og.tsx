@@ -194,10 +194,12 @@ export function OgFrame({
   children,
   seed,
   align = 'center',
+  domainColor = COLORS.faint,
 }: {
   children: ReactNode;
   seed?: number;
   align?: 'center' | 'flex-start';
+  domainColor?: string;
 }) {
   return (
     <div
@@ -253,7 +255,7 @@ export function OgFrame({
           alignItems: 'center',
           fontFamily: PIXEL_FONT,
           fontSize: 14,
-          color: COLORS.faint,
+          color: domainColor,
           letterSpacing: 1,
         }}
       >

@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import sharp from 'sharp';
-import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, PIXEL_FONT, PixelTitle, SANS_FONT, ogColors, ogImage } from '@/lib/og';
+import { OG_CONTENT_TYPE, OG_SIZE, OgFrame, PIXEL_FONT, PixelTitle, SANS_FONT, ogImage } from '@/lib/og';
 
 export const alt = 'Matthew D. Huff · mystery & dopeness — The Vow Sigil';
 export const size = OG_SIZE;
@@ -12,14 +12,14 @@ export default async function Image() {
   const sigil = await sharp(original).resize(1080, 1080).jpeg({ quality: 90 }).toBuffer();
 
   return ogImage(
-    <OgFrame seed={31}>
+    <OgFrame seed={31} domainColor="#f4f4f5">
       <div style={{ display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', flexDirection: 'column', width: 560, paddingRight: 40 }}>
           <PixelTitle size={40}>MATTHEW D. HUFF</PixelTitle>
           <div style={{ display: 'flex', fontFamily: PIXEL_FONT, fontSize: 23, lineHeight: 1.5, color: '#e4e4e7', marginTop: 30 }}>
             mystery &amp; dopeness
           </div>
-          <div style={{ display: 'flex', fontFamily: SANS_FONT, fontSize: 23, lineHeight: 1.5, color: ogColors.muted, marginTop: 30 }}>
+          <div style={{ display: 'flex', fontFamily: SANS_FONT, fontSize: 23, lineHeight: 1.5, color: '#f4f4f5', marginTop: 30 }}>
             Games, paintings, stories, and experiments that stoke aliveness and curiosity.
           </div>
         </div>
