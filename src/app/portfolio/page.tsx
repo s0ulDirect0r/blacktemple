@@ -14,32 +14,23 @@ import Contact from '@/components/portfolio/Contact';
 export const revalidate = 3600;
 
 const DESCRIPTION =
-  'Paintings, a novel, and two browser games by Matthew D. Huff, a digital painter, software engineer, and novelist in New York City.';
+  'I make games, paintings, stories, and experiments that stoke aliveness and curiosity. Come explore.';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { hero } = await getPortfolioArt();
-  const title = `Portfolio · ${portfolio.hero.name}`;
-
-  return {
-    // The root layout's template appends the name, so the tab title is just 'Portfolio'.
-    title: 'Portfolio',
+export const metadata: Metadata = {
+  title: 'Portfolio',
+  description: DESCRIPTION,
+  openGraph: {
+    title: 'Matthew D. Huff · mystery & dopeness',
     description: DESCRIPTION,
-    openGraph: {
-      title,
-      description: DESCRIPTION,
-      type: 'website',
-      images: hero
-        ? [{ url: hero.url, width: hero.width, height: hero.height, alt: hero.title }]
-        : undefined,
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title,
-      description: DESCRIPTION,
-      images: hero ? [hero.url] : undefined,
-    },
-  };
-}
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Matthew D. Huff · mystery & dopeness',
+    description: DESCRIPTION,
+    images: ['/portfolio/opengraph-image'],
+  },
+};
 
 export default async function PortfolioPage() {
   const { hero: heroArtwork, paintings: rest } = await getPortfolioArt();
