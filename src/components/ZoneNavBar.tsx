@@ -19,6 +19,7 @@ const navLinks: NavEntry[] = [
   { kind: 'zone', id: 'book', label: 'Book' },
   { kind: 'zone', id: 'resume', label: 'Resume' },
   { kind: 'zone', id: 'about', label: 'About' },
+  { kind: 'route', id: 'calls', label: 'Calls', href: '/calls' },
 ];
 
 // Standalone pages that sit under a zone in the site's hierarchy: the bar
@@ -84,8 +85,8 @@ export default function ZoneNavBar({ placement = 'overlay' }: ZoneNavBarProps) {
           : 'fixed top-0 left-0 right-0 z-30 pointer-events-none'
       }
     >
-      {/* Mobile: 2-row grid (4 items per row), Desktop: flex row */}
-      <div className="grid grid-cols-4 gap-x-2 gap-y-1 py-2 px-2 sm:flex sm:flex-wrap sm:justify-center sm:items-center sm:gap-6 md:gap-10 sm:py-4 sm:px-4">
+      {/* Mobile: centered rows that wrap at word width (two rows on a phone), Desktop: one row */}
+      <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-2 sm:gap-6 md:gap-10 sm:py-4 sm:px-4">
         {navLinks.map((link) => {
           const isActive = activeId === link.id;
           if (link.kind === 'route') {
