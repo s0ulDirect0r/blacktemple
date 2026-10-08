@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { pageMetadata } from '@/lib/site';
 
 export const metadata = pageMetadata({
@@ -31,7 +30,7 @@ export default function PrivacyPage() {
             <section className="space-y-4">
               <h2 className="font-pixel text-base text-white">Booking a call</h2>
               <p>
-                When you book a call on <Link href="/calls" className={link}>/calls</Link>, I collect your name, your
+                When you book a call through this site, I collect your name, your
                 email, the time you pick, your time zone, and anything you write in the optional note. I use them only
                 to schedule and hold the call:
               </p>

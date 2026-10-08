@@ -2,6 +2,7 @@ import type { MetadataRoute } from 'next';
 import { getGalleryImages } from '@/lib/gallery';
 import { getAllPosts } from '@/lib/mdx';
 import { SITE_URL } from '@/lib/site';
+import { CALLS_AVAILABLE } from '@/lib/calls/access';
 
 // Regenerate hourly so new artwork and posts show up without a redeploy.
 export const revalidate = 3600;
@@ -25,7 +26,7 @@ const STATIC_ROUTES: Array<{
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
-  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.map((route) => ({
+  const staticEntries: MetadataRoute.Sitemap = STATIC_ROUTES.filter((route) => CALLS_AVAILABLE || route.path !== '/calls').map((route) => ({
     url: `${SITE_URL}${route.path}`,
     lastModified: now,
     changeFrequency: route.changeFrequency,

@@ -39,7 +39,6 @@ const linksAbove: NavLink[] = [
 
 const linksBelow: NavLink[] = [
   { label: 'Book', zoneId: 'book' },
-  { label: 'Resume', zoneId: 'resume' },
   { label: 'About Me', zoneId: 'about' },
 ];
 
@@ -167,15 +166,15 @@ export default function NavLinks() {
     );
   }
 
-  // Wider screens: 6-point star pattern around the machine
+  // Wider screens: evenly spaced links around the machine
   // Star radius is 20% of home visible width, capped at reasonable sizes
   const radius = Math.min(5, Math.max(3, homeVisibleWidth * 0.2));
 
   return (
     <group position={[0, 0, 0]}>
       {allLinks.map((link, index) => {
-        // 6 points of a star, starting from top and going clockwise
-        const angle = (Math.PI / 2) - (index * (2 * Math.PI / 6));
+        // Start from the top and space links evenly clockwise
+        const angle = (Math.PI / 2) - (index * (2 * Math.PI / allLinks.length));
         const x = Math.cos(angle) * radius;
         const y = Math.sin(angle) * radius - 0.8;
 

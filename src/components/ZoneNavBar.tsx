@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useOptionalNavigation } from '@/context/NavigationContext';
+import { CALLS_AVAILABLE } from '@/lib/calls/access';
 import { ZoneId, ZONES, isZonePath, pathToZoneId } from '@/constants/zones';
 
 // Nav entries in display order. Zones fly the camera; routes are plain pages.
@@ -11,13 +12,10 @@ type NavEntry =
   | { kind: 'route'; id: string; label: string; href: string };
 
 const navLinks: NavEntry[] = [
-  { kind: 'zone', id: 'home', label: 'Home' },
   { kind: 'zone', id: 'projects', label: 'Code' },
   { kind: 'zone', id: 'gallery', label: 'Art' },
   { kind: 'route', id: 'writing', label: 'Writing', href: '/writing' },
-  { kind: 'route', id: 'music', label: 'Sound', href: '/music' },
   { kind: 'zone', id: 'book', label: 'Book' },
-  { kind: 'zone', id: 'resume', label: 'Resume' },
   { kind: 'zone', id: 'about', label: 'About' },
   { kind: 'route', id: 'calls', label: 'Calls', href: '/calls' },
 ];
@@ -87,7 +85,7 @@ export default function ZoneNavBar({ placement = 'overlay' }: ZoneNavBarProps) {
     >
       {/* Mobile: centered rows that wrap at word width (two rows on a phone), Desktop: one row */}
       <div className="flex flex-wrap justify-center items-center gap-x-3 gap-y-1 py-2 px-2 sm:gap-6 md:gap-10 sm:py-4 sm:px-4">
-        {navLinks.map((link) => {
+        {navLinks.filter((link) => CALLS_AVAILABLE || link.id !== 'calls').map((link) => {
           const isActive = activeId === link.id;
           if (link.kind === 'route') {
             return (

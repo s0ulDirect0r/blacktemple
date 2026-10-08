@@ -1,0 +1,19 @@
+/* All three retain the selected starfield design and the same wording. */
+.type-bright .intro { font-family: Geist, sans-serif; font-size: 21px; font-weight: 450; line-height: 1.75; color: #e4e4e7; max-width: 610px; }
+.type-bright .conversation p { font-family: Geist, sans-serif; font-size: 18px; font-weight: 450; line-height: 1.8; color: #e4e4e7; }
+.type-mono .intro { font-family: GeistMono, monospace; font-size: 18px; font-weight: 400; line-height: 1.85; letter-spacing: -.025em; color: #d4d4d8; max-width: 640px; }
+.type-mono .conversation p { font-family: GeistMono, monospace; font-size: 16px; font-weight: 400; line-height: 1.85; letter-spacing: -.025em; color: #d4d4d8; }
+.type-emphasis .intro { font-family: Geist, sans-serif; color: #c7c7d1; font-size: 18px; line-height: 1.8; max-width: 610px; }
+.type-emphasis .lead { display: block; color: #f4f4f5; font-size: 24px; font-weight: 500; line-height: 1.55; margin-bottom: 16px; }
+.type-emphasis .intro strong { color: #c4b5fd; font-weight: 600; }
+.type-emphasis .conversation p { font-family: Geist, sans-serif; font-size: 17px; line-height: 1.8; color: #c7c7d1; }
+.type-emphasis .conversation strong { color: #f4f4f5; font-weight: 600; }
+@media(max-width:700px) {
+  .type-bright .intro { font-size: 18px; line-height: 1.75; }
+  .type-bright .conversation p { font-size: 17px; }
+  .type-mono .intro { font-size: 16px; line-height: 1.85; }
+  .type-mono .conversation p { font-size: 15px; }
+  .type-emphasis .intro { font-size: 16.5px; line-height: 1.8; }
+  .type-emphasis .lead { font-size: 21px; line-height: 1.55; margin-bottom: 14px; }
+  .type-emphasis .conversation p { font-size: 16px; }
+}

@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { SlotTakenError, type CallBooking } from '@/lib/calls/bookings';
 import { confirmCheckoutSession, describeSlot } from '@/lib/calls/checkout';
 import { stripe } from '@/lib/calls/stripe';
+import { CALLS_AVAILABLE } from '@/lib/calls/access';
 
 export const metadata: Metadata = { title: 'Booked', robots: { index: false } };
 
@@ -46,7 +47,7 @@ async function resolve(sessionId: string): Promise<Outcome> {
 
 export default async function BookedPage({ searchParams }: { searchParams: Promise<{ session_id?: string }> }) {
   const { session_id: sessionId } = await searchParams;
-  if (!sessionId) redirect('/calls');
+  if (!sessionId) redirect(CALLS_AVAILABLE ? '/calls' : '/');
 
   const outcome = await resolve(sessionId);
 
@@ -117,10 +118,22 @@ export default async function BookedPage({ searchParams }: { searchParams: Promi
               <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl">Not booked yet</h1>
               <p className="mt-8 max-w-xl leading-relaxed text-zinc-400">
                 We couldn&apos;t find a completed payment for this booking.{' '}
-                <Link href="/calls" className="text-white underline underline-offset-4">
-                  Pick a time
-                </Link>{' '}
-                to try again.
+                {CALLS_AVAILABLE ? (
+                  <>
+                    <Link href="/calls" className="text-white underline underline-offset-4">
+                      Pick a time
+                    </Link>{' '}
+                    to try again.
+                  </>
+                ) : (
+                  <>
+                    For help, write to{' '}
+                    <a href={`mailto:${CONTACT_EMAIL}`} className="text-white underline underline-offset-4">
+                      {CONTACT_EMAIL}
+                    </a>
+                    .
+                  </>
+                )}
               </p>
             </>
           )}
