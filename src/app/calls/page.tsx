@@ -4,7 +4,7 @@ import { pageMetadata } from '@/lib/site';
 
 const DESCRIPTION = 'A one-on-one conversation with Matthew D. Huff to get honest about what you want, explore it together, and find a next step toward it.';
 
-export const metadata = pageMetadata({ title: 'Desire interviews', description: DESCRIPTION, path: '/calls' });
+export const metadata = pageMetadata({ title: 'Desire Confessionals', description: DESCRIPTION, path: '/calls' });
 
 /** Standalone page (no 3D scene, see LayoutContent; the site bar sits above). */
 export default function CallsPage() {
@@ -15,11 +15,11 @@ export default function CallsPage() {
       <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
         <main className="pt-16 sm:pt-24">
           <header>
-            <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl lg:text-5xl">Desire interviews</h1>
+            <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl lg:text-5xl">Desire Confessionals</h1>
 
             <div className="mt-6 max-w-xl space-y-4 text-base leading-relaxed text-zinc-400 sm:mt-8 sm:text-lg">
               <p>
-                I love talking with people about their desires. A desire interview is a space to get honest
+                I love talking with people about their desires. A desire confessional is a space to get honest
                 about what you want, explore it together, and find a next step toward it.
               </p>
               <p>
