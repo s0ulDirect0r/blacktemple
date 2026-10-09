@@ -1,23 +1,28 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Press_Start_2P } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import LayoutContent from "@/components/LayoutContent";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: "./fonts/Geist-Latin-Variable.woff2",
   variable: "--font-geist-sans",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: "./fonts/GeistMono-Latin-Variable.woff2",
   variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "100 900",
+  display: "swap",
 });
 
-const pressStart2P = Press_Start_2P({
+const pressStart2P = localFont({
+  src: "./fonts/PressStart2P-Regular.ttf",
   variable: "--font-pixel",
   weight: "400",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
