@@ -86,7 +86,12 @@ export async function deliverAccountEmail(id: string, email: AccountEmail, trans
     body:JSON.stringify({from,to:[email.to],subject:email.subject,text:email.text,html:email.html,...(process.env.MEMBERSHIP_EMAIL_REPLY_TO ? {reply_to:process.env.MEMBERSHIP_EMAIL_REPLY_TO}: {})}),
     signal:AbortSignal.timeout(15000),redirect:'error',
   });
-  if (!response.ok) throw new EmailDeliveryError(response.status===429 || response.status>=500,'provider-http-'+response.status);
+  if (!response.ok) {
+    // Keep Resend's error name (e.g. validation_error); its message can echo addresses, so it is not stored.
+    const body: unknown = await response.json().catch(() => null);
+    const name = body && typeof body === 'object' && 'name' in body && typeof body.name === 'string' && /^[a-z_]{1,40}$/.test(body.name) ? ':' + body.name : '';
+    throw new EmailDeliveryError(response.status===429 || response.status>=500,'provider-http-'+response.status+name);
+  }
   const result: unknown = await response.json();
   if (!result || typeof result !== 'object' || !('id' in result) || typeof result.id !== 'string') throw new EmailDeliveryError(true,'provider-invalid-response');
   return result.id;

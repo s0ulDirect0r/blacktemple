@@ -47,7 +47,8 @@ export interface MembershipAccess {
 }
 
 export function hasAccess(membership: MembershipAccess | null, feature: Feature = 'studio', now = new Date()): boolean {
-  if (!membership || !['active', 'past_due'].includes(membership.status) || membership.revoked_at) return false;
+  // A canceled member keeps what they already paid for; paid_through still bounds access.
+  if (!membership || !['active', 'past_due', 'canceled'].includes(membership.status) || membership.revoked_at) return false;
   if (!membership.term_start || !membership.term_end || !membership.paid_through) return false;
   if (membership.term_start > now || membership.term_end <= now || membership.paid_through <= now) return false;
   const minimumRank = { studio: 1, gatherings: 2, conversations: 3 }[feature];

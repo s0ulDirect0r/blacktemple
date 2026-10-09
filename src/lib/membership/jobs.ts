@@ -25,9 +25,25 @@ export async function processNextMembershipEvent() {
     await membershipDatabase().query("UPDATE membership_webhook_jobs SET status='complete',completed_at=NOW(),lease_until=NULL,last_error=NULL WHERE stripe_event_id=$1 AND status='processing' AND attempts=$2",[job.stripe_event_id,job.attempts+1]);
   } catch (error) {
     const retrySeconds = Math.min(300, Math.pow(2, Math.min(job.attempts,8)) * 5);
-    const name = error instanceof Error ? error.name : 'UnknownError';
-    await membershipDatabase().query("UPDATE membership_webhook_jobs SET status='pending',lease_until=NULL,available_at=NOW()+$2*INTERVAL '1 second',last_error=$3 WHERE stripe_event_id=$1 AND status='processing' AND attempts=$4",[job.stripe_event_id,retrySeconds,name,job.attempts+1]);
-    console.error('[membership] queued event will retry:',job.stripe_event_id,name);
+    const reason = failureReason(error);
+    await membershipDatabase().query("UPDATE membership_webhook_jobs SET status='pending',lease_until=NULL,available_at=NOW()+$2*INTERVAL '1 second',last_error=$3 WHERE stripe_event_id=$1 AND status='processing' AND attempts=$4",[job.stripe_event_id,retrySeconds,reason,job.attempts+1]);
+    console.error('[membership] queued event will retry:',job.stripe_event_id,reason);
   }
   return true;
+}
+
+/** Each delivery also clears a small backlog, bounded so it fits inside the webhook's time budget. */
+export async function drainMembershipEvents(maxJobs = 5, budgetMs = 20000) {
+  const started = Date.now();
+  let processed = 0;
+  while (processed < maxJobs && Date.now() - started < budgetMs && await processNextMembershipEvent()) processed++;
+  return processed;
+}
+
+/** A bounded, secret-free reason for operators: Stripe's error type and code, otherwise the message. */
+export function failureReason(error: unknown) {
+  if (!(error instanceof Error)) return 'UnknownError';
+  const { type, code } = error as { type?: unknown; code?: unknown };
+  const reason = typeof type === 'string' && type.startsWith('Stripe') ? [type, typeof code === 'string' ? code : ''].filter(Boolean).join(':') : `${error.name}: ${error.message}`;
+  return reason.replace(/[^\s@]+@[^\s@]+/g, '<email>').replace(/\b(?:sk|rk|pk|whsec|re)_[A-Za-z0-9_]+/g, '<redacted>').slice(0, 200);
 }

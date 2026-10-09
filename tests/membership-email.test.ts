@@ -62,6 +62,9 @@ test('provider sending requires explicit activation and uses retry-safe requests
     process.env.MEMBERSHIP_EMAIL_SEND_ENABLED='true';assert.equal(await deliverAccountEmail('job',mail,transport),'provider-fixture');assert.equal(calls,1);
     await assert.rejects(deliverAccountEmail('job',mail,async()=>new Response(null,{status:429})),(error:unknown)=>error instanceof EmailDeliveryError&&error.retryable);
     await assert.rejects(deliverAccountEmail('job',mail,async()=>new Response(null,{status:403})),(error:unknown)=>error instanceof EmailDeliveryError&&!error.retryable);
+    // The provider's error name is kept for diagnosis; its message (which can echo addresses) is not.
+    await assert.rejects(deliverAccountEmail('job',mail,async()=>Response.json({name:'validation_error',message:'Invalid `to` field: fixture@example.test'},{status:400})),(error:unknown)=>error instanceof EmailDeliveryError&&error.category==='provider-http-400:validation_error');
+    await assert.rejects(deliverAccountEmail('job',mail,async()=>Response.json({name:'Not A Safe Name!'},{status:400})),(error:unknown)=>error instanceof EmailDeliveryError&&error.category==='provider-http-400');
   } finally {process.env=previous;}
 });
 test('auth redirects, origins, malformed JSON and public response normalization',async()=>{

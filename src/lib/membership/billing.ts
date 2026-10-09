@@ -15,9 +15,16 @@ const date = (seconds: number) => new Date(seconds * 1000);
 
 async function occupied(client: PoolClient, tier: TierId, excluding?: string) {
   const result = await client.query<{ count: string }>(`SELECT
-    (SELECT COUNT(*) FROM memberships WHERE tier=$1 AND status NOT IN ('canceled','incomplete_expired') AND term_end>NOW()) +
+    (SELECT COUNT(*) FROM memberships WHERE tier=$1 AND status NOT IN ('canceled','incomplete_expired') AND revoked_at IS NULL AND term_end>NOW()) +
     (SELECT COUNT(*) FROM membership_attempts WHERE tier=$1 AND status IN ('creating','open','activating') AND expires_at>NOW() AND id IS DISTINCT FROM $2::uuid) AS count`, [tier, excluding ?? null]);
   return Number(result.rows[0].count);
+}
+
+/** A revoked membership must stop billing before the same member enrolls again. */
+async function endRevokedBilling(membership: Membership) {
+  const stripe = membershipStripe();
+  const schedule = await stripe.subscriptionSchedules.retrieve(membership.stripe_schedule_id);
+  if (['active','not_started'].includes(schedule.status)) await stripe.subscriptionSchedules.cancel(schedule.id, { invoice_now: false, prorate: false }, { idempotencyKey: 'bt-member-revoked-cancel:' + membership.id });
 }
 
 /** Persist the reservation first, so a network timeout can resume the same attempt. */
@@ -27,7 +34,9 @@ export async function startMemberCheckout(user: { id: string; email: string; nam
   const attemptId = await transaction(async client => {
     await lock(client, billingLock);
     const existingMembership = await currentMembership(user.id, client);
-    if (existingMembership && !['canceled','incomplete_expired'].includes(existingMembership.status) && existingMembership.term_end! > new Date()) throw new MemberError(409, 'You already have a membership term. Open My Membership to manage it.');
+    // A revoked term no longer holds a place, so the member may enroll again.
+    if (existingMembership?.revoked_at) await endRevokedBilling(existingMembership);
+    else if (existingMembership && !['canceled','incomplete_expired'].includes(existingMembership.status) && existingMembership.term_end! > new Date()) throw new MemberError(409, 'You already have a membership term. Open My Membership to manage it.');
     const pending = (await client.query<Attempt>("SELECT * FROM membership_attempts WHERE user_id=$1 AND status IN ('creating','open','activating') ORDER BY created_at DESC LIMIT 1 FOR UPDATE", [user.id])).rows[0];
     if (pending && pending.expires_at > new Date()) {
       if (pending.tier !== tier) throw new MemberError(409, 'Finish or close your existing checkout before choosing another membership.');
@@ -144,7 +153,7 @@ async function reconcileSubscription(client: PoolClient, subscriptionId: string)
     if (stripeId(invoice.customer) !== membership.stripe_customer_id) throw new Error('Invoice ownership mismatch');
     const payments = await stripe.invoicePayments.list({ invoice: invoice.id, limit: 10 });
     let chargeId: string | null = null;
-    let reversed = false;
+    let disputed = false, refunded = false;
     let verifiedAmount = 0;
     for (const payment of payments.data) {
       const intentId = stripeId(payment.payment.payment_intent);
@@ -153,13 +162,15 @@ async function reconcileSubscription(client: PoolClient, subscriptionId: string)
       const charge = typeof intent.latest_charge === 'object' ? intent.latest_charge : null;
       if (charge) {
         chargeId = charge.id;
-        if (charge.disputed || charge.refunded || charge.amount_refunded > 0) reversed = true;
-        if (payment.status === 'paid' && intent.status === 'succeeded' && intent.currency === 'usd' && stripeId(intent.customer) === membership.stripe_customer_id && charge.paid && !reversed) verifiedAmount += payment.amount_paid ?? 0;
+        // A dispute revokes access; a full refund (`refunded`) removes this month; a partial refund changes nothing.
+        if (charge.disputed) disputed = true;
+        if (charge.refunded) refunded = true;
+        if (payment.status === 'paid' && intent.status === 'succeeded' && intent.currency === 'usd' && stripeId(intent.customer) === membership.stripe_customer_id && charge.paid && !disputed && !refunded) verifiedAmount += payment.amount_paid ?? 0;
       }
     }
-    const validPaid = invoice.status === 'paid' && invoice.currency === 'usd' && invoice.amount_paid >= priceFor(membership.tier) && verifiedAmount >= priceFor(membership.tier) && !reversed;
+    const validPaid = invoice.status === 'paid' && invoice.currency === 'usd' && invoice.amount_paid >= priceFor(membership.tier) && verifiedAmount >= priceFor(membership.tier) && !disputed && !refunded;
     if (validPaid) paidPeriods.push({ start: periodStart, end: periodEnd });
-    if (reversed) await client.query('UPDATE memberships SET revoked_at=COALESCE(revoked_at,NOW()) WHERE id=$1', [membership.id]);
+    if (disputed) await client.query('UPDATE memberships SET revoked_at=COALESCE(revoked_at,NOW()) WHERE id=$1', [membership.id]);
     await client.query(`INSERT INTO membership_invoices(stripe_invoice_id,membership_id,status,currency,amount_due,amount_paid,period_start,period_end,hosted_url,charge_id)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (stripe_invoice_id) DO UPDATE SET status=EXCLUDED.status,amount_paid=EXCLUDED.amount_paid,hosted_url=EXCLUDED.hosted_url,charge_id=EXCLUDED.charge_id,updated_at=NOW()`, [invoice.id,membership.id,invoice.status ?? 'unknown',invoice.currency,invoice.amount_due,invoice.amount_paid,periodStart,periodEnd,invoice.hosted_invoice_url,chargeId]);
   }

@@ -1,5 +1,5 @@
 import { after } from 'next/server';
-import { enqueueMembershipEvent, processNextMembershipEvent } from '@/lib/membership/jobs';
+import { drainMembershipEvents, enqueueMembershipEvent } from '@/lib/membership/jobs';
 import { membershipStripe } from '@/lib/membership/stripe';
 
 export const runtime = 'nodejs';
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
   catch { return Response.json({ error: 'Invalid webhook signature.' }, { status: 400 }); }
   try {
     const result = await enqueueMembershipEvent(event);
-    after(async () => { try { await processNextMembershipEvent(); } catch { console.error('[membership] event worker needs retry'); } });
+    after(async () => { try { await drainMembershipEvents(); } catch { console.error('[membership] event worker needs retry'); } });
     return Response.json({ received: true, ...result });
   }
   catch (error) {

@@ -14,11 +14,19 @@ test('offers have the approved three-payment USD amounts', () => {
   assert.equal(MEMBERSHIP_TERM_MONTHS,3);
   assert.deepEqual(TIERS.map(tier=>[tier.monthlyCents,tier.monthlyCents*3]), [[2000,6000],[10000,30000],[100000,300000]]);
 });
-test('free, unconfirmed, failed, refunded and canceled memberships stay locked', () => {
+test('free, unconfirmed, failed and revoked memberships stay locked', () => {
   assert.equal(hasAccess(null,'studio',start),false);
-  for (const status of ['activating','incomplete','incomplete_expired','unpaid','canceled']) assert.equal(hasAccess({...record,status},'studio',start),false,status);
+  for (const status of ['activating','incomplete','incomplete_expired','unpaid']) assert.equal(hasAccess({...record,status},'studio',start),false,status);
   assert.equal(hasAccess({...record,paid_through:null},'studio',start),false);
   assert.equal(hasAccess({...record,revoked_at:start},'studio',start),false);
+  assert.equal(hasAccess({...record,status:'canceled',revoked_at:start},'studio',start),false);
+});
+test('a canceled membership keeps access only through the month already paid', () => {
+  const canceled = {...record,status:'canceled'};
+  assert.equal(hasAccess(canceled,'studio',start),true);
+  assert.equal(hasAccess(canceled,'studio',firstEnd),false);
+  assert.equal(hasAccess({...canceled,paid_through:null},'studio',start),false);
+  assert.equal(hasAccess({...canceled,paid_through:end},'studio',end),false);
 });
 test('access is bounded by both paid month and fixed term, even if subscription status is stale', () => {
   assert.equal(hasAccess(record,'studio',new Date(start.getTime()-1)),false);
