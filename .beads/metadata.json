@@ -1,4 +1,7 @@
 {
-  "database": "beads.db",
-  "jsonl_export": "beads.jsonl"
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "blacktemple",
+  "project_id": "9932f13c-097e-41c9-b192-f5b633ec68c9"
 }
