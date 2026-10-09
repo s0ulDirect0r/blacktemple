@@ -31,6 +31,12 @@ export async function collectFirstMembershipInvoice(subscriptionId: string, atte
   if(invoice.status==='draft') invoice=await stripe.invoices.finalizeInvoice(invoiceId,{auto_advance:true},{idempotencyKey:'bt-member-finalize:'+attemptId});
   if(invoice.status==='open') {
     try {await stripe.invoices.pay(invoiceId,{}, {idempotencyKey:'bt-member-first-payment:'+attemptId});}
-    catch(error) {if(!(error instanceof Error) || error.name!=='StripeCardError')throw error;}
+    catch(error) {if(!isCardDecline(error))throw error;}
   }
+}
+
+/** A declined first payment leaves an open invoice for webhook reconciliation; it must not abort activation. */
+export function isCardDecline(error: unknown) {
+  // stripe-node reports the class in `type`; `name` is the generic "Error".
+  return error instanceof Error && (error as {type?: unknown}).type === 'StripeCardError';
 }
