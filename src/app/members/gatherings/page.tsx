@@ -5,6 +5,8 @@ import { hasAccess } from '@/lib/membership/config';
 import { gatheringsForMember } from '@/lib/membership/content';
 import styles from '@/components/membership/membership.module.css';
 
+export const metadata = { title: 'Gatherings' };
+
 export default async function GatheringsPage() {
   const session = await requireMemberSession('/members/gatherings');
   const membership = await currentMembership(session.user.id);

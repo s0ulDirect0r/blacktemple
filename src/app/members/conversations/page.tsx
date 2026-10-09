@@ -5,6 +5,8 @@ import { hasAccess, MEMBERSHIP_SUPPORT_EMAIL } from '@/lib/membership/config';
 import ConversationBooking from '@/components/membership/ConversationBooking';
 import styles from '@/components/membership/membership.module.css';
 
+export const metadata = { title: 'Private conversations' };
+
 export default async function ConversationsPage() {
   const session = await requireMemberSession('/members/conversations');
   const membership = await currentMembership(session.user.id);

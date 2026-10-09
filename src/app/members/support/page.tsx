@@ -4,6 +4,8 @@ import { serviceRequests } from '@/lib/membership/content';
 import RequestForm from '@/components/membership/RequestForm';
 import styles from '@/components/membership/membership.module.css';
 
+export const metadata = { title: 'Support' };
+
 export default async function SupportPage() {
   const session = await requireMemberSession('/members/support');
   const requests = (await serviceRequests(session.user.id)).filter(request => request.kind === 'support');

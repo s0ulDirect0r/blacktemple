@@ -2,9 +2,11 @@ import { requireMemberSession } from '@/lib/membership/auth';
 import MemberNav, { SignOut } from '@/components/membership/MemberNav';
 import SessionGuard from '@/components/membership/SessionGuard';
 import styles from '@/components/membership/membership.module.css';
+import { SITE_NAME } from '@/lib/site';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Members', robots: { index: false, follow: false } };
+// Each member page names itself, so screen readers announce where a navigation landed.
+export const metadata = { title: { default: `Members · ${SITE_NAME}`, template: `%s · Members · ${SITE_NAME}` }, robots: { index: false, follow: false } };
 export default async function MembersLayout({ children }: { children: React.ReactNode }) {
   const session = await requireMemberSession();
   return <div className={styles.world}><div className={styles.shell}><SessionGuard userId={session.user.id}>

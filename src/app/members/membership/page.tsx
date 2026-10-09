@@ -5,6 +5,8 @@ import { hasAccess, money, tierById } from '@/lib/membership/config';
 import PendingCheckout from '@/components/membership/PendingCheckout';
 import styles from '@/components/membership/membership.module.css';
 
+export const metadata = { title: 'My Membership' };
+
 const date = (value: Date | null) => value ? value.toLocaleDateString('en-US', { timeZone: 'UTC', dateStyle: 'long' }) : 'Waiting for payment';
 export default async function MyMembershipPage() {
   const session = await requireMemberSession('/members/membership');
