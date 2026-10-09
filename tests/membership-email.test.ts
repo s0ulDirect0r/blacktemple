@@ -5,6 +5,22 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { accountEmail, encryptEmail, decryptEmail, deliverAccountEmail, captureDirectory, EmailDeliveryError } from '../src/lib/membership/email';
 import { accountCallback, handleAccountRequest } from '../src/lib/membership/auth-route';
+import { GET as accountGet } from '../src/app/api/member-auth/[...all]/route';
+
+test('unconfigured hosted account responses stay private and reveal no configuration values', async () => {
+  const previous = process.env.MEMBERSHIP_DATABASE_URL;
+  delete process.env.MEMBERSHIP_DATABASE_URL;
+  try {
+    const response = await accountGet(new Request('https://preview.example.test/api/member-auth/get-session'));
+    assert.equal(response.status, 503);
+    assert.equal(response.headers.get('cache-control'), 'private, no-store');
+    assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
+    assert.deepEqual(await response.json(), { error: 'Sign-in is not configured yet.' });
+  } finally {
+    if (previous === undefined) delete process.env.MEMBERSHIP_DATABASE_URL;
+    else process.env.MEMBERSHIP_DATABASE_URL = previous;
+  }
+});
 
 test('account email URLs are owned and payload encryption authenticates changes',()=>{
   const previous={...process.env};

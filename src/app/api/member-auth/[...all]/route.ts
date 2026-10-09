@@ -6,7 +6,10 @@ import { authConfigured, memberAuth } from '@/lib/membership/auth';
 
 export const runtime = 'nodejs';
 async function handle(request: Request) {
-  if (!authConfigured()) return Response.json({ error: 'Sign-in is not configured yet.' }, { status: 503 });
+  if (!authConfigured()) return Response.json({ error: 'Sign-in is not configured yet.' }, {
+    status: 503,
+    headers: { 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer' },
+  });
   const handlers = toNextJsHandler(memberAuth());
   const result = await handleAccountRequest(request, handlers);
   const response = new Response(result.body,{status:result.status,headers:result.headers});
