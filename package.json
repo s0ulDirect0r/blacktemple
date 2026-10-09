@@ -20,7 +20,9 @@
     "postinstall": "node scripts/apply-dependency-security-patches.mjs",
     "security:patch-check": "node scripts/apply-dependency-security-patches.mjs --check",
     "test:dependency-security": "node --import tsx --test tests/dependency-security.test.ts",
-    "prebuild": "node scripts/apply-dependency-security-patches.mjs --check"
+    "prebuild": "node scripts/apply-dependency-security-patches.mjs --check",
+    "membership:fixtures": "tsx scripts/membership-ui-fixtures.ts",
+    "test:a11y": "playwright test"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -49,7 +51,9 @@
     "three": "^0.182.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@eslint/eslintrc": "^3",
+    "@playwright/test": "1.64.0",
     "@types/node": "^20.17.22",
     "@types/pg": "8.23.1",
     "@types/react": "^19",

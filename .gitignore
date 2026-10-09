@@ -50,3 +50,7 @@ next-env.d.ts
 .beads-credential-key
 .beads/proxieddb/
 *.gate.lock*
+
+# Playwright output (accessibility suite)
+/test-results/
+/playwright-report/
