@@ -19,7 +19,7 @@ export const TIERS = [
     id: 'champion', name: 'Champion', monthlyCents: 100000, rank: 3,
     invitation: 'Make room for what matters.',
     description: 'Support the world of Black Temple, with time together to explore your desires or champion your creative work.',
-    benefits: ['Everything in Companion', 'One private 45-minute conversation each month', 'Choose a Desire Confessional or creative championing'],
+    benefits: ['Everything in Companion', 'One private 90-minute conversation each month', 'Choose a Desire Confessional or creative championing'],
   },
 ] as const;
 
