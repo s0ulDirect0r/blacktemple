@@ -8,9 +8,6 @@ import {
   ARRIVAL_THRESHOLD,
 } from '@/constants/zones';
 
-// Three.js requires direct mutation of camera properties - this is the standard pattern
-/* eslint-disable react-hooks/immutability */
-
 export default function CameraController() {
   const { camera } = useThree();
   const {

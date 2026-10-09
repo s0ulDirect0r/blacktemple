@@ -10,7 +10,7 @@ const SceneLayout = dynamic(() => import('./SceneLayout'), { loading: () => <Zon
 export default function LayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   if (pathname.startsWith('/portfolio')) return <>{children}</>;
-  const standalone = ['/music', '/spidernomicon', '/calls', '/privacy'];
+  const standalone = ['/music', '/spidernomicon', '/calls', '/privacy', '/membership', '/members', '/login'];
   if (standalone.some((prefix) => pathname.startsWith(prefix))) {
     return <><ZoneNavBar placement="inline" />{children}</>;
   }

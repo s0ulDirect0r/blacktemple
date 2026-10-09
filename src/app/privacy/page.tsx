@@ -17,13 +17,27 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
         <main className="pt-16 sm:pt-24">
           <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl">Privacy</h1>
-          <p className="mt-4 text-sm text-zinc-500">Last updated October 6, 2026</p>
+          <p className="mt-4 text-sm text-zinc-500">Local membership draft · October 9, 2026</p>
 
           <div className="mt-10 max-w-xl space-y-10 leading-relaxed text-zinc-400">
             <section className="space-y-4">
               <p>
                 This site doesn&apos;t use analytics, ads or tracking cookies. It&apos;s hosted on Vercel, which, like any
                 web host, keeps short-lived server logs (including IP addresses) to run and protect the service.
+              </p>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="font-pixel text-base text-white">Membership accounts</h2>
+              <p>
+                A membership account stores your name, email, a protected password record, and sign-in sessions.
+                An essential session cookie keeps you signed in. The membership database also holds your chosen
+                tier, payment and access records, and any support or conversation requests you save.
+              </p>
+              <p>
+                Stripe handles card details directly. This site receives payment references and invoice status,
+                and sends Stripe your account name and email. Membership retention and account recovery
+                arrangements are still being reviewed before a live opening.
               </p>
             </section>
 

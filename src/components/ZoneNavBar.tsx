@@ -17,6 +17,7 @@ const navLinks: NavEntry[] = [
   { kind: 'route', id: 'writing', label: 'Writing', href: '/writing' },
   { kind: 'zone', id: 'book', label: 'Book' },
   { kind: 'zone', id: 'about', label: 'About' },
+  { kind: 'route', id: 'membership', label: 'Members', href: '/membership' },
   { kind: 'route', id: 'calls', label: 'Calls', href: '/calls' },
 ];
 
@@ -33,6 +34,7 @@ interface ZoneNavBarProps {
 }
 
 function activeEntryId(pathname: string, targetZone: ZoneId | undefined): string | null {
+  if (pathname === '/login' || pathname.startsWith('/members')) return 'membership';
   const route = navLinks.find((link) => link.kind === 'route' && pathname.startsWith(link.href));
   if (route) return route.id;
 

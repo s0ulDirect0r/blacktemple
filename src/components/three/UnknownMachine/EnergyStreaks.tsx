@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -26,10 +27,10 @@ export default function EnergyStreaks({
     const baseColor = new THREE.Color(0xffee66);
 
     for (let i = 0; i < count; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = seededRandom(i, 302) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i, 303) - 1);
 
-      const startRadius = coreRadius * (1.0 + Math.random() * 0.05);
+      const startRadius = coreRadius * (1.0 + seededRandom(i, 304) * 0.05);
 
       const x = Math.sin(phi) * Math.cos(theta);
       const y = Math.sin(phi) * Math.sin(theta);
@@ -40,13 +41,13 @@ export default function EnergyStreaks({
       pos[i * 3 + 2] = z * startRadius;
 
       // Faster velocity (0.08-0.20)
-      const speed = 0.08 + Math.random() * 0.12;
+      const speed = 0.08 + seededRandom(i, 305) * 0.12;
       vel[i * 3] = x * speed;
       vel[i * 3 + 1] = y * speed;
       vel[i * 3 + 2] = z * speed;
 
       // Bright variation
-      const colorVariation = 0.95 + Math.random() * 0.1;
+      const colorVariation = 0.95 + seededRandom(i, 306) * 0.1;
       col[i * 3] = baseColor.r * colorVariation;
       col[i * 3 + 1] = baseColor.g * colorVariation;
       col[i * 3 + 2] = baseColor.b * colorVariation;
@@ -56,7 +57,7 @@ export default function EnergyStreaks({
   }, [coreRadius, count]);
 
   // Animation state
-  const particleLife = useRef(new Float32Array(count).fill(0).map(() => Math.random()));
+  const particleLife = useRef(new Float32Array(count).fill(0).map((_, i) => seededRandom(i, 301)));
   const maxLife = 1.5; // Shorter life = more frequent respawns
 
   useFrame((state, delta) => {
