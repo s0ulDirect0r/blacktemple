@@ -82,5 +82,7 @@ export function membershipPreflight(env: Readonly<Record<string, string | undefi
   warnings.push('Static checks do not verify database connectivity/schema, TLS certificates, Stripe price amounts/mode, webhook delivery, email domain delivery, scheduler operation, or provider permissions.');
   if (env.MEMBERSHIP_CHECKOUT_ENABLED !== 'true') warnings.push('Membership checkout remains disabled.');
   if (mode !== 'live') warnings.push('Stripe remains in test mode; this is not live billing readiness.');
+  if (target === 'production' && !env.CRON_SECRET) warnings.push('CRON_SECRET is not set; the queue recovery cron will be rejected.');
+  if (target !== 'local' && !env.MEMBERSHIP_OPS_ALERT_EMAIL) warnings.push('MEMBERSHIP_OPS_ALERT_EMAIL is not set; queue alerts are only written to logs.');
   return { target, ok: errors.length === 0, errors, warnings };
 }
