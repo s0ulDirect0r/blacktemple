@@ -42,7 +42,8 @@ const authorSQL = `json_build_object('id',a.id,'name',a.name,'alias',a.alias,'av
 export async function feed(userId: string, cursor: string | null = null, single?: string) {
   await communityAccess(userId);
   const p = await ownProfile(userId), page = pageCursor(cursor);
-  const rows = (await membershipDatabase().query(`SELECT p.id,p.body,p.link,p.offering,p.version,p.created_at,p.updated_at,p.hidden_at,p.moderation_reason,${authorSQL},
+  const rows = (await membershipDatabase().query(`SELECT p.id,p.body,p.link,p.offering,p.version,p.created_at,p.updated_at,p.hidden_at,
+    CASE WHEN p.author_id=$1 THEN p.moderation_reason ELSE NULL END AS moderation_reason,${authorSQL},
     COALESCE((SELECT json_agg(json_build_object('id',m.id,'alt',m.alt,'width',m.width,'height',m.height) ORDER BY m.created_at,m.id) FROM temple_media m WHERE m.post_id=p.id),'[]') AS media,
     (SELECT COUNT(*)::int FROM temple_comments c WHERE c.post_id=p.id AND c.deleted_at IS NULL AND c.hidden_at IS NULL) AS comment_count,
     COALESCE((SELECT json_object_agg(kind,n) FROM (SELECT kind,COUNT(*)::int n FROM temple_reactions WHERE post_id=p.id GROUP BY kind) r),'{}') AS reactions,
@@ -92,7 +93,8 @@ export async function comments(userId:string,postId:string,cursor:string|null) {
   await communityAccess(userId); const p=await ownProfile(userId), page=pageCursor(cursor);
   const db=membershipDatabase();
   if(!(await db.query('SELECT 1 FROM temple_posts WHERE id=$1 AND deleted_at IS NULL AND hidden_at IS NULL',[uuid(postId)])).rowCount) throw new MemberError(404,'That contribution is not available.');
-  const rows=(await db.query(`SELECT c.id,c.post_id,c.body,c.version,c.created_at,c.updated_at,c.hidden_at,c.moderation_reason,${authorSQL}
+  const rows=(await db.query(`SELECT c.id,c.post_id,c.body,c.version,c.created_at,c.updated_at,c.hidden_at,
+    CASE WHEN c.author_id=$2 THEN c.moderation_reason ELSE NULL END AS moderation_reason,${authorSQL}
     FROM temple_comments c JOIN temple_profiles a ON a.id=c.author_id WHERE c.post_id=$1 AND c.deleted_at IS NULL AND (c.hidden_at IS NULL OR c.author_id=$2)
     AND ($3::timestamptz IS NULL OR (c.created_at,c.id)<($3,$4::uuid)) ORDER BY c.created_at DESC,c.id DESC LIMIT 31`,[postId,p?.id??null,page?.[0]??null,page?.[1]??null])).rows;
   const items=rows.slice(0,30), last=items.at(-1);return {comments:items,cursor:rows.length>30&&last?Buffer.from(JSON.stringify([last.created_at,last.id])).toString('base64url'):null};
@@ -138,6 +140,17 @@ export async function mediaFor(userId:string,id:string) {
   if(m.author_id!==p?.id) {await communityAccess(userId); if(!m.avatar && (!m.post_id || m.hidden_at || m.deleted_at)) throw new MemberError(404,'Image not available.');}
   return m as {bytes:Buffer;mime:string;filename:string};
 }
+/** Separate operator access: never widen ordinary member or draft-image access. */
+export async function moderationMediaFor(userId:string,id:string) {
+  await communityAccess(userId);
+  if(!await moderator(userId))throw new MemberError(403,'Moderator access required.');
+  const media=(await membershipDatabase().query<{bytes:Buffer;mime:string;filename:string}>(`SELECT m.bytes,m.mime,m.filename
+    FROM temple_media m JOIN temple_posts p ON p.id=m.post_id
+    WHERE m.id=$1 AND p.deleted_at IS NULL AND (p.hidden_at IS NOT NULL OR
+      EXISTS(SELECT 1 FROM temple_reports r WHERE r.target_kind='post' AND r.target_id=p.id))`,[uuid(id)])).rows[0];
+  if(!media)throw new MemberError(404,'Reported image not available.');
+  return media;
+}
 export async function removeMedia(userId:string,id:string) {
   const p=await requireProfile(userId); uuid(id);
   return transaction(async client=>{await lock(client,'temple-author:'+userId);await limit(client,userId);
@@ -148,15 +161,24 @@ export async function ownMedia(userId:string) {const p=await ownProfile(userId);
 export async function report(userId:string,body:Record<string,unknown>) {
   await communityAccess(userId);const p=await requireProfile(userId),kind=body.kind,id=uuid(body.targetId),reason=text(body.reason,5,1000,'Report');
   if(kind!=='post'&&kind!=='comment') throw new MemberError(400,'Choose a contribution or reply.');
-  return transaction(async client=>{await limit(client,userId,'report',5);
+  return transaction(async client=>{await limit(client,userId,'report',5);await lock(client,'temple-review:'+kind+':'+id);
     const table=kind==='post'?'temple_posts':'temple_comments';
-    if(!(await client.query(`SELECT 1 FROM ${table} WHERE id=$1 AND deleted_at IS NULL AND hidden_at IS NULL`,[id])).rowCount) throw new MemberError(404,'Contribution not available.');
-    await client.query('INSERT INTO temple_reports(id,reporter_id,target_kind,target_id,reason) VALUES($1,$2,$3,$4,$5) ON CONFLICT(reporter_id,target_kind,target_id) DO NOTHING',[randomUUID(),p.id,kind,id,reason]);return {reported:true}; });
+    const target=(await client.query<{version:number}>(`SELECT version FROM ${table} WHERE id=$1 AND deleted_at IS NULL AND hidden_at IS NULL FOR SHARE`,[id])).rows[0];
+    if(!target) throw new MemberError(404,'Contribution not available.');
+    const inserted=(await client.query<{id:string;content_version:number}>(`INSERT INTO temple_reports(id,reporter_id,target_kind,target_id,reason,content_version)
+      VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(reporter_id,target_kind,target_id) WHERE status='open' DO NOTHING RETURNING id,content_version`,[randomUUID(),p.id,kind,id,reason,target.version])).rows[0];
+    if(inserted)return {id:inserted.id,reported:true,duplicate:false,contentVersion:inserted.content_version};
+    const open=(await client.query<{id:string;content_version:number|null}>("SELECT id,content_version FROM temple_reports WHERE reporter_id=$1 AND target_kind=$2 AND target_id=$3 AND status='open'",[p.id,kind,id])).rows[0];
+    return {id:open.id,reported:false,duplicate:true,contentVersion:open.content_version}; });
 }
 export async function moderationQueue(userId:string) {
   await communityAccess(userId);if(!await moderator(userId)) throw new MemberError(403,'Moderator access required.');
-  return (await membershipDatabase().query(`SELECT r.id,r.target_kind,r.target_id,r.reason,r.status,r.created_at,
-    COALESCE(p.body,c.body) body,COALESCE(p.hidden_at,c.hidden_at) hidden_at,COALESCE(p.deleted_at,c.deleted_at) deleted_at
+  return (await membershipDatabase().query(`SELECT r.id,r.target_kind,r.target_id,r.reason,r.status,r.created_at,r.content_version,
+    COALESCE(p.body,c.body) body,p.link,COALESCE(p.version,c.version) current_version,
+    COALESCE(p.hidden_at,c.hidden_at) hidden_at,COALESCE(p.deleted_at,c.deleted_at) deleted_at,
+    COALESCE(p.moderation_reason,c.moderation_reason) moderation_reason,
+    COALESCE((SELECT json_agg(json_build_object('id',m.id,'alt',m.alt,'width',m.width,'height',m.height) ORDER BY m.created_at,m.id)
+      FROM temple_media m WHERE m.post_id=p.id),'[]') AS media
     FROM temple_reports r LEFT JOIN temple_posts p ON r.target_kind='post' AND p.id=r.target_id LEFT JOIN temple_comments c ON r.target_kind='comment' AND c.id=r.target_id
     ORDER BY (r.status='open') DESC,r.created_at DESC LIMIT 100`)).rows;
 }
@@ -164,7 +186,7 @@ export async function moderate(userId:string,body:Record<string,unknown>) {
   await communityAccess(userId);if(!await moderator(userId)) throw new MemberError(403,'Moderator access required.');
   const kind=body.kind,id=uuid(body.targetId),action=body.action,reason=text(body.reason,5,1000,'Moderation reason');
   if((kind!=='post'&&kind!=='comment')||(action!=='hide'&&action!=='restore'&&action!=='dismiss')) throw new MemberError(400,'Invalid moderation action.');
-  return transaction(async client=>{await limit(client,userId);
+  return transaction(async client=>{await limit(client,userId);await lock(client,'temple-review:'+kind+':'+id);
     if(action!=='dismiss') {const table=kind==='post'?'temple_posts':'temple_comments';
       const result=await client.query(`UPDATE ${table} SET hidden_at=${action==='hide'?'NOW()':'NULL'},moderation_reason=$2,updated_at=NOW(),version=version+1 WHERE id=$1 AND deleted_at IS NULL`,[id,reason]);
       if(!result.rowCount) throw new MemberError(404,'Contribution not available.');

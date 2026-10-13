@@ -9,6 +9,9 @@ export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export const maxDuration=60;
 type Context={params:Promise<{path:string[]}>};
+function privateImage(m:{bytes:Buffer;mime:string}) {
+  return new Response(new Uint8Array(m.bytes),{headers:{'Content-Type':m.mime,'Content-Length':String(m.bytes.length),'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; sandbox",'Referrer-Policy':'no-referrer'}});
+}
 export async function handle(request:Request,context:Context) {
   try {
     const method=request.method,mutating=!['GET','HEAD'].includes(method),{path}=await context.params;
@@ -56,12 +59,12 @@ export async function handle(request:Request,context:Context) {
         return privateJson(await temple.upload(userId,uuid(data.get('id')),Buffer.from(await file.arrayBuffer()),file.name,data.get('alt')),201);
       }
       if(method==='GET'&&id&&path.length===2) {
-        const m=await temple.mediaFor(userId,id);
-        return new Response(new Uint8Array(m.bytes),{headers:{'Content-Type':m.mime,'Content-Length':String(m.bytes.length),'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; sandbox",'Referrer-Policy':'no-referrer'}});
+        return privateImage(await temple.mediaFor(userId,id));
       }
       if(method==='DELETE'&&id&&path.length===2)return privateJson(await temple.removeMedia(userId,id));
     }
-    if(space==='reports'&&path.length===1&&method==='POST')return privateJson(await temple.report(userId,body),201);
+    if(space==='reports'&&path.length===1&&method==='POST') {const result=await temple.report(userId,body);return privateJson(result,result.duplicate?200:201);}
+    if(space==='moderation'&&id==='media'&&action&&method==='GET')return privateImage(await temple.moderationMediaFor(userId,action));
     if(space==='moderation'&&path.length===1) {
       if(method==='GET')return privateJson({reports:await temple.moderationQueue(userId)});
       if(method==='POST')return privateJson(await temple.moderate(userId,body));

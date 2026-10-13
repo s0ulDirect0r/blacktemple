@@ -45,7 +45,7 @@ test('ZIP uses standard CRC32 and UTF-8 entry names',async()=>{
 test('Temple API denies unauthenticated reads, exports and uploads without touching a database',async()=>{
   const previous={...process.env};try{
     delete process.env.MEMBERSHIP_DATABASE_URL;delete process.env.BETTER_AUTH_SECRET;process.env.BETTER_AUTH_URL='http://localhost:3003';
-    for(const path of [['feed'],['export'],['identity'],['media','11111111-1111-4111-8111-111111111111'],['moderation']]){
+    for(const path of [['feed'],['export'],['identity'],['media','11111111-1111-4111-8111-111111111111'],['moderation'],['moderation','media','11111111-1111-4111-8111-111111111111']]){
       const response=await handle(new Request('http://localhost:3003/api/temple/'+path.join('/')),{params:Promise.resolve({path})});assert.equal(response.status,401);assert.equal(response.headers.get('cache-control'),'no-store');
     }
     const response=await handle(new Request('http://localhost:3003/api/temple/feed',{method:'POST',headers:{origin:'https://evil.test','content-type':'application/json'},body:'{}'}),{params:Promise.resolve({path:['feed']})});assert.equal(response.status,403);

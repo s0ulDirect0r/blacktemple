@@ -9,9 +9,9 @@ import ui from './temple.module.css';
 
 function Byline({author,date}:{author:Author;date:string}) {return <div className={ui.byline}>{author.avatarId?<Image unoptimized width={44} height={44} className={ui.avatar} src={'/api/temple/media/'+author.avatarId} alt="" />:<span className={ui.initial} aria-hidden="true">{author.name.slice(0,1)}</span>}<div><p><Link className={styles.textLink} href={'/members/people/'+author.id}>{author.name}</Link> <span className={styles.note}>@{author.alias}</span></p><time className={styles.note} dateTime={date}>{new Date(date).toLocaleDateString('en-US',{timeZone:'UTC',dateStyle:'medium'})} · UTC</time></div></div>;}
 function Report({kind,targetId,onClose}:{kind:'post'|'comment';targetId:string;onClose:()=>void}) {
-  const [reason,setReason]=useState(''),[error,setError]=useState(''),[sent,setSent]=useState(false),[busy,setBusy]=useState(false);
-  async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);try{await api('reports','POST',{kind,targetId,reason});setSent(true);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
-  if(sent)return <div className={ui.notice} role="status">Report received. A moderator can review it. <button className={styles.secondary} onClick={onClose}>Close</button></div>;
+  const [reason,setReason]=useState(''),[error,setError]=useState(''),[sent,setSent]=useState(''),[busy,setBusy]=useState(false);
+  async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);try{const result=await api<{duplicate:boolean}>('reports','POST',{kind,targetId,reason});setSent(result.duplicate?'You already have an open report for this contribution. Your original report remains in review.':'Report received. A moderator can review it.');}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  if(sent)return <div className={ui.notice} role="status">{sent} <button className={styles.secondary} onClick={onClose}>Close</button></div>;
   return <form className={styles.form} onSubmit={submit}><label>What needs attention?<textarea required minLength={5} maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)} /></label><div className={styles.actions}><button className={styles.secondary} disabled={busy}>Send report</button><button type="button" className={styles.secondary} onClick={onClose}>Cancel</button></div>{error&&<p role="alert" className={styles.error}>{error}</p>}</form>;
 }
 function Replies({postId,identity}:{postId:string;identity:Identity|null}) {

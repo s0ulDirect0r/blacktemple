@@ -23,7 +23,7 @@
     "prebuild": "node scripts/apply-dependency-security-patches.mjs --check",
     "membership:fixtures": "tsx scripts/membership-ui-fixtures.ts",
     "test:a11y": "playwright test",
-    "test:temple:integration": "tsx --test tests/integration/temple.integration.ts",
+    "test:temple:integration": "tsx --test tests/integration/temple*.integration.ts",
     "test:temple:browser": "playwright test --config playwright.temple.config.ts"
   },
   "dependencies": {

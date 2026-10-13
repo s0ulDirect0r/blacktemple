@@ -12,7 +12,7 @@ No home page, front-door scene, site navigation, unrelated page, billing/authent
 
 ## Setup
 
-Install the existing lockfile with `npm ci`; the repository's dependency patch script must run if install scripts are disabled. Apply `npm run membership:migrate` against a reviewed target. This adds migration `007_community.sql`; Better Auth and the previous membership migrations are prerequisites. Remote migration requires separate target authorization and the existing explicit `--allow-remote` flow.
+Install the existing lockfile with `npm ci`; the repository's dependency patch script must run if install scripts are disabled. Apply `npm run membership:migrate` against a reviewed target. This adds migrations `007_community.sql` and `008_report_reviews.sql`; Better Auth and the previous membership migrations are prerequisites. Remote migration requires separate target authorization and the existing explicit `--allow-remote` flow. Migration 008 replaces permanent report uniqueness with open-review uniqueness and preserves prior resolved reviews; historical report versions remain unknown rather than being invented.
 
 No new provider is required: originals are stored as PostgreSQL `BYTEA`. Each still PNG/JPEG/WebP is at most 8 MiB and 24 million pixels; a post can contain four images. The initial per-author media cap is 64 MiB, including avatars and drafts. These operational limits are separate from prices and should be reviewed against hosting/database capacity before production. Original files and their metadata are retained unchanged. Large deployments may later move bytes behind a private object-storage adapter without changing community IDs or the media API.
 
@@ -28,7 +28,9 @@ Writes validate exact Origin, content type and request bounds. Image uploads are
 
 Client-generated UUIDs make creation retries return the original post/reply/upload rather than duplicate it. Account locks, SQL ownership predicates, optimistic `version` checks and partial operations inside transactions prevent stale edits and attachment theft. Request throttles count failures before parsing/decoding; service limits also constrain successful writes. A conflicting alias or version preserves the visible draft and requests a reload.
 
-Deletion removes the author's post body/link and attached originals; it does not delete another member's replies from their own export. Deleted work is omitted from the author's export. Moderator removal is reversible, records operator/reason, hides shared content and media, and leaves the author a reason notice and access to their own export. Reports are deduplicated by reporter/target. The review UI includes recent resolved reports so removals can be restored. It is not a general membership administration dashboard.
+Deletion removes the author's post body/link and attached originals; it does not delete another member's replies from their own export. Deleted work is omitted from the author's export. Moderator removal is reversible, records operator/reason, hides shared content and media, and leaves the author a reason notice and access to their own export. Shared feed/reply responses expose the latest reason only to the author, including after restoration. Operator-only projections expose reasons separately.
+
+Reports are deduplicated only while open for the same reporter/target. A resolved report does not block a subsequent review. New reports record the target version; the queue labels reported/current versions and shows current content, not an invented historical snapshot. Duplicate responses identify the existing open review and do not claim a new report was saved. A target advisory lock serializes reporting with resolution. The review UI renders text, links and original images, including hidden images through a separate moderator-only endpoint. That endpoint never grants access to unattached drafts or deleted post media. The UI includes recent resolved reports so removals can be restored. It is not a general membership administration dashboard.
 
 The Machine signal counts real, visible, undeleted posts marked as offerings since midnight UTC. No activity, replies, points, streaks or rewards are fabricated. The invitation is optional. Draft text stays in the open composer during failures; it is not persisted across a closed tab. Unattached uploads can be removed from Identity & export.
 
@@ -53,8 +55,9 @@ All routes use the existing verified session cookie. There are no minted agent t
 | `POST /media` | Multipart `id`, `file`, `alt`; retry-stable UUID, bounded upload |
 | `GET /media/:id` | Authenticated original binary; no redirect or public Blob URL |
 | `DELETE /media/:id` | Requester's unattached, unused original; JSON `{}` |
-| `POST /reports` | `{kind:'post'|'comment',targetId,reason}` |
+| `POST /reports` | `{kind:'post'|'comment',targetId,reason}`; 201 for a new versioned review, 200 with `duplicate:true,reported:false` for an existing open review |
 | `GET /moderation` | Moderator-only recent report queue |
+| `GET /moderation/media/:id` | Moderator-only original for a reported or hidden post; never unattached drafts or deleted images |
 | `POST /moderation` | Moderator-only `{kind,targetId,action:'hide'|'restore'|'dismiss',reason}` |
 | `GET /export` | Own-work ZIP; available after paid membership ends |
 | `GET /export?format=json` | Same own-work manifest without binary bytes |
