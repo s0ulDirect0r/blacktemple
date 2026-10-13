@@ -12,7 +12,7 @@ export default defineConfig({
   workers: 1,
   timeout: 120_000,
   reporter: [['list']],
-  use: { baseURL },
+  use: { baseURL, launchOptions: process.env.PLAYWRIGHT_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } : undefined },
   webServer: process.env.A11Y_BASE_URL ? undefined : {
     command: 'npm run dev -- --port 3003',
     url: baseURL + '/membership',

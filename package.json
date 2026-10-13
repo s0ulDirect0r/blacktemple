@@ -22,7 +22,9 @@
     "test:dependency-security": "node --import tsx --test tests/dependency-security.test.ts",
     "prebuild": "node scripts/apply-dependency-security-patches.mjs --check",
     "membership:fixtures": "tsx scripts/membership-ui-fixtures.ts",
-    "test:a11y": "playwright test"
+    "test:a11y": "playwright test",
+    "test:temple:integration": "tsx --test tests/integration/temple.integration.ts",
+    "test:temple:browser": "playwright test --config playwright.temple.config.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",

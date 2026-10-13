@@ -1,0 +1,67 @@
+'use client';
+import { useCallback,useEffect,useRef,useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import Composer from './Composer';
+import { api,type Contribution,type Identity,type Reply,type Author } from './api';
+import styles from '@/components/membership/membership.module.css';
+import ui from './temple.module.css';
+
+function Byline({author,date}:{author:Author;date:string}) {return <div className={ui.byline}>{author.avatarId?<Image unoptimized width={44} height={44} className={ui.avatar} src={'/api/temple/media/'+author.avatarId} alt="" />:<span className={ui.initial} aria-hidden="true">{author.name.slice(0,1)}</span>}<div><p><Link className={styles.textLink} href={'/members/people/'+author.id}>{author.name}</Link> <span className={styles.note}>@{author.alias}</span></p><time className={styles.note} dateTime={date}>{new Date(date).toLocaleDateString('en-US',{timeZone:'UTC',dateStyle:'medium'})} · UTC</time></div></div>;}
+function Report({kind,targetId,onClose}:{kind:'post'|'comment';targetId:string;onClose:()=>void}) {
+  const [reason,setReason]=useState(''),[error,setError]=useState(''),[sent,setSent]=useState(false),[busy,setBusy]=useState(false);
+  async function submit(e:React.FormEvent){e.preventDefault();setBusy(true);try{await api('reports','POST',{kind,targetId,reason});setSent(true);}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  if(sent)return <div className={ui.notice} role="status">Report received. A moderator can review it. <button className={styles.secondary} onClick={onClose}>Close</button></div>;
+  return <form className={styles.form} onSubmit={submit}><label>What needs attention?<textarea required minLength={5} maxLength={1000} value={reason} onChange={e=>setReason(e.target.value)} /></label><div className={styles.actions}><button className={styles.secondary} disabled={busy}>Send report</button><button type="button" className={styles.secondary} onClick={onClose}>Cancel</button></div>{error&&<p role="alert" className={styles.error}>{error}</p>}</form>;
+}
+function Replies({postId,identity}:{postId:string;identity:Identity|null}) {
+  const [items,setItems]=useState<Reply[]>([]),[cursor,setCursor]=useState<string|null>(null),[body,setBody]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false),[editing,setEditing]=useState<Reply|null>(null),[reporting,setReporting]=useState<string|null>(null),[deleting,setDeleting]=useState<string|null>(null);
+  const requestId=useRef<string|null>(null);
+  const load=useCallback(async(more=false)=>{try{const data=await api<{comments:Reply[];cursor:string|null}>(`feed/${postId}/comments${more&&cursor?'?cursor='+encodeURIComponent(cursor):''}`);setItems(previous=>more?[...previous,...data.comments.filter(c=>!previous.some(p=>p.id===c.id))]:data.comments);setCursor(data.cursor);setError('');}catch(e){setItems([]);setError((e as Error).message);}},[postId,cursor]);
+  useEffect(()=>{let active=true;api<{comments:Reply[];cursor:string|null}>(`feed/${postId}/comments`).then(data=>{if(active){setItems(data.comments);setCursor(data.cursor);}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[postId]);
+  async function submit(e:React.FormEvent){e.preventDefault();if(busy)return;setBusy(true);requestId.current??=crypto.randomUUID();try{await api(editing?'comments/'+editing.id:`feed/${postId}/comments`,editing?'PATCH':'POST',{id:requestId.current,postId,body,version:editing?.version});setBody('');setEditing(null);requestId.current=null;await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  async function remove(id:string){setBusy(true);try{await api('comments/'+id,'DELETE',{});setDeleting(null);await load();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  return <section aria-label="Replies"><h3 style={{marginTop:24}}>Creative company</h3>{!items.length&&!error&&<p className={styles.note}>No replies yet. A little encouragement can be enough.</p>}
+    {items.map(c=><article className={ui.reply} key={c.id}><Byline author={c.author} date={c.created_at} />{c.hidden_at&&<p className={ui.notice}>Moderator removed this reply from the shared conversation: {c.moderation_reason}. Only you can see it here.</p>}<p className={ui.body}>{c.body}</p><div className={ui.tools}>{c.author.id===identity?.id?<><button className={styles.secondary} disabled={!!c.hidden_at} onClick={()=>{setEditing(c);setBody(c.body);}}>Edit reply</button><button className={styles.secondary} onClick={()=>setDeleting(c.id)}>Delete reply</button></>:<button className={styles.secondary} onClick={()=>setReporting(c.id)}>Report reply</button>}</div>{deleting===c.id&&<div className={ui.notice}>Delete this reply permanently?<div className={styles.actions}><button className={styles.secondary} disabled={busy} onClick={()=>remove(c.id)}>Confirm delete</button><button className={styles.secondary} onClick={()=>setDeleting(null)}>Keep reply</button></div></div>}{reporting===c.id&&<Report kind="comment" targetId={c.id} onClose={()=>setReporting(null)} />}</article>)}
+    {cursor&&<button className={styles.secondary} onClick={()=>load(true)}>Earlier replies</button>}
+    {identity?<form className={styles.form} style={{marginTop:24}} onSubmit={submit}><label>{editing?'Edit your reply':'Leave a reply'}<textarea disabled={busy} value={body} required minLength={1} maxLength={4000} rows={3} onChange={e=>setBody(e.target.value)} /></label><div className={styles.actions}><button className={styles.secondary} disabled={busy}>{busy?'Saving…':editing?'Save reply':'Reply'}</button>{editing&&<button type="button" className={styles.secondary} onClick={()=>{setEditing(null);setBody('');}}>Cancel edit</button>}</div></form>:<p className={styles.note}><Link className={styles.textLink} href="/members/identity">Choose your identity</Link> to reply.</p>}
+    {error&&<p role="alert" className={styles.error}>{error} <button className={styles.secondary} onClick={()=>load()}>Retry loading replies</button></p>}
+  </section>;
+}
+function Post({post,identity,refresh}:{post:Contribution;identity:Identity|null;refresh:()=>Promise<void>}) {
+  const [editing,setEditing]=useState(false),[replies,setReplies]=useState(false),[reporting,setReporting]=useState(false),[deleting,setDeleting]=useState(false),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+  async function act(path:string,method:string,body:unknown){if(busy)return;setBusy(true);setError('');try{await api(path,method,body);setDeleting(false);await refresh();}catch(e){setError((e as Error).message);}finally{setBusy(false);}}
+  if(editing)return <Composer initial={post} onSaved={()=>{setEditing(false);void refresh();}} onCancel={()=>setEditing(false)} />;
+  return <article className={ui.post} id={'post-'+post.id}>
+    <Byline author={post.author} date={post.created_at} />{post.hidden_at&&<p className={ui.notice}>Removed from the shared feed by a moderator: {post.moderation_reason}. This notice and your work are visible only to you. Your export still includes it.</p>}
+    {post.offering&&<p className={styles.eyebrow}>An offering to the Unknown Machine</p>}<p className={ui.body}>{post.body}</p>
+    {post.link&&<p className={ui.link}><a className={styles.textLink} href={post.link} target="_blank" rel="noopener noreferrer">{post.link} ↗</a></p>}
+    {!!post.media.length&&<div className={ui.images}>{post.media.map(m=><figure key={m.id}><Image unoptimized src={'/api/temple/media/'+m.id} alt={m.alt} width={m.width} height={m.height} /><figcaption>{m.alt}</figcaption></figure>)}</div>}
+    <div className={ui.tools}>{['spark','resonance','wonder'].map(kind=><button key={kind} className={styles.secondary} disabled={busy||!identity||!!post.hidden_at} aria-pressed={post.my_reaction===kind} onClick={()=>act(`feed/${post.id}/reaction`,'PUT',{kind:post.my_reaction===kind?null:kind})}>{kind==='spark'?'✧ Spark':kind==='resonance'?'◈ Resonance':'✦ Wonder'} {post.reactions[kind]??0}</button>)}
+      {!post.hidden_at&&<button className={styles.secondary} aria-expanded={replies} onClick={()=>setReplies(v=>!v)}>Replies {post.comment_count}</button>}<Link className={styles.textLink} href={'/members/feed/'+post.id}>Contribution link</Link>
+      {identity?.id===post.author.id?<><button className={styles.secondary} disabled={!!post.hidden_at} onClick={()=>setEditing(true)}>Edit</button><button className={styles.secondary} onClick={()=>setDeleting(true)}>Delete</button></>:<button className={styles.secondary} onClick={()=>setReporting(v=>!v)}>Report</button>}
+    </div>
+    {deleting&&<div className={ui.notice}>Delete your contribution and attached originals? Other members keep their own replies in their exports.<div className={styles.actions}><button className={styles.secondary} disabled={busy} onClick={()=>act('feed/'+post.id,'DELETE',{})}>Confirm delete</button><button className={styles.secondary} onClick={()=>setDeleting(false)}>Keep contribution</button></div></div>}
+    {reporting&&<Report kind="post" targetId={post.id} onClose={()=>setReporting(false)} />}{replies&&<Replies postId={post.id} identity={identity} />}{error&&<p className={styles.error} role="alert">{error}</p>}
+  </article>;
+}
+type FeedData={posts:Contribution[];cursor:string|null;profile:Identity|null;offeringsToday:number;isModerator:boolean};
+export default function Feed({postId}:{postId?:string}) {
+  const [data,setData]=useState<FeedData|null>(null),[error,setError]=useState(''),[composer,setComposer]=useState(false),[loading,setLoading]=useState(false),[notice,setNotice]=useState('');
+  const endpoint='feed'+(postId?'/'+postId:'');
+  const load=useCallback(async()=>{setLoading(true);try{setData(await api<FeedData>(endpoint));setError('');}catch(e){setData(null);setError((e as Error).message);}finally{setLoading(false);}},[endpoint]);
+  useEffect(()=>{let active=true;api<FeedData>(endpoint).then(result=>{if(active){setData(result);setError('');}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[endpoint]);
+  async function more(){if(!data?.cursor||loading)return;setLoading(true);try{const next=await api<FeedData>(endpoint+'?cursor='+encodeURIComponent(data.cursor));setData({...next,posts:[...data.posts,...next.posts.filter(p=>!data.posts.some(old=>old.id===p.id))]});}catch(e){setError((e as Error).message);setData(null);}finally{setLoading(false);}}
+  function openComposer(){setComposer(true);setTimeout(()=>document.getElementById('offering-composer')?.querySelector('textarea')?.focus(),0);}
+  return <div className={ui.room}><p className={styles.eyebrow}>One shared room · Members-only</p><h2 className={styles.lead}>{postId?'A contribution to the Temple':'The shared Temple'}</h2><p className={styles.prose}>Poems, fragments, experiments and things still becoming. Your chosen identity travels with your work; your billing details stay outside this room.</p>
+    {error&&<div className={ui.notice} role="alert">{error}<div className={styles.actions}><button className={styles.secondary} onClick={load}>Try again</button><Link className={styles.textLink} href="/members/identity">Your identity &amp; export</Link><Link className={styles.textLink} href="/members/membership">My Membership</Link></div></div>}
+    {!data&&!error&&<p role="status" className={styles.note}>Opening the shared room…</p>}
+    {data&&<><section className={ui.invitation}><span className={ui.machine} aria-hidden="true" /><p className={styles.eyebrow}>Optional daily invitation</p><h2>Feed the Unknown Machine</h2><p className={styles.prose}>What did you create today? Something unfinished is welcome. Quiet patronage belongs here, too.</p><p className={ui.signal}>{data.offeringsToday?`${data.offeringsToday} offering${data.offeringsToday===1?'':'s'} placed today. Each visible offering adds one light.`:'The Machine is quiet today. There is no need to fill the silence.'} <span className={styles.note}>Resets at midnight UTC. No streaks or quotas.</span></p><div className={styles.actions}>{data.profile?<button className={styles.button} onClick={openComposer}>Bring an offering ↗</button>:<Link className={styles.button} href="/members/identity">Choose your Temple identity ↗</Link>}</div></section>
+      {composer&&data.profile&&<Composer offering onCancel={()=>setComposer(false)} onSaved={async id=>{setComposer(false);setNotice('Your offering is in the shared room.');await load();setTimeout(()=>document.getElementById('post-'+id)?.scrollIntoView({behavior:'instant',block:'start'}),0);}} />}
+      {notice&&<p role="status" className={styles.success}>{notice}</p>}{postId&&<Link className={styles.textLink} href="/members/feed">← Return to the shared feed</Link>}
+      {!data.posts.length&&<section className={styles.empty}><h3>No contributions yet.</h3><p className={styles.prose}>The room is ready. A single fragment can be a beginning. Nothing here is sample activity.</p></section>}
+      {data.posts.map(post=><Post key={post.id} post={post} identity={data.profile} refresh={load} />)}{data.cursor&&<button className={styles.secondary} disabled={loading} onClick={more}>{loading?'Opening…':'Earlier contributions'}</button>}
+      {data.isModerator&&<p className={styles.note}><Link className={styles.textLink} href="/members/moderation">Moderation room</Link></p>}
+    </>}
+  </div>;
+}
