@@ -93,3 +93,50 @@ References used: installed Next.js 16.3.8 route/page guides under
 `node_modules/next/dist/docs/01-app/03-api-reference/03-file-conventions/`,
 [Stripe Checkout create](https://docs.stripe.com/api/checkout/sessions/create), and
 [Stripe idempotency](https://docs.stripe.com/api/idempotent_requests).
+
+## Approved upload and sandbox review, October 14
+
+The user subsequently approved branch upload and verification at $0 additional
+cost using existing sandbox credentials, without access expansion. Origin was
+verified as `https://github.com/s0ulDirect0r/blacktemple.git`; commit `1497556` was
+pushed to `feat/one-time-support` and the remote SHA was verified. Git integration
+automatically built a preview on the existing `blacktemple` project:
+`blacktemple-ebca7d643-anansis-projects.vercel.app` (`dpl_4M6J6pjg9EjZg6kEJKpe5oYX7sSo`).
+It is a preview, not production, and support remains disabled. No manual deployment
+or production change was made.
+
+Payment review confirmed exact amount validation, retry keys, separate support
+records, and membership isolation. The support queue now strips full Checkout
+payloads (including payer details and arbitrary metadata), retaining only event ID,
+type, mode and session reference/app marker; canonical Stripe state is fetched when
+processing. This has a regression test. Existing membership events are unchanged.
+All 83 tests, TypeScript and lint passed after that improvement; the prior three
+browser/accessibility checks and production build also passed.
+
+Hosted verification remains blocked (tracked as `blacktemple-gfi`):
+
+- The exact sandbox project, team, preview database attachment and Neon external
+  resource ID match the approved IDs. Neon reports Free with quota not exceeded.
+  However, the existing Vercel team is Pro and its latest returned billing report
+  shows nonzero billed usage. The connector exposes no remaining included-credit
+  or hard-$0 execution guarantee, so another build/function run cannot be claimed
+  to have zero incremental cost. No manually requested preview was created.
+- The inherited Stripe key is a Sensitive preview variable; read-back returns no
+  value (`decrypted: false`). It was not recreated, rotated, copied, or given new
+  access. This blocks local Stripe API verification. A hosted preview could inherit
+  it once the cost/access prerequisite is resolved.
+- The existing sandbox database URL was used privately, without logging or writing
+  it to the repository. PostgreSQL transport failed `EAI_AGAIN`. The alternate Neon
+  HTTPS transport also failed its initial schema read with `Error connecting to
+  database: fetch failed`. Migration 009 was not reached, and no remote schema or
+  support records were changed.
+- The executor briefly disconnected, then recovered. Work was preserved.
+
+Support checkout was not enabled on any remote project. No test or real payment,
+signed hosted webhook replay, or user email was sent during this follow-up.
+No persistent credential/access change was made. The main branch remains at
+`5d7283d3f9c22d9e698563cd26c7a5c9b79d66b3`.
+
+Reviewed screenshots are exported in
+[`one-time-support-review/mobile.png`](one-time-support-review/mobile.png) and
+[`one-time-support-review/desktop.png`](one-time-support-review/desktop.png).

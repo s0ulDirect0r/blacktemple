@@ -22,7 +22,7 @@ export default function PrivacyPage() {
           <div className="mt-10 max-w-xl space-y-10 leading-relaxed text-zinc-400">
             <section className="space-y-4">
               <h2 className="font-pixel text-base text-white">One-time support</h2>
-              <p>Stripe handles optional support payments and collects the payment information you enter in checkout. Card details never reach this site. I keep payment references, amount, currency and date for bookkeeping. Signed payment events are also held in the payment processing queue and can include checkout details such as your email. Support doesn&apos;t create an account, membership or mailing list subscription.</p>
+              <p>Stripe handles optional support payments and collects the payment information you enter in checkout. Card details never reach this site. I keep payment references, amount, currency and date for bookkeeping. Support checkout events are reduced to payment references before they enter the processing queue. Support doesn&apos;t create an account, membership or mailing list subscription.</p>
             </section>
             <section className="space-y-4">
               <p>

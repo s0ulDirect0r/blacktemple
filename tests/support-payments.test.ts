@@ -6,7 +6,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { membershipDatabase } from '@/lib/membership/database';
 import { membershipStripe } from '@/lib/membership/stripe';
 import { handleMembershipEvent } from '@/lib/membership/billing';
-import { enqueueMembershipEvent, processNextMembershipEvent } from '@/lib/membership/jobs';
+import { enqueueMembershipEvent, processNextMembershipEvent, queuedPaymentEvent } from '@/lib/membership/jobs';
 import { POST as checkout } from '@/app/api/support/checkout/route';
 import { POST as webhook } from '@/app/api/membership/webhook/route';
 import { supportCents } from '@/lib/support/amount';
@@ -24,6 +24,16 @@ function event(type: string, value = session()): Stripe.Event {
 test('custom USD amount uses exact cents and rejects malformed or out-of-bounds values', () => {
   for (const [input, expected] of [['1', 100], ['12.34', 1234], ['1.1', 110], ['1000.00', 100000], [' 5.00 ', 500]] as const) assert.equal(supportCents(input), expected);
   for (const value of [null, {}, [], 10, '', '0', '0.99', '-1', '1000.01', '10000', '1.234', '1e2', 'NaN', 'Infinity', '1,000', '$10', '+1', '1.', '.99', '0x10']) assert.equal(supportCents(value), null, String(value));
+});
+
+test('support queue strips payer details and extra metadata while leaving membership events intact', () => {
+  const source = event('checkout.session.completed', session({ customer_details: { email: 'fixture@example.invalid', name: 'Private fixture' } as Stripe.Checkout.Session.CustomerDetails,
+    metadata: { app: SUPPORT_APP, amountCents: '1234', privateNote: 'private fixture' } }));
+  assert.deepEqual(queuedPaymentEvent(source), { id: source.id, object: 'event', type: source.type, livemode: false,
+    data: { object: { id: 'cs_test_support1', object: 'checkout.session', metadata: { app: SUPPORT_APP } } } });
+  assert.equal(JSON.stringify(queuedPaymentEvent(source)).includes('fixture'), false);
+  const membership = event('checkout.session.completed', session({ metadata: { app: 'blacktemple_membership' } }));
+  assert.equal(queuedPaymentEvent(membership), membership);
 });
 
 test('checkout is explicitly one payment without recurring prices, account binding or future usage', () => {

@@ -1,11 +1,23 @@
 import type Stripe from 'stripe';
 import { membershipDatabase, transaction } from './database';
 import { handleMembershipEvent } from './billing';
+import { SUPPORT_APP } from '@/lib/support/payments';
+
+/** Support processing fetches canonical state; its queue needs no payer details. */
+export function queuedPaymentEvent(event: Stripe.Event) {
+  if (!event.type.startsWith('checkout.session.')) return event;
+  const session = event.data.object as Stripe.Checkout.Session;
+  if (session.metadata?.app !== SUPPORT_APP) return event;
+  return {
+    id: event.id, object: event.object, type: event.type, livemode: event.livemode,
+    data: { object: { id: session.id, object: session.object, metadata: { app: SUPPORT_APP } } },
+  };
+}
 
 export async function enqueueMembershipEvent(event: Stripe.Event) {
   if (event.livemode !== (process.env.MEMBERSHIP_BILLING_MODE === 'live')) throw new Error('Wrong webhook mode');
   const result = await membershipDatabase().query(`INSERT INTO membership_webhook_jobs(stripe_event_id,event_type,payload)
-    VALUES ($1,$2,$3) ON CONFLICT (stripe_event_id) DO NOTHING`, [event.id,event.type,JSON.stringify(event)]);
+    VALUES ($1,$2,$3) ON CONFLICT (stripe_event_id) DO NOTHING`, [event.id,event.type,JSON.stringify(queuedPaymentEvent(event))]);
   return { queued: true, duplicate: result.rowCount === 0 };
 }
 
