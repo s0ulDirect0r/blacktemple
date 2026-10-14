@@ -24,7 +24,8 @@
     "membership:fixtures": "tsx scripts/membership-ui-fixtures.ts",
     "test:a11y": "playwright test",
     "test:temple:integration": "tsx --test tests/integration/temple*.integration.ts",
-    "test:temple:browser": "playwright test --config playwright.temple.config.ts"
+    "test:temple:browser": "playwright test --config playwright.temple.config.ts",
+    "test:support:browser": "playwright test --config playwright.support.config.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
@@ -54,6 +55,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@electric-sql/pglite": "0.5.10",
     "@eslint/eslintrc": "^3",
     "@playwright/test": "1.64.0",
     "@types/node": "^20.17.22",

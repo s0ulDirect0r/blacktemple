@@ -19,6 +19,7 @@ const navLinks: NavEntry[] = [
   { kind: 'zone', id: 'about', label: 'About' },
   { kind: 'route', id: 'membership', label: 'Members', href: '/membership' },
   { kind: 'route', id: 'calls', label: 'Calls', href: '/calls' },
+  { kind: 'route', id: 'support', label: 'Support', href: '/support' },
 ];
 
 // Standalone pages that sit under a zone in the site's hierarchy: the bar

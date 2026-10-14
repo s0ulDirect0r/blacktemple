@@ -17,9 +17,13 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
         <main className="pt-16 sm:pt-24">
           <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl">Privacy</h1>
-          <p className="mt-4 text-sm text-zinc-500">Local membership draft · October 9, 2026</p>
+          <p className="mt-4 text-sm text-zinc-500">Local payment and membership draft · October 14, 2026</p>
 
           <div className="mt-10 max-w-xl space-y-10 leading-relaxed text-zinc-400">
+            <section className="space-y-4">
+              <h2 className="font-pixel text-base text-white">One-time support</h2>
+              <p>Stripe handles optional support payments and collects the payment information you enter in checkout. Card details never reach this site. I keep payment references, amount, currency and date for bookkeeping. Signed payment events are also held in the payment processing queue and can include checkout details such as your email. Support doesn&apos;t create an account, membership or mailing list subscription.</p>
+            </section>
             <section className="space-y-4">
               <p>
                 This site doesn&apos;t use analytics, ads or tracking cookies. It&apos;s hosted on Vercel, which, like any

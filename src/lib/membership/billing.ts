@@ -7,6 +7,7 @@ import { MemberError } from './errors';
 import { lock, transaction } from './database';
 import { currentMembership, type Attempt, type Membership } from './store';
 import { membershipPrice, membershipStripe, stripeId } from './stripe';
+import { handleSupportEvent } from '@/lib/support/payments';
 
 const APP = 'blacktemple_membership';
 const billingLock = 'blacktemple-membership-billing';
@@ -202,6 +203,7 @@ async function reserveCompletedSetup(sessionId: string) {
 /** Signed event IDs are deduplicated; each change reads canonical Stripe state. */
 export async function handleMembershipEvent(event: Stripe.Event) {
   if (event.livemode !== (process.env.MEMBERSHIP_BILLING_MODE === 'live')) throw new Error('Wrong webhook mode');
+  if (await handleSupportEvent(event)) return;
   if (event.type === 'checkout.session.completed') await reserveCompletedSetup(event.data.object.id);
   return transaction(async client => {
     await lock(client, billingLock);
