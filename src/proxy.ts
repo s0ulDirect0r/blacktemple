@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
     response.headers.set('X-Robots-Tag', 'noindex, nofollow');
     return response;
   }
-  if (path === '/members' || path.startsWith('/members/') || path === '/membership/checkout' || path === '/membership/return') {
+  if (path === '/members' || path.startsWith('/members/') || path === '/membership/checkout' || path === '/membership/return' || path === '/membership/welcome') {
     // This is only an optimistic redirect. Every page/API verifies the database session.
     if (!getSessionCookie(request, { cookiePrefix: 'blacktemple_member' })) {
       const login = new URL('/login', request.url);
@@ -42,5 +42,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/login/:path*', '/calls', '/api/calls/slots', '/api/calls/checkout', '/members/:path*', '/membership/checkout', '/membership/return'],
+  matcher: ['/login/:path*', '/calls', '/api/calls/slots', '/api/calls/checkout', '/members/:path*', '/membership/checkout', '/membership/return', '/membership/welcome'],
 };

@@ -4,6 +4,7 @@ import * as temple from '@/lib/temple/store';
 import { exportResponse } from '@/lib/temple/export';
 import { MAX_IMAGE_BYTES, uuid } from '@/lib/temple/validation';
 import { boundedBytes } from '@/lib/temple/request';
+import { MAX_AVATAR_BYTES } from '@/lib/temple/arrival';
 
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
@@ -12,10 +13,11 @@ type Context={params:Promise<{path:string[]}>};
 function privateImage(m:{bytes:Buffer;mime:string}) {
   return new Response(new Uint8Array(m.bytes),{headers:{'Content-Type':m.mime,'Content-Length':String(m.bytes.length),'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Security-Policy':"default-src 'none'; sandbox",'Referrer-Policy':'no-referrer'}});
 }
-export async function handle(request:Request,context:Context) {
+async function handle(request:Request,context:Context) {
   try {
     const method=request.method,mutating=!['GET','HEAD'].includes(method),{path}=await context.params;
-    const uploading=method==='POST'&&path.length===1&&path[0]==='media';
+    const arriving=method==='POST'&&path.length===1&&path[0]==='arrival';
+    const uploading=method==='POST'&&path.length===1&&(path[0]==='media'||arriving);
     // Multipart uploads get the same exact-origin protection as JSON writes.
     if(uploading) {
       const origin=process.env.BETTER_AUTH_URL;
@@ -28,6 +30,13 @@ export async function handle(request:Request,context:Context) {
     const body=mutating&&!uploading?await jsonObject(new Request(request.url,{method,headers:request.headers,body:new Uint8Array(await boundedBytes(request,64*1024))})):{};
     const [space,id,action]=path;
     if(path.length>3) throw new MemberError(404,'Temple route not found.');
+    if(arriving) {
+      await temple.communityAccess(userId);
+      const bounded=new Request(request.url,{method:'POST',headers:{'content-type':request.headers.get('content-type')!},body:new Uint8Array(await boundedBytes(request,MAX_AVATAR_BYTES+65536))});
+      const data=await bounded.formData(),file=data.get('file');
+      if(file && (!(file instanceof File)||file.size>MAX_AVATAR_BYTES))throw new MemberError(413,'Choose a profile picture under 3 MiB.');
+      return privateJson({profile:await temple.arrive(userId,{name:data.get('name'),alias:data.get('alias')},file instanceof File?{id:uuid(data.get('mediaId')),bytes:Buffer.from(await file.arrayBuffer()),name:file.name,alt:typeof data.get('alt')==='string'?String(data.get('alt')):''}:undefined)},201);
+    }
     if(space==='identity'&&path.length===1) {
       if(method==='GET') return privateJson({profile:await temple.ownProfile(userId),media:await temple.ownMedia(userId)});
       if(method==='PUT') return privateJson({profile:await temple.saveProfile(userId,body)});

@@ -5,7 +5,7 @@ import { profileInput,postInput,webLink,uuid,pageCursor,filename,MAX_IMAGE_BYTES
 import { inspectImage } from '../src/lib/temple/media';
 import { crc32,zip } from '../src/lib/temple/zip';
 import { createHash } from 'node:crypto';
-import { handle } from '../src/app/api/temple/[...path]/route';
+import { POST as handle } from '../src/app/api/temple/[...path]/route';
 import { boundedBytes } from '../src/lib/temple/request';
 import { MemberError } from '../src/lib/membership/errors';
 
@@ -50,5 +50,7 @@ test('Temple API denies unauthenticated reads, exports and uploads without touch
     }
     const response=await handle(new Request('http://localhost:3003/api/temple/feed',{method:'POST',headers:{origin:'https://evil.test','content-type':'application/json'},body:'{}'}),{params:Promise.resolve({path:['feed']})});assert.equal(response.status,403);
     const upload=await handle(new Request('http://localhost:3003/api/temple/media',{method:'POST',headers:{origin:'https://evil.test','content-type':'multipart/form-data; boundary=x'},body:'bad'}),{params:Promise.resolve({path:['media']})});assert.equal(upload.status,403);
+    const arrival=await handle(new Request('http://localhost:3003/api/temple/arrival',{method:'POST',headers:{origin:'https://evil.test','content-type':'multipart/form-data; boundary=x'},body:'bad'}),{params:Promise.resolve({path:['arrival']})});assert.equal(arrival.status,403);
+    const unauthenticatedArrival=await handle(new Request('http://localhost:3003/api/temple/arrival',{method:'POST',headers:{origin:'http://localhost:3003','content-type':'multipart/form-data; boundary=x'},body:'bad'}),{params:Promise.resolve({path:['arrival']})});assert.equal(unauthenticatedArrival.status,401);
   }finally{process.env=previous;}
 });

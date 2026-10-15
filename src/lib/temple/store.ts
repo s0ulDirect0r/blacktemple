@@ -6,6 +6,7 @@ import { currentMembership } from '@/lib/membership/store';
 import { MemberError } from '@/lib/membership/errors';
 import { inspectImage } from './media';
 import { postInput, profileInput, revision, text, uuid, REACTIONS, pageCursor } from './validation';
+import { MAX_AVATAR_BYTES } from './arrival';
 
 export interface Profile { id: string; name: string; alias: string; persona: string; avatar_id: string | null; version: number; created_at: Date; updated_at: Date }
 export async function ownProfile(userId: string, client: Pick<PoolClient,'query'> = membershipDatabase()) { return (await client.query<Profile>('SELECT id,name,alias,persona,avatar_id,version,created_at,updated_at FROM temple_profiles WHERE user_id=$1', [userId])).rows[0] ?? null; }
@@ -39,6 +40,40 @@ export async function saveProfile(userId: string, body: Record<string, unknown>)
   }); } catch(error) { if ((error as {code?:string}).code==='23505') throw new MemberError(409,'That alias is already in use. Choose another.'); throw error; }
 }
 const authorSQL = `json_build_object('id',a.id,'name',a.name,'alias',a.alias,'avatarId',a.avatar_id) AS author`;
+/** Create the identity and optional portrait together; a failed upload leaves neither behind. */
+export async function arrive(userId: string, body: Record<string, unknown>, picture?: { id: string; bytes: Buffer; name: string; alt: string }) {
+  await communityAccess(userId);
+  const input = profileInput({ name: body.name, alias: body.alias });
+  if (picture && picture.bytes.length > MAX_AVATAR_BYTES) throw new MemberError(413, 'Choose a profile picture under 3 MiB.');
+  const image = picture ? await inspectImage(picture.bytes, picture.name, picture.alt || 'Chosen Temple portrait') : null;
+  const mediaId = picture ? uuid(picture.id) : null;
+  try { return await transaction(async client => {
+    // Billing and author locks keep entitlement checks and identity creation in one transaction.
+    await lock(client, 'blacktemple-membership-billing');
+    await lock(client, 'temple-author:' + userId);
+    if (!hasAccess(await currentMembership(userId, client))) throw new MemberError(403, 'Your paid membership must be active before entering the Temple.');
+    await limit(client, userId);
+    const old = await ownProfile(userId, client);
+    if (old) {
+      // A response lost after commit can safely retry the same name and media identifier.
+      if (old.name === input.name && old.alias === input.alias && old.avatar_id === mediaId) {
+        if (image && (await client.query('SELECT sha256 FROM temple_media WHERE id=$1 AND author_id=$2', [mediaId, old.id])).rows[0]?.sha256 !== image.sha256) throw new MemberError(409, 'Choose a new picture before retrying.');
+        return old;
+      }
+      throw new MemberError(409, 'You already have a Temple identity. Open Identity & export to change it.');
+    }
+    const id = randomUUID();
+    await client.query('INSERT INTO temple_profiles(id,user_id,name,alias) VALUES($1,$2,$3,$4)', [id, userId, input.name, input.alias]);
+    if (picture && image) {
+      await client.query('INSERT INTO temple_media(id,author_id,filename,mime,alt,bytes,sha256,width,height) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)', [mediaId,id,image.filename,image.mime,image.alt,picture.bytes,image.sha256,image.width,image.height]);
+      await client.query('UPDATE temple_profiles SET avatar_id=$2 WHERE id=$1', [id, mediaId]);
+    }
+    return (await ownProfile(userId, client))!;
+  }); } catch (error) {
+    if ((error as {code?: string}).code === '23505') throw new MemberError(409, 'That alias is already in use. Choose another.');
+    throw error;
+  }
+}
 export async function feed(userId: string, cursor: string | null = null, single?: string) {
   await communityAccess(userId);
   const p = await ownProfile(userId), page = pageCursor(cursor);
