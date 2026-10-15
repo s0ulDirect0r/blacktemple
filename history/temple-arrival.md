@@ -1,14 +1,14 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the compact composer: `7b727ef3617cea0bf1e19df242265b1f23dbdec5`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with direct identity-to-Temple entry: `caffa39a32323c745c05afce3f737c9d99f804ba`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY compact composer Preview deployment: `dpl_A9HdqdKwVttTe6ehBi2QpGnJn3nc`.
-- Deployment URL: https://blacktemple-membership-test-hd0913v5v-anansis-projects.vercel.app
-- Only the sandbox alias is updated; its previous target was `dpl_DsYX3Jjh4Ztp1da9oaH5k6B7fHnJ`. Other existing aliases, environment values/scopes, and security settings are preserved.
+- READY direct-arrival Preview deployment: `dpl_AZnxSACM3afVcq42U5aUMC183CjP`.
+- Deployment URL: https://blacktemple-membership-test-38dtbjc95-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_A9HdqdKwVttTe6ehBi2QpGnJn3nc`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
@@ -19,7 +19,7 @@ The welcome includes a clearly labeled video placeholder and written message. A 
 
 `POST /api/temple/arrival` checks the exact origin, native authentication, paid entitlement, request bounds, alias constraints and decoded image bytes. Identity, cropped image and avatar attachment commit in one transaction. The billing and author locks protect the paid check and concurrent setup. A retry of the same successfully committed name/alias/media identifier returns the same profile. Failed images and alias conflicts leave no partial identity or image.
 
-After a short doorway animation, the member enters the shared feed with their chosen name and portrait. Reduced-motion users enter immediately. Quiet entry is available without creating a profile. Existing identities skip the creation ceremony; Identity & export remains the editing interface. Account/billing identity is unchanged.
+After successful setup, the form stays busy until the populated shared feed is ready. A fresh server navigation includes the saved identity without showing an intermediate success view or repeated arrival welcome. Quiet entry is available without creating a profile. Existing identities skip the creation ceremony; Identity & export remains the editing interface. Account/billing identity is unchanged.
 
 ## Verification
 
@@ -63,3 +63,15 @@ The existing transition is unchanged for review: after successful identity setup
 Screenshot gallery: `/Users/matthewhuff/.codex/visualizations/2026/10/15/01a140f1-1591-74e1-adf5-12c221db988d/temple-submission-review.html`. Original captures remain under its adjacent `temple-submission/` directory; this gallery also includes desktop/phone composer images.
 
 The compact composer Preview reached READY and the stable sandbox alias was reassigned to it. Hosted access-boundary checks passed before and after; membership/profile counts, environment and security hashes and all other aliases stayed unchanged. Temporary local services were stopped after verification.
+
+## Direct identity-to-Temple entry
+
+Successful identity submission now goes directly to `/members/feed`. The 650 ms identity-ready screen, its animation and the arrival-only welcome banner are removed, including for old `?arrival=1` links. While navigation is pending the existing form stays disabled and its button says Opening the shared Temple. A fresh server navigation avoids previously cached member identity/layout data; quiet-entry prefetch is disabled.
+
+The root feed loads its authenticated, paid-access-checked first page on the server and passes a JSON-safe private snapshot into Feed. The client starts with the populated room instead of an empty loading view. Existing explicit refresh, pagination, single-contribution pages and retry/access-error states remain usable. Server errors show a generic retry message unless they are expected MemberErrors. No shared cache, schema, billing or authentication configuration changes were introduced.
+
+TypeScript, changed-file ESLint and diff whitespace checks passed. Browser verification covered direct entry with client feed requests blocked, a DOM observer detecting either removed welcome or the feed loading view, persisted/cropped avatar pixels, alias conflict and lost-save retry, optional pictures, quiet entry followed by identity creation with the correct new member name, unpaid denial, reduced-motion/slow payment confirmation, the complete posting/moderation/export journey and narrow-phone keyboard posting. The community fixture now clears synthetic login throttles only after checking its explicit database is the matching loopback preview database.
+
+The screenshot gallery now distinguishes the previous transition from the new direct arrival and links `temple-submission/identity-direct-to-temple.png`. Only local synthetic accounts were used for authenticated verification.
+
+The direct-arrival Preview reached READY and the stable sandbox alias was reassigned. Hosted welcome/feed anonymous redirects (307), anonymous arrival (401), and foreign-origin arrival (403) passed before/after. The account still has one membership and one profile; environment/security hashes and all other aliases stayed unchanged. No hosted identity, membership, billing or provider records were modified. Temporary local preview/database services were stopped after verification.
