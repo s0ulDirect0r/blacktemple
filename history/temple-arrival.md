@@ -1,23 +1,23 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the coalescing portal: `852148d95bd80b600728e50dfe5bdf2edf45f826`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with avatar cropping: `a05c6a43af56a2fc0af83e43e0108cb344a40aaf`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY portal Preview deployment: `dpl_D7tsUtg8SJMYbYirfmfPYeTBbTpE`.
-- Deployment URL: https://blacktemple-membership-test-pq96j9vc6-anansis-projects.vercel.app
-- Only the sandbox alias is updated; its previous target was `dpl_2FCdR6JXh3iC1e9ewVFcnR4zT4KK`. Other existing aliases, environment values/scopes, and security settings are preserved.
+- READY avatar Preview deployment: `dpl_DsYX3Jjh4Ztp1da9oaH5k6B7fHnJ`.
+- Deployment URL: https://blacktemple-membership-test-459zn99dv-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_D7tsUtg8SJMYbYirfmfPYeTBbTpE`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
 
 The checkout return polls the authenticated membership record. Only confirmed paid access opens `/membership/welcome`. It preserves the return URL across sign-in and offers a manual confirmation retry after a slow response.
 
-The welcome includes a clearly labeled video placeholder and written message. A new member chooses a Temple name, edits the suggested unique alias if desired, and optionally selects a still JPEG/PNG/WebP portrait up to 3 MiB. The portrait has a local preview and an optional description. No video or third-party player is loaded.
+The welcome includes a clearly labeled video placeholder and written message. A new member chooses a Temple name, edits the suggested unique alias if desired, and optionally selects a JPEG/PNG/WebP portrait up to 20 MiB and 24 megapixels. A local editor frames the picture with drag, zoom and position sliders. A circular preview shows its avatar appearance; only the applied 512 × 512 PNG crop is uploaded, within the server’s 3 MiB arrival limit. The portrait has an optional description. No video or third-party player is loaded.
 
-`POST /api/temple/arrival` checks the exact origin, native authentication, paid entitlement, request bounds, alias constraints and decoded image bytes. Identity, original image and avatar attachment commit in one transaction. The billing and author locks protect the paid check and concurrent setup. A retry of the same successfully committed name/alias/media identifier returns the same profile. Failed images and alias conflicts leave no partial identity or image.
+`POST /api/temple/arrival` checks the exact origin, native authentication, paid entitlement, request bounds, alias constraints and decoded image bytes. Identity, cropped image and avatar attachment commit in one transaction. The billing and author locks protect the paid check and concurrent setup. A retry of the same successfully committed name/alias/media identifier returns the same profile. Failed images and alias conflicts leave no partial identity or image.
 
 After a short doorway animation, the member enters the shared feed with their chosen name and portrait. Reduced-motion users enter immediately. Quiet entry is available without creating a profile. Existing identities skip the creation ceremony; Identity & export remains the editing interface. Account/billing identity is unchanged.
 
@@ -41,3 +41,13 @@ Only verified paid access opens the portal and navigates to the existing identit
 Three local end-to-end journeys passed: moving portal and confirmed crossing through avatar creation; static reduced-motion portal and actual delayed-confirmation retry; optional portrait, quiet entry/resume and unpaid denial. TypeScript, changed-file ESLint, mobile overflow and accessibility checks passed. The local test fixture now verifies its actual database matches the explicit loopback test database before resetting leftover synthetic login throttles. No hosted memberships or billing state are changed for this visual update.
 
 Final hosted read-back verified the new sandbox alias, unchanged other aliases, unchanged environment and security hashes, unchanged account record counts, and the same anonymous/foreign-origin access denials. No remote schema or provider operation was performed. Temporary local preview and PostgreSQL services were stopped after verification.
+
+## Avatar framing
+
+The shared AvatarPicker works during paid arrival and in Identity & export. It supports mouse/touch dragging, 1–4× zoom, independent horizontal/vertical controls, arrow-key positioning with larger Shift steps, reset, cancel and an explicit Use this crop action. Parent submission is blocked while an unapplied crop is open. Applying preserves the local source for readjustment; cancel restores the committed framing. Only the cropped copy leaves the browser. Source signatures, decode success, byte and pixel limits are checked before editing, while existing server image validation remains in place.
+
+Two crop invariant/header unit tests, TypeScript and changed-file ESLint passed. Local authenticated browser checks covered source selection, keyboard and pointer framing, mobile accessibility/overflow, cancel/recrop, arrival retry/atomic rollback, exact saved 512 × 512 dimensions and selected pixel colors, existing profile avatar replacement without changing profile identity, optional portraits, quiet entry and paid-access boundaries. These use disposable loopback data, with no Stripe operation.
+
+The existing community browser journey also passed, including offering image uploads, moderation, profile editing and portable exports. Generic offering image uploads continue to preserve their original bytes.
+
+Hosted checks on the READY crop deployment and reassigned stable sandbox alias passed: welcome redirects correctly, anonymous arrival is 401 and foreign-origin arrival is 403. The account still has one membership and one profile; configuration/security hashes and every other alias stayed unchanged. No hosted account or provider mutations were performed. Temporary local services were stopped after verification.
