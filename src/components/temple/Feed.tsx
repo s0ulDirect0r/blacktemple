@@ -2,7 +2,7 @@
 import { useCallback,useEffect,useRef,useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Composer from './Composer';
+import Composer, { MachineMark } from './Composer';
 import { api,type Contribution,type Identity,type Reply,type Author } from './api';
 import styles from '@/components/membership/membership.module.css';
 import ui from './temple.module.css';
@@ -47,19 +47,17 @@ function Post({post,identity,refresh}:{post:Contribution;identity:Identity|null;
 }
 export type FeedData={posts:Contribution[];cursor:string|null;profile:Identity|null;offeringsToday:number;isModerator:boolean};
 export default function Feed({postId,initialData=null,initialError=''}:{postId?:string;initialData?:FeedData|null;initialError?:string}) {
-  const [data,setData]=useState<FeedData|null>(initialData),[error,setError]=useState(initialError),[composer,setComposer]=useState(false),[loading,setLoading]=useState(false),[notice,setNotice]=useState('');
+  const [data,setData]=useState<FeedData|null>(initialData),[error,setError]=useState(initialError),[composerVersion,setComposerVersion]=useState(0),[loading,setLoading]=useState(false),[notice,setNotice]=useState('');
   const endpoint='feed'+(postId?'/'+postId:'');
   const load=useCallback(async()=>{setLoading(true);try{setData(await api<FeedData>(endpoint));setError('');}catch(e){setData(null);setError((e as Error).message);}finally{setLoading(false);}},[endpoint]);
   useEffect(()=>{let active=true;const request=initialData?Promise.resolve(initialData):initialError?Promise.reject(new Error(initialError)):api<FeedData>(endpoint);request.then(result=>{if(active){setData(result);setError('');}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[endpoint,initialData,initialError]);
   async function more(){if(!data?.cursor||loading)return;setLoading(true);try{const next=await api<FeedData>(endpoint+'?cursor='+encodeURIComponent(data.cursor));setData({...next,posts:[...data.posts,...next.posts.filter(p=>!data.posts.some(old=>old.id===p.id))]});}catch(e){setError((e as Error).message);setData(null);}finally{setLoading(false);}}
-  function openComposer(){setComposer(true);setTimeout(()=>document.getElementById('offering-composer')?.querySelector('textarea')?.focus(),0);}
   return <div className={ui.room}><p className={styles.eyebrow}>One shared room · Members-only</p><h2 className={styles.lead}>{postId?'A contribution to the Temple':'The shared Temple'}</h2><p className={styles.prose}>Poems, fragments, experiments and things still becoming. Your chosen identity travels with your work; your billing details stay outside this room.</p>
     {error&&<div className={ui.notice} role="alert">{error}<div className={styles.actions}><button className={styles.secondary} onClick={load}>Try again</button><Link className={styles.textLink} href="/members/identity">Your identity &amp; export</Link><Link className={styles.textLink} href="/members/membership">My Membership</Link></div></div>}
     {!data&&!error&&<p role="status" className={styles.note}>Opening the shared room…</p>}
-    {data&&<><section className={ui.invitation}><span className={ui.machine} aria-hidden="true" /><p className={styles.eyebrow}>Optional daily invitation</p><h2>Feed the Unknown Machine</h2><p className={styles.prose}>What did you create today? Something unfinished is welcome. Quiet patronage belongs here, too.</p><p className={ui.signal}>{data.offeringsToday?`${data.offeringsToday} offering${data.offeringsToday===1?'':'s'} placed today. Each visible offering adds one light.`:'The Machine is quiet today. There is no need to fill the silence.'} <span className={styles.note}>Resets at midnight UTC. No streaks or quotas.</span></p><div className={styles.actions}>{data.profile?<button className={styles.button} onClick={openComposer}>Bring an offering ↗</button>:<Link className={styles.button} href="/members/identity">Choose your Temple identity ↗</Link>}</div></section>
-      {composer&&data.profile&&<Composer offering onCancel={()=>setComposer(false)} onSaved={async id=>{setComposer(false);setNotice('Your offering is in the shared room.');await load();setTimeout(()=>document.getElementById('post-'+id)?.scrollIntoView({behavior:'instant',block:'start'}),0);}} />}
+    {data&&<>{data.profile?<Composer key={composerVersion} offering inviting offeringsToday={data.offeringsToday} onSaved={async id=>{setComposerVersion(version=>version+1);setNotice('Your offering is in the shared room.');await load();setTimeout(()=>document.getElementById('post-'+id)?.scrollIntoView({behavior:'instant',block:'start'}),0);}} />:<section className={ui.identityInvitation} aria-label="Share an offering"><MachineMark/><div><h3>A little of your world belongs here.</h3><p className={styles.note}>Choose a Temple name to share a thought, image or unfinished fragment.</p><Link className={styles.textLink} href="/members/identity">Choose your Temple identity ↗</Link></div></section>}
       {notice&&<p role="status" className={styles.success}>{notice}</p>}{postId&&<Link className={styles.textLink} href="/members/feed">← Return to the shared feed</Link>}
-      {!data.posts.length&&<section className={styles.empty}><h3>No contributions yet.</h3><p className={styles.prose}>The room is ready. A single fragment can be a beginning. Nothing here is sample activity.</p></section>}
+      {!data.posts.length&&<section className={styles.empty}><h3>The first fragment can be yours.</h3><p className={styles.note}>Offerings will appear here as members share them.</p></section>}
       {data.posts.map(post=><Post key={post.id} post={post} identity={data.profile} refresh={load} />)}{data.cursor&&<button className={styles.secondary} disabled={loading} onClick={more}>{loading?'Opening…':'Earlier contributions'}</button>}
       {data.isModerator&&<p className={styles.note}><Link className={styles.textLink} href="/members/moderation">Moderation room</Link></p>}
     </>}
