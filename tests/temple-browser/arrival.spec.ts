@@ -6,13 +6,17 @@ import sharp from 'sharp';
 import { membershipDatabase } from '../../src/lib/membership/database';
 import { memberAuth } from '../../src/lib/membership/auth';
 
+const database=process.env.MEMBERSHIP_DATABASE_URL;
+if(!database||database!==process.env.TEMPLE_TEST_DATABASE_URL||!['127.0.0.1','localhost','[::1]'].includes(new URL(database).hostname)||process.env.VERCEL_ENV)throw new Error('Arrival browser fixtures require the same explicitly isolated loopback database as the test server.');
 const origin=process.env.TEMPLE_TEST_ORIGIN!,db=membershipDatabase(),suffix=randomUUID().slice(0,8);
 const password='Synthetic-Arrival-Only-2026!';
 test.use({navigationTimeout:60000});
 const users:Record<string,{id:string;email:string;checkout:string}>={};
 test.beforeAll(async()=>{
+  // This disposable local database can retain login throttles from earlier test runs.
+  await db.query('DELETE FROM member_rate_limit');
   const auth=await memberAuth().$context,hash=await auth.password.hash(password);
-  for(const key of ['main','plain','quiet','unpaid']){
+  for(const key of ['main','plain','quiet','unpaid','motion']){
     const email=`arrival-${key}-${suffix}@example.test`;
     const u=await auth.internalAdapter.createUser({name:'PRIVATE TEST BILLING '+key,email,emailVerified:true},{method:'admin'});
     await auth.internalAdapter.linkAccount({userId:u.id,providerId:'credential',accountId:u.id,password:hash});
@@ -31,9 +35,16 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
   try{
     await signIn(context,'main');const page=await context.newPage();
     await page.goto('/membership/return?checkout='+users.main.checkout);
-    await expect(page.getByRole('heading',{name:'Opening your membership…'})).toBeVisible();
+    await expect(page.getByRole('heading',{name:'A doorway is forming.'})).toBeVisible();
+    const canvas=page.locator('canvas');await expect(canvas).toBeVisible();
+    await expect.poll(()=>canvas.evaluate(c=>Array.from((c as HTMLCanvasElement).getContext('2d')!.getImageData(0,0,(c as HTMLCanvasElement).width,(c as HTMLCanvasElement).height).data).some((v,i)=>i%4===3&&v>0))).toBe(true);
+    const first=await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL());
+    await expect.poll(()=>canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).not.toBe(first);
+    await page.setViewportSize({width:390,height:844});await audit(page);
+    await page.screenshot({path:test.info().outputPath('coalescing-portal-phone.png'),fullPage:true});
     expect((await context.request.get('/membership/welcome',{maxRedirects:0})).status()).toBe(307);
     await db.query("UPDATE memberships SET paid_through=NOW()+INTERVAL '1 month' WHERE user_id=$1",[users.main.id]);
+    await expect(page.getByText('First payment confirmed. Opening your Temple identity…')).toBeVisible({timeout:15000});
     await expect(page).toHaveURL(/\/membership\/welcome/,{timeout:20000});
     await expect(page.getByRole('heading',{name:'Who will you become here?'})).toBeVisible();
     await expect(page.getByText('Welcome video coming soon')).toBeVisible();
@@ -73,6 +84,22 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     await page.setViewportSize({width:320,height:844});await audit(page);
     await page.screenshot({path:test.info().outputPath('feed-phone.png'),fullPage:true});
   }finally{await context.close();await anonymous.close();}
+});
+
+test('reduced motion uses a still portal; a slow confirmation can retry without another checkout',async({browser})=>{
+  const context=await browser.newContext({baseURL:origin,reducedMotion:'reduce'});
+  try{
+    await signIn(context,'motion');const page=await context.newPage();await page.goto('/membership/return?checkout='+users.motion.checkout);
+    await expect(page.getByRole('heading',{name:'A doorway is forming.'})).toBeVisible();
+    const canvas=page.locator('canvas');await expect.poll(()=>canvas.evaluate(c=>Array.from((c as HTMLCanvasElement).getContext('2d')!.getImageData(0,0,(c as HTMLCanvasElement).width,(c as HTMLCanvasElement).height).data).some((v,i)=>i%4===3&&v>0))).toBe(true);
+    const first=await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL());
+    await expect(page.getByRole('button',{name:'Check confirmation again'})).toBeVisible({timeout:45000});
+    expect(await canvas.evaluate(c=>(c as HTMLCanvasElement).toDataURL())).toBe(first);
+    await db.query("UPDATE memberships SET paid_through=NOW()+INTERVAL '1 month' WHERE user_id=$1",[users.motion.id]);
+    await page.getByRole('button',{name:'Check confirmation again'}).click();
+    await expect(page).toHaveURL(/\/membership\/welcome/,{timeout:20000});
+    await expect(page.getByRole('heading',{name:'Who will you become here?'})).toBeVisible();
+  }finally{await context.close();}
 });
 
 test('picture is optional; quiet entry can resume; unpaid members cannot create an identity',async({browser})=>{
