@@ -1,14 +1,14 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with direct identity-to-Temple entry: `caffa39a32323c745c05afce3f737c9d99f804ba`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the always-open offering invitation: `2b958ea9845d0d00b07312b2a812b8af2d311a3c`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY direct-arrival Preview deployment: `dpl_AZnxSACM3afVcq42U5aUMC183CjP`.
-- Deployment URL: https://blacktemple-membership-test-38dtbjc95-anansis-projects.vercel.app
-- Only the sandbox alias is updated; its previous target was `dpl_A9HdqdKwVttTe6ehBi2QpGnJn3nc`. Other existing aliases, environment values/scopes, and security settings are preserved.
+- READY always-open offering Preview deployment: `dpl_BNXbRZS5wg1oJNgwE3rXnY4xVvmC`.
+- Deployment URL: https://blacktemple-membership-test-66ofqe8up-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_AZnxSACM3afVcq42U5aUMC183CjP`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
@@ -75,3 +75,13 @@ TypeScript, changed-file ESLint and diff whitespace checks passed. Browser verif
 The screenshot gallery now distinguishes the previous transition from the new direct arrival and links `temple-submission/identity-direct-to-temple.png`. Only local synthetic accounts were used for authenticated verification.
 
 The direct-arrival Preview reached READY and the stable sandbox alias was reassigned. Hosted welcome/feed anonymous redirects (307), anonymous arrival (401), and foreign-origin arrival (403) passed before/after. The account still has one membership and one profile; environment/security hashes and all other aliases stayed unchanged. No hosted identity, membership, billing or provider records were modified. Temporary local preview/database services were stopped after verification.
+
+## Always-open offering invitation
+
+The shared feed now places the offering composer directly beneath the room introduction. The separate Machine invitation and Bring an offering button are gone. A smaller glowing double-diamond sits beside Feed the Unknown Machine and A fragment is enough, inside the same subtle violet card as the writing area, attachment toolbar and Post button. The optional Machine checkbox and concise daily count remain. Empty-room copy is shortened. Members without an identity see a compact identity prompt with the same symbol.
+
+The main composer remains open after posting and resets only on confirmed success, using a new component key for the next draft. Failed upload/post retries retain the current draft and stable IDs. Inline contribution editing remains separate and keeps its Cancel action. The form does not steal focus or open the phone keyboard on arrival. No server, billing, schema or entitlement changes.
+
+Always-open composer verification: TypeScript, changed-file ESLint and diff checks passed. Four local browser journeys passed (arrival/avatar retry, optional/quiet/unpaid paths, full community posting/edit/moderation/export, compact mobile/keyboard/attachments); the quiet path was rerun with the explicit identity-prompt assertions and passed. The full community test verifies the composer is visible without a button, returns to an empty disabled-Post state after success, retains upload/post retries, and still edits individual contributions. Phone accessibility/overflow checks passed at 390px and 320px. Desktop and phone screenshots were visually inspected and saved as `temple-submission/always-open-offering-*.png` alongside the gallery.
+
+The always-open invitation Preview reached READY and the stable sandbox alias now points to it. Anonymous welcome/feed redirects, anonymous arrival denial and foreign-origin denial passed before and after. The real account still has one membership and one profile; environment/security hashes and all other aliases stayed unchanged. Local preview/database services were stopped. No hosted account, membership, provider or schema mutations were performed.
