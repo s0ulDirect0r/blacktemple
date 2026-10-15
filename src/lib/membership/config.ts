@@ -69,5 +69,5 @@ export function paidCoverage(termStart: Date, termEnd: Date, periods: { start: D
 export function safeReturnPath(value: unknown): string {
   if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || /[\\\u0000-\u001f]/.test(value)) return '/members';
   const url = new URL(value, 'https://blacktemple.invalid');
-  return url.origin === 'https://blacktemple.invalid' && (url.pathname === '/members' || url.pathname.startsWith('/members/') || url.pathname === '/membership/checkout') ? url.pathname + url.search : '/members';
+  return url.origin === 'https://blacktemple.invalid' && (url.pathname === '/members' || url.pathname.startsWith('/members/') || ['/membership/checkout','/membership/return','/membership/welcome'].includes(url.pathname)) ? url.pathname + url.search : '/members';
 }

@@ -50,6 +50,9 @@ test('invoice ordering and duplicates cannot extend coverage past gaps or the te
 test('login return paths reject external origins, encoded escapes and unrelated routes', () => {
   for (const value of ['https://evil.example','//evil.example','/\\evil.example','/members/../../calls','/api/members/studio','/members\n','/%2f%2fevil.example']) assert.equal(safeReturnPath(value),'/members');
   assert.equal(safeReturnPath('/membership/checkout?tier=companion'),'/membership/checkout?tier=companion');
+  assert.equal(safeReturnPath('/membership/return?checkout=cs_test_example'),'/membership/return?checkout=cs_test_example');
+  assert.equal(safeReturnPath('/membership/welcome'),'/membership/welcome');
+  assert.equal(safeReturnPath('/membership/welcome/../../calls'),'/members');
   assert.equal(safeReturnPath('/members/support'),'/members/support');
 });
 test('malformed, null and array JSON receive a client error', async () => {
