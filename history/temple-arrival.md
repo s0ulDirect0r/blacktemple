@@ -1,14 +1,14 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Application commit: `486db5c34427ee42dd767b5b70616a686b976cac`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the coalescing portal: `852148d95bd80b600728e50dfe5bdf2edf45f826`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY Preview deployment: `dpl_2FCdR6JXh3iC1e9ewVFcnR4zT4KK`.
-- Deployment URL: https://blacktemple-membership-test-czemequwv-anansis-projects.vercel.app
-- Only the sandbox alias moved; its previous target was `dpl_9GH5aAP6z5QYEh2ezkMZ6F6ee4HZ`. Other existing aliases, environment values/scopes, and security settings were read back unchanged.
+- READY portal Preview deployment: `dpl_D7tsUtg8SJMYbYirfmfPYeTBbTpE`.
+- Deployment URL: https://blacktemple-membership-test-pq96j9vc6-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_2FCdR6JXh3iC1e9ewVFcnR4zT4KK`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
@@ -31,3 +31,13 @@ After a short doorway animation, the member enters the shared feed with their ch
 - Hosted fresh Stripe checkout and authenticated avatar creation were not repeated. The complete post-payment story was tested locally with synthetic entitlement; hosted checks verified deployment and access boundaries. No real or test provider charge was created for this work.
 
 The feature branch is separate from `feat/one-time-support`. Nothing was merged to main or released to the public production site.
+
+## Coalescing confirmation portal
+
+Follow-up application commit `852148d95bd80b600728e50dfe5bdf2edf45f826` replaces the plain confirmation panel with inward-spiraling sparks and a fluid, uneven portal membrane. The canvas runs at 30 frames per second, caps its pixel ratio at two, and stops drawing in a hidden tab. Reduced-motion preference produces a still portal.
+
+Only verified paid access opens the portal and navigates to the existing identity invitation. Normal motion uses a 700 ms crossing; reduced motion proceeds immediately. Prefetch starts only after paid access is confirmed, avoiding a cached unpaid redirect. The continuation link remains usable if navigation is interrupted; the temporary crossing layer clears itself. Slow confirmation retains the explicit retry and account links.
+
+Three local end-to-end journeys passed: moving portal and confirmed crossing through avatar creation; static reduced-motion portal and actual delayed-confirmation retry; optional portrait, quiet entry/resume and unpaid denial. TypeScript, changed-file ESLint, mobile overflow and accessibility checks passed. The local test fixture now verifies its actual database matches the explicit loopback test database before resetting leftover synthetic login throttles. No hosted memberships or billing state are changed for this visual update.
+
+Final hosted read-back verified the new sandbox alias, unchanged other aliases, unchanged environment and security hashes, unchanged account record counts, and the same anonymous/foreign-origin access denials. No remote schema or provider operation was performed. Temporary local preview and PostgreSQL services were stopped after verification.
