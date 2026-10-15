@@ -1,14 +1,14 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the always-open offering invitation: `2b958ea9845d0d00b07312b2a812b8af2d311a3c`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with automatic offering counting: `f14746b418dd9e10445648618c8afe5038087daa`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY always-open offering Preview deployment: `dpl_BNXbRZS5wg1oJNgwE3rXnY4xVvmC`.
-- Deployment URL: https://blacktemple-membership-test-66ofqe8up-anansis-projects.vercel.app
-- Only the sandbox alias is updated; its previous target was `dpl_AZnxSACM3afVcq42U5aUMC183CjP`. Other existing aliases, environment values/scopes, and security settings are preserved.
+- READY automatic-offering Preview deployment: `dpl_52BS3fh6qhf471bYwU9sxMVQhtAL`.
+- Deployment URL: https://blacktemple-membership-test-72la80i8q-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_BNXbRZS5wg1oJNgwE3rXnY4xVvmC`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
@@ -85,3 +85,11 @@ The main composer remains open after posting and resets only on confirmed succes
 Always-open composer verification: TypeScript, changed-file ESLint and diff checks passed. Four local browser journeys passed (arrival/avatar retry, optional/quiet/unpaid paths, full community posting/edit/moderation/export, compact mobile/keyboard/attachments); the quiet path was rerun with the explicit identity-prompt assertions and passed. The full community test verifies the composer is visible without a button, returns to an empty disabled-Post state after success, retains upload/post retries, and still edits individual contributions. Phone accessibility/overflow checks passed at 390px and 320px. Desktop and phone screenshots were visually inspected and saved as `temple-submission/always-open-offering-*.png` alongside the gallery.
 
 The always-open invitation Preview reached READY and the stable sandbox alias now points to it. Anonymous welcome/feed redirects, anonymous arrival denial and foreign-origin denial passed before and after. The real account still has one membership and one profile; environment/security hashes and all other aliases stayed unchanged. Local preview/database services were stopped. No hosted account, membership, provider or schema mutations were performed.
+
+## Automatic offering counting
+
+The composer checkbox and its local state/prop/payload flag are removed. Every post write is canonicalized as an offering by server validation, including requests omitting the legacy flag or passing false; malformed non-boolean legacy flags remain rejected. Existing stored posts are not bulk modified. The small daily count remains beneath the composer. No migration or hosted data write was needed.
+
+All seven Temple unit tests, TypeScript and changed-file ESLint passed. The focused local desktop/mobile browser journey passed, verifying there is no checkbox, posting without the flag stores offering=true, and the visible daily count increases by exactly one. It also covers optional attachments, keyboard posting and narrow-screen accessibility. The first cold-development run timed out opening Link; an unchanged warm rerun passed. Updated composer screenshots replace the gallery's current offering screenshots.
+
+Automatic-offering Preview reached READY and the stable sandbox alias was reassigned. Hosted welcome/feed guards, unauthenticated arrival and foreign-origin denial passed before/after. Account membership/profile counts, all other aliases and environment/security hashes remained unchanged. Temporary local services were stopped; no remote account/provider/schema records were modified.
