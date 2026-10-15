@@ -1,14 +1,14 @@
 # Paid-member Temple arrival
 
-Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with avatar cropping: `a05c6a43af56a2fc0af83e43e0108cb344a40aaf`.
+Implemented October 15, 2026, on `codex/temple-arrival`, based on community commit `2bac3c9`. Initial arrival commit: `486db5c34427ee42dd767b5b70616a686b976cac`. Current application commit with the compact composer: `7b727ef3617cea0bf1e19df242265b1f23dbdec5`.
 
 ## Sandbox
 
 - Review: https://blacktemple-membership-sandbox.vercel.app/membership/welcome
 - Vercel project: `blacktemple-membership-test` (`prj_clGFGAA3ElKL6sH4MLdiYw4jjSIK`).
-- READY avatar Preview deployment: `dpl_DsYX3Jjh4Ztp1da9oaH5k6B7fHnJ`.
-- Deployment URL: https://blacktemple-membership-test-459zn99dv-anansis-projects.vercel.app
-- Only the sandbox alias is updated; its previous target was `dpl_D7tsUtg8SJMYbYirfmfPYeTBbTpE`. Other existing aliases, environment values/scopes, and security settings are preserved.
+- READY compact composer Preview deployment: `dpl_A9HdqdKwVttTe6ehBi2QpGnJn3nc`.
+- Deployment URL: https://blacktemple-membership-test-hd0913v5v-anansis-projects.vercel.app
+- Only the sandbox alias is updated; its previous target was `dpl_DsYX3Jjh4Ztp1da9oaH5k6B7fHnJ`. Other existing aliases, environment values/scopes, and security settings are preserved.
 - Database remains the separate `blacktemple-membership-sandbox` Neon store (`store_0nh6RmW1yJz6jBD2`, external project `icy-paper-04060838`). Migrations 001–008 remain in place; no migration was needed or run remotely.
 
 ## Behavior
@@ -51,3 +51,15 @@ Two crop invariant/header unit tests, TypeScript and changed-file ESLint passed.
 The existing community browser journey also passed, including offering image uploads, moderation, profile editing and portable exports. Generic offering image uploads continue to preserve their original bytes.
 
 Hosted checks on the READY crop deployment and reassigned stable sandbox alias passed: welcome redirects correctly, anonymous arrival is 401 and foreign-origin arrival is 403. The account still has one membership and one profile; configuration/security hashes and every other alias stayed unchanged. No hosted account or provider mutations were performed. Temporary local services were stopped after verification.
+
+## Compact posting and identity transition captures
+
+The offering composer now starts as a compact expanding text area with Image, Link and Preview controls and one Post action. Links appear on demand. Up to four images can be selected together; their previews, descriptions and removal controls appear only after selection. Post uploads chosen originals and then saves the contribution. Stable image/post IDs and retained successful upload results support retries without duplicates. The Machine checkbox retains the original optional participation behavior. Ctrl/Cmd+Enter posts, and empty submissions are disabled. No schema, server permissions or billing changes.
+
+TypeScript and changed-file ESLint passed. The complete local community journey passed, covering interrupted upload and lost post confirmation retries, moderation, editing, avatars, original-media byte preservation and own-work exports. A targeted compact composer journey passed at 390px/320px with accessibility/overflow audits, optional link removal, multiple image selection/removal and keyboard posting. The authenticated arrival journey also passed and captured actual transition stages.
+
+The existing transition is unchanged for review: after successful identity setup, a separate identity-ready panel appears for 650 ms; navigation then replaces the welcome layout with the member layout, a second personalized welcome, and Feed's client loading state before the final invitation/contributions. The screenshot test pauses the timer and gates the feed response to expose these otherwise short views. These are synthetic local accounts, not screenshots of Matthew's private account. The local preview badge and local developer UI do not represent sandbox production content.
+
+Screenshot gallery: `/Users/matthewhuff/.codex/visualizations/2026/10/15/01a140f1-1591-74e1-adf5-12c221db988d/temple-submission-review.html`. Original captures remain under its adjacent `temple-submission/` directory; this gallery also includes desktop/phone composer images.
+
+The compact composer Preview reached READY and the stable sandbox alias was reassigned to it. Hosted access-boundary checks passed before and after; membership/profile counts, environment and security hashes and all other aliases stayed unchanged. Temporary local services were stopped after verification.
