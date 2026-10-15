@@ -36,7 +36,7 @@ export function postInput(body: Record<string, unknown>) {
   if (mediaIds.length > 4 || new Set(mediaIds).size !== mediaIds.length) invalid('Choose up to four different images.');
   if (!content && !link && !mediaIds.length) invalid('Bring a fragment, image or link.');
   if (body.offering !== undefined && typeof body.offering !== 'boolean') invalid('Offering must be true or false.');
-  return { body: content, link, mediaIds, offering: body.offering === true };
+  return { body: content, link, mediaIds, offering: true };
 }
 export function pageCursor(value: string | null) {
   if (!value) return null;

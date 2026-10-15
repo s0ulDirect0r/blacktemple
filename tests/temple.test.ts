@@ -16,6 +16,7 @@ test('chosen identity is validated separately from private account fields',()=>{
 test('offerings preserve poem line breaks and reject unsafe links and foreign request shapes',()=>{
   const poem='A small light\n\ninside the machine.';
   assert.equal(postInput({body:poem}).body,poem);
+  for(const offering of [undefined,false,true])assert.equal(postInput({body:poem,offering}).offering,true);
   for(const link of ['javascript:alert(1)','data:text/html,x','file:///secret','https://user:password@example.test','//example.test'])assert.throws(()=>webLink(link));
   assert.equal(webLink('https://example.test/work'),'https://example.test/work');
   assert.throws(()=>postInput({body:'',mediaIds:[]}));assert.throws(()=>postInput({body:'hello',mediaIds:'not a list'}));assert.throws(()=>postInput({body:'hello',offering:'true'}));

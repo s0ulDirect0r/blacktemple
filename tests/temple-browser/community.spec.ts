@@ -69,7 +69,7 @@ test('compact composer keeps attachments optional and posts with the keyboard',a
   try{
     await mkdir(artifactDir,{recursive:true});await signIn(context,'weaver');const page=await context.newPage();await page.goto('/members/feed');await expect(page.getByLabel('Your offering',{exact:true})).toBeVisible();
     const composer=page.getByRole('form',{name:'Create a post'}),post=composer.getByRole('button',{name:'Post ↗',exact:true});
-    await expect(post).toBeDisabled();await expect(composer.getByRole('button',{name:'Upload image',exact:true})).toHaveCount(0);await expect(composer.getByLabel('Link (optional)')).toHaveCount(0);
+    await expect(post).toBeDisabled();await expect(composer.getByRole('checkbox')).toHaveCount(0);const before=(await (await context.request.get('/api/temple/feed')).json()).offeringsToday;await expect(composer.getByRole('button',{name:'Upload image',exact:true})).toHaveCount(0);await expect(composer.getByLabel('Link (optional)')).toHaveCount(0);
     await page.addStyleTag({content:'nextjs-portal{visibility:hidden!important}'});
     await composer.screenshot({path:artifactDir+'/compact-composer-desktop.png'});
     await page.setViewportSize({width:390,height:844});await audit(page);expect((await composer.boundingBox())!.height).toBeLessThan(420);await composer.screenshot({path:artifactDir+'/compact-composer-phone.png'});
@@ -81,6 +81,6 @@ test('compact composer keeps attachments optional and posts with the keyboard',a
     await page.setViewportSize({width:390,height:844});await composer.screenshot({path:artifactDir+'/compact-composer-attachment-phone.png'});
     await composer.getByRole('button',{name:'Remove image 1',exact:true}).click();
     const body='Synthetic compact keyboard post '+randomUUID();await composer.getByLabel('Your offering',{exact:true}).fill(body);await composer.getByLabel('Your offering',{exact:true}).press('Control+Enter');await expect(page.getByText('Your offering is in the shared room.')).toBeVisible();
-    const feed=await (await context.request.get('/api/temple/feed')).json();postId=feed.posts.find((item:{body:string})=>item.body===body)?.id;expect(postId).toBeTruthy();
+    const feed=await (await context.request.get('/api/temple/feed')).json();const saved=feed.posts.find((item:{body:string})=>item.body===body);postId=saved?.id;expect(postId).toBeTruthy();expect(saved.offering).toBe(true);expect(feed.offeringsToday).toBe(before+1);
   }finally{if(postId)await context.request.delete('/api/temple/feed/'+postId,{headers:{origin},data:{}});await context.close();}
 });
