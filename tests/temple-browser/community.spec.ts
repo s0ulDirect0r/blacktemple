@@ -27,12 +27,14 @@ test('membership offering and private creative journey work on desktop and phone
     const page=await a.newPage();await page.goto('/members/feed');await expect(page.getByRole('heading',{name:'The shared Temple',exact:true})).toBeVisible();await expect(page.getByText('Local synthetic preview · test accounts and contributions')).toBeVisible();await expect(page.getByText(/PRIVATE SYNTHETIC BILLING/)).toHaveCount(0);await audit(page);
     await page.getByRole('button',{name:'Bring an offering'}).click();await expect(page.getByLabel('Your offering')).toBeFocused();
     const body='Synthetic browser poem '+randomUUID()+'\n\nThis line survives refresh.',otherText='Another member’s private reply '+randomUUID();
-    await page.getByLabel('Your offering').fill(body);await page.getByLabel('Link (optional)').fill('https://example.test/synthetic-art');
+    const composer=page.getByRole('form',{name:'Create a post'});await expect(composer.getByRole('button',{name:'Post ↗',exact:true})).toBeDisabled();await expect(composer.getByLabel('Link (optional)')).toHaveCount(0);expect((await composer.boundingBox())!.height).toBeLessThan(360);
+    await composer.screenshot({path:artifactDir+'/compact-composer-desktop.png'});await page.setViewportSize({width:390,height:844});await audit(page);await composer.screenshot({path:artifactDir+'/compact-composer-phone.png'});await page.setViewportSize({width:1280,height:900});
+    await page.getByLabel('Your offering').fill(body);await composer.getByRole('button',{name:'Link',exact:true}).click();await page.getByLabel('Link (optional)').fill('https://example.test/synthetic-art');
     const bytes=await sharp({create:{width:640,height:420,channels:3,background:'#231638'}}).png().toBuffer();const imagePath=artifactDir+'/synthetic-original.png';await writeFile(imagePath,bytes);
     let firstUpload=true;await page.route('**/api/temple/media',async route=>{if(firstUpload&&route.request().method()==='POST'){firstUpload=false;await route.fulfill({status:503,json:{error:'Synthetic upload interruption. Retry the same image.'}});}else await route.continue();});
-    await page.getByLabel('Image file',{exact:true}).setInputFiles(imagePath);await page.getByLabel('Image description',{exact:true}).fill('Synthetic violet field: unfinished light.');await page.getByRole('button',{name:'Upload image',exact:true}).click();await expect(page.getByText('Synthetic upload interruption. Retry the same image.')).toBeVisible();await page.getByRole('button',{name:'Upload image',exact:true}).click();await expect(page.locator('#offering-composer').getByRole('img',{name:'Synthetic violet field: unfinished light.'})).toBeVisible();
+    await page.getByLabel('Image file',{exact:true}).setInputFiles(imagePath);await page.getByLabel('Image 1 description',{exact:true}).fill('Synthetic violet field: unfinished light.');await expect(composer.getByRole('img',{name:'Selected image preview'})).toBeVisible();await composer.getByRole('button',{name:'Post ↗',exact:true}).click();await expect(page.getByText('Synthetic upload interruption. Retry the same image.')).toBeVisible();await expect(page.getByLabel('Your offering')).toHaveValue(body);
     let firstPublish=true;await page.route('**/api/temple/feed',async route=>{if(firstPublish&&route.request().method()==='POST'){firstPublish=false;const saved=await route.fetch();expect(saved.status()).toBe(201);await route.fulfill({status:503,json:{error:'Synthetic lost confirmation. Retry your kept draft.'}});}else await route.continue();});
-    await page.getByRole('button',{name:'Preview',exact:true}).click();await expect(page.getByRole('region',{name:'Offering preview'})).toBeVisible();await page.getByRole('button',{name:'Place your offering'}).click();await expect(page.getByText(/Synthetic lost confirmation/)).toBeVisible();await expect(page.getByLabel('Your offering')).toHaveValue(body);await page.getByRole('button',{name:'Place your offering'}).click();await expect(page.getByText('Your offering is in the shared room.')).toBeVisible();
+    await page.getByRole('button',{name:'Preview',exact:true}).click();await expect(page.getByRole('region',{name:'Offering preview'})).toBeVisible();await page.getByRole('button',{name:'Post ↗',exact:true}).click();await expect(page.getByText(/Synthetic lost confirmation/)).toBeVisible();await expect(page.getByLabel('Your offering')).toHaveValue(body);await page.getByRole('button',{name:'Post ↗',exact:true}).click();await expect(page.getByText('Your offering is in the shared room.')).toBeVisible();
     let card=page.locator('article').filter({has:page.getByText(body,{exact:true})});await expect(card).toHaveCount(1);const href=await card.getByRole('link',{name:'Contribution link'}).getAttribute('href'),id=href!.split('/').at(-1)!;
     const imageSrc=await card.getByRole('img').getAttribute('src'),imageId=imageSrc!.split('/').at(-1)!;
     await page.reload();card=page.locator('article').filter({has:page.getByText(body,{exact:true})});await expect(card).toHaveCount(1);await card.getByRole('button',{name:'Edit',exact:true}).click();await page.getByLabel('Your offering').fill(body+'\nA deliberate edit.');await page.getByRole('button',{name:'Save changes',exact:true}).click();await expect(page.getByText(body+'\nA deliberate edit.',{exact:true})).toBeVisible();
@@ -56,4 +58,25 @@ test('membership offering and private creative journey work on desktop and phone
     await db.query("UPDATE memberships SET paid_through=NOW()+INTERVAL '1 month' WHERE user_id=$1",[userId]);
     expect((await a.request.delete('/api/temple/feed/'+id,{headers:{origin},data:{}})).status()).toBe(200);expect((await a.request.delete('/api/temple/feed/'+id,{headers:{origin},data:{}})).status()).toBe(200);expect((await b.request.get(imageSrc!)).status()).toBe(404);
   }finally{for(const context of [a,b,mod,anon])await context.close();}
+});
+
+test('compact composer keeps attachments optional and posts with the keyboard',async({browser})=>{
+  const context=await browser.newContext({baseURL:origin});let postId:string|undefined;
+  try{
+    await mkdir(artifactDir,{recursive:true});await signIn(context,'weaver');const page=await context.newPage();await page.goto('/members/feed');await page.getByRole('button',{name:'Bring an offering'}).click();
+    const composer=page.getByRole('form',{name:'Create a post'}),post=composer.getByRole('button',{name:'Post ↗',exact:true});
+    await expect(post).toBeDisabled();await expect(composer.getByRole('button',{name:'Upload image',exact:true})).toHaveCount(0);await expect(composer.getByLabel('Link (optional)')).toHaveCount(0);
+    await page.addStyleTag({content:'nextjs-portal{visibility:hidden!important}'});
+    await composer.screenshot({path:artifactDir+'/compact-composer-desktop.png'});
+    await page.setViewportSize({width:390,height:844});await audit(page);expect((await composer.boundingBox())!.height).toBeLessThan(360);await composer.screenshot({path:artifactDir+'/compact-composer-phone.png'});
+    await page.setViewportSize({width:320,height:844});await audit(page);
+    await composer.getByRole('button',{name:'Link',exact:true}).click();await composer.getByLabel('Link (optional)').fill('https://example.test/kept');await composer.getByRole('button',{name:'Remove link'}).click();await expect(composer.getByLabel('Link (optional)')).toHaveCount(0);
+    const bytes=await sharp({create:{width:120,height:80,channels:3,background:'#604b90'}}).png().toBuffer();
+    await composer.getByLabel('Image file',{exact:true}).setInputFiles([{name:'one.png',mimeType:'image/png',buffer:bytes},{name:'two.png',mimeType:'image/png',buffer:bytes}]);await expect(composer.getByRole('img',{name:'Selected image preview'})).toHaveCount(2);
+    await composer.getByRole('button',{name:'Remove image 2',exact:true}).click();await composer.getByLabel('Image 1 description',{exact:true}).fill('Violet rectangle');await audit(page);
+    await page.setViewportSize({width:390,height:844});await composer.screenshot({path:artifactDir+'/compact-composer-attachment-phone.png'});
+    await composer.getByRole('button',{name:'Remove image 1',exact:true}).click();
+    const body='Synthetic compact keyboard post '+randomUUID();await composer.getByLabel('Your offering',{exact:true}).fill(body);await composer.getByLabel('Your offering',{exact:true}).press('Control+Enter');await expect(page.getByText('Your offering is in the shared room.')).toBeVisible();
+    const feed=await (await context.request.get('/api/temple/feed')).json();postId=feed.posts.find((item:{body:string})=>item.body===body)?.id;expect(postId).toBeTruthy();
+  }finally{if(postId)await context.request.delete('/api/temple/feed/'+postId,{headers:{origin},data:{}});await context.close();}
 });
