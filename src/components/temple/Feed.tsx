@@ -45,12 +45,12 @@ function Post({post,identity,refresh}:{post:Contribution;identity:Identity|null;
     {reporting&&<Report kind="post" targetId={post.id} onClose={()=>setReporting(false)} />}{replies&&<Replies postId={post.id} identity={identity} />}{error&&<p className={styles.error} role="alert">{error}</p>}
   </article>;
 }
-type FeedData={posts:Contribution[];cursor:string|null;profile:Identity|null;offeringsToday:number;isModerator:boolean};
-export default function Feed({postId}:{postId?:string}) {
-  const [data,setData]=useState<FeedData|null>(null),[error,setError]=useState(''),[composer,setComposer]=useState(false),[loading,setLoading]=useState(false),[notice,setNotice]=useState('');
+export type FeedData={posts:Contribution[];cursor:string|null;profile:Identity|null;offeringsToday:number;isModerator:boolean};
+export default function Feed({postId,initialData=null,initialError=''}:{postId?:string;initialData?:FeedData|null;initialError?:string}) {
+  const [data,setData]=useState<FeedData|null>(initialData),[error,setError]=useState(initialError),[composer,setComposer]=useState(false),[loading,setLoading]=useState(false),[notice,setNotice]=useState('');
   const endpoint='feed'+(postId?'/'+postId:'');
   const load=useCallback(async()=>{setLoading(true);try{setData(await api<FeedData>(endpoint));setError('');}catch(e){setData(null);setError((e as Error).message);}finally{setLoading(false);}},[endpoint]);
-  useEffect(()=>{let active=true;api<FeedData>(endpoint).then(result=>{if(active){setData(result);setError('');}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[endpoint]);
+  useEffect(()=>{let active=true;const request=initialData?Promise.resolve(initialData):initialError?Promise.reject(new Error(initialError)):api<FeedData>(endpoint);request.then(result=>{if(active){setData(result);setError('');}}).catch(e=>{if(active)setError(e.message);});return()=>{active=false;};},[endpoint,initialData,initialError]);
   async function more(){if(!data?.cursor||loading)return;setLoading(true);try{const next=await api<FeedData>(endpoint+'?cursor='+encodeURIComponent(data.cursor));setData({...next,posts:[...data.posts,...next.posts.filter(p=>!data.posts.some(old=>old.id===p.id))]});}catch(e){setError((e as Error).message);setData(null);}finally{setLoading(false);}}
   function openComposer(){setComposer(true);setTimeout(()=>document.getElementById('offering-composer')?.querySelector('textarea')?.focus(),0);}
   return <div className={ui.room}><p className={styles.eyebrow}>One shared room · Members-only</p><h2 className={styles.lead}>{postId?'A contribution to the Temple':'The shared Temple'}</h2><p className={styles.prose}>Poems, fragments, experiments and things still becoming. Your chosen identity travels with your work; your billing details stay outside this room.</p>
