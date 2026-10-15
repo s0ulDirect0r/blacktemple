@@ -4,6 +4,7 @@ import { membershipDatabase } from '@/lib/membership/database';
 import Confirmation from '@/components/membership/Confirmation';
 import SessionGuard from '@/components/membership/SessionGuard';
 import styles from '@/components/membership/membership.module.css';
+import ui from '@/components/membership/confirmation.module.css';
 
 export const metadata = { title: 'Membership confirmation', robots: { index: false } };
 export default async function ReturnPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
@@ -11,5 +12,5 @@ export default async function ReturnPage({ searchParams }: { searchParams: Promi
   const returnPath = '/membership/return?checkout=' + encodeURIComponent(checkout ?? '');
   const session = await requireMemberSession(returnPath);
   if (!checkout || !(await membershipDatabase().query('SELECT 1 FROM membership_attempts WHERE checkout_session_id=$1 AND user_id=$2', [checkout,session.user.id])).rowCount) notFound();
-  return <div className={styles.world}><main className={styles.authShell}><SessionGuard userId={session.user.id}><p className={styles.eyebrow}>Black Temple</p><h1 className={styles.title}>Your place<br />inside.</h1><Confirmation returnPath={returnPath} /></SessionGuard></main></div>;
+  return <div className={styles.world}><main className={ui.shell}><SessionGuard userId={session.user.id}><p className={styles.eyebrow}>Black Temple</p><h1 className={styles.title}>Your place inside.</h1><Confirmation returnPath={returnPath} /></SessionGuard></main></div>;
 }

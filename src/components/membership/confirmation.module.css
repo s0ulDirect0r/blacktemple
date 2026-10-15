@@ -1,0 +1,20 @@
+.shell{max-width:700px;padding:40px 24px 64px;margin:auto;text-align:center;}
+.shell>h1{font-size:clamp(22px,4vw,30px);margin-bottom:6px;}
+.shell>h1::after{margin-left:auto;margin-right:auto;}
+.scene{position:relative;isolation:isolate;}
+.portal{height:290px;width:min(280px,100%);margin:-8px auto 2px;position:relative;}
+.canvas{display:block;width:100%;height:100%;}
+.scene h2{font-size:23px;line-height:1.6;font-weight:400;margin:4px 0 16px;}
+.scene p{margin:14px auto;max-width:430px;}
+.status{color:#b9f5ff;font-size:14px;line-height:1.8;}
+.actions{display:flex;gap:18px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:24px;}
+.scene[data-phase='confirmed'] .portal{animation:portal-arrival .7s ease-in both;}
+.scene[data-phase='confirmed'] .copy{animation:pass-through .7s ease-in both,restore-copy .3s 1.3s forwards;}
+.crossing{position:fixed;inset:0;z-index:50;pointer-events:none;background:radial-gradient(ellipse at center,#30204a,#09040f 65%);clip-path:ellipse(0% 0% at 50% 46%);animation:crossing .7s cubic-bezier(.5,0,.4,1) both,restore-view .3s 1s forwards;}
+@keyframes portal-arrival{to{transform:scale(1.6);opacity:.4;}}
+@keyframes pass-through{to{transform:translateY(-6px);opacity:0;}}
+@keyframes restore-copy{to{transform:none;opacity:1;}}
+@keyframes restore-view{to{opacity:0;}}
+@keyframes crossing{0%,20%{clip-path:ellipse(0% 0% at 50% 46%);}100%{clip-path:ellipse(130% 160% at 50% 46%);}}
+@media(max-width:420px){.shell{padding:32px 22px 54px;}.portal{height:260px;width:250px;max-width:100%;}.scene h2{font-size:21px;}}
+@media(prefers-reduced-motion:reduce){.scene[data-phase='confirmed'] .portal,.scene[data-phase='confirmed'] .copy{animation:none;}.crossing{display:none;}}
