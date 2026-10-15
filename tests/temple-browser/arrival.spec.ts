@@ -39,7 +39,7 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     await expect(page.getByText('Welcome video coming soon')).toBeVisible();
     await expect(page.locator('video,iframe')).toHaveCount(0);
     await page.setViewportSize({width:390,height:844});await audit(page);
-    await page.screenshot({path:'/private/tmp/temple-arrival-welcome-phone.png',fullPage:true});
+    await page.screenshot({path:test.info().outputPath('welcome-phone.png'),fullPage:true});
     await page.getByLabel('Temple name',{exact:true}).fill('Synthetic Night Orchard');
     await expect(page.getByLabel('Temple alias',{exact:false})).toHaveValue('synthetic-night-orchard');
     const bytes=await sharp({create:{width:72,height:72,channels:3,background:'#7350a0'}}).png().toBuffer();
@@ -71,7 +71,7 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     await page.goto('/membership/welcome');await expect(page).toHaveURL(/\/members\/feed$/);
     const login=await anonymous.request.get('/membership/welcome',{maxRedirects:0});expect(login.headers().location).toContain('next=%2Fmembership%2Fwelcome');
     await page.setViewportSize({width:320,height:844});await audit(page);
-    await page.screenshot({path:'/private/tmp/temple-arrival-feed-phone.png',fullPage:true});
+    await page.screenshot({path:test.info().outputPath('feed-phone.png'),fullPage:true});
   }finally{await context.close();await anonymous.close();}
 });
 
