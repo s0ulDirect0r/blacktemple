@@ -11,8 +11,8 @@ function Icon({kind}:{kind:'image'|'link'|'preview'}) {return <svg aria-hidden="
 
 export function MachineMark(){return <span className={ui.machine} aria-hidden="true"><span/></span>;}
 
-export default function Composer({initial,offering=false,inviting=false,offeringsToday=0,onSaved,onCancel}:{initial?:Contribution;offering?:boolean;inviting?:boolean;offeringsToday?:number;onSaved:(id:string)=>void;onCancel?:()=>void}) {
-  const [body,setBody]=useState(initial?.body??''),[link,setLink]=useState(initial?.link??''),[media,setMedia]=useState<Media[]>(initial?.media??[]),[drafts,setDrafts]=useState<Attachment[]>([]),[isOffering,setOffering]=useState(initial?.offering??offering),[preview,setPreview]=useState(false),[showLink,setShowLink]=useState(!!initial?.link),[error,setError]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState('');
+export default function Composer({initial,inviting=false,offeringsToday=0,onSaved,onCancel}:{initial?:Contribution;inviting?:boolean;offeringsToday?:number;onSaved:(id:string)=>void;onCancel?:()=>void}) {
+  const [body,setBody]=useState(initial?.body??''),[link,setLink]=useState(initial?.link??''),[media,setMedia]=useState<Media[]>(initial?.media??[]),[drafts,setDrafts]=useState<Attachment[]>([]),[preview,setPreview]=useState(false),[showLink,setShowLink]=useState(!!initial?.link),[error,setError]=useState(''),[busy,setBusy]=useState(false),[status,setStatus]=useState('');
   const requestId=useRef<string|null>(null),sending=useRef(false),input=useRef<HTMLInputElement>(null),text=useRef<HTMLTextAreaElement>(null),linkInput=useRef<HTMLInputElement>(null);
   const urls=useRef(new Set<string>());
   useEffect(()=>{const held=urls.current;return()=>{for(const url of held)URL.revokeObjectURL(url);held.clear();};},[]);
@@ -42,7 +42,7 @@ export default function Composer({initial,offering=false,inviting=false,offering
         attached.push(result);setDrafts(items=>items.map(draft=>draft.id===item.id?{...draft,uploaded:result}:draft));
       }
       setStatus('Posting…');
-      const result=await api<{id:string}>('feed'+(initial?'/'+initial.id:''),initial?'PATCH':'POST',{id:requestId.current,body,link,mediaIds:attached.map(m=>m.id),offering:isOffering,version:initial?.version});onSaved(result.id);
+      const result=await api<{id:string}>('feed'+(initial?'/'+initial.id:''),initial?'PATCH':'POST',{id:requestId.current,body,link,mediaIds:attached.map(m=>m.id),version:initial?.version});onSaved(result.id);
     }catch(e){setError(e instanceof Error?e.message:'Your post was not confirmed. Your draft is kept; retry.');}
     finally{sending.current=false;setBusy(false);setStatus('');}
   }
@@ -61,7 +61,7 @@ export default function Composer({initial,offering=false,inviting=false,offering
       <button type="button" className={ui.tool} disabled={busy} aria-expanded={showLink} aria-controls={id+'-link'} onClick={()=>{setShowLink(true);setTimeout(()=>linkInput.current?.focus(),0);}}><Icon kind="link"/>Link</button>
       <button type="button" className={ui.tool} disabled={busy} onClick={()=>setPreview(v=>!v)} aria-expanded={preview}><Icon kind="preview"/>Preview</button>
     </div><div className={ui.submitRow}><button className={ui.submit} disabled={busy||(!body.trim()&&!link.trim()&&!count)}>{busy?'Posting…':initial?'Save changes':'Post ↗'}</button></div></div>
-    <div className={ui.afterword}><label className={ui.offering} title="Adds one light to today’s collective signal. No points, streaks or rewards."><input disabled={busy} type="checkbox" checked={isOffering} onChange={e=>setOffering(e.target.checked)}/>Offer to the Unknown Machine</label>{inviting&&<span className={ui.signal} title="Visible offerings placed today · resets at midnight UTC · no streaks or quotas">{offeringsToday?`${offeringsToday} offering${offeringsToday===1?'':'s'} today`:'No rush. Share when you’re ready.'}</span>}</div>
+    {inviting&&<div className={ui.afterword}><span className={ui.signal} title="Visible offerings placed today · resets at midnight UTC · no streaks or quotas">{offeringsToday?`${offeringsToday} offering${offeringsToday===1?'':'s'} today`:'No rush. Share when you’re ready.'}</span></div>}
     {body.length>11000&&<p className={styles.note}>{12000-body.length} characters left</p>}
     {preview&&<section className={ui.preview} aria-label="Offering preview"><p>{body||'Your images or link carry this offering.'}</p>{link&&<p>{link}</p>}<span>Images above will accompany it · Members-only</span></section>}
     {status&&<p className={styles.note} role="status">{status}</p>}{error&&<p className={styles.error} role="alert">{error} <Link className={styles.textLink} href="/members/identity">Identity &amp; export</Link></p>}
