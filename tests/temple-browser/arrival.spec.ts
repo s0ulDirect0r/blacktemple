@@ -79,21 +79,20 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     await page.route('**/api/temple/arrival',async route=>{if(!lost){lost=true;const response=await route.fetch();expect(response.status()).toBe(201);await route.fulfill({status:503,json:{error:'Synthetic lost confirmation. Retry your kept identity.'}});}else await route.continue();});
     await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page.getByText('Synthetic lost confirmation. Retry your kept identity.')).toBeVisible();
     await expect(page.getByRole('img',{name:'Your selected profile picture'})).toBeVisible();
-    await page.addStyleTag({content:'nextjs-portal{visibility:hidden!important}'});await page.clock.install();await page.clock.pauseAt(new Date());
-    await page.screenshot({path:test.info().outputPath('01-identity-before-submit.png'),fullPage:true});
-    await page.getByRole('button',{name:'Take this name & enter'}).click();
-    await expect(page.getByRole('region',{name:'Your Temple identity is ready'})).toBeVisible();
-    await page.screenshot({path:test.info().outputPath('02-identity-ready-flash.png'),fullPage:true});
+    // Block client feed requests: the destination must already include its room data.
     let releaseFeed!:()=>void;const feedGate=new Promise<void>(resolve=>{releaseFeed=resolve;});
     await page.route('**/api/temple/feed',async route=>{await feedGate;await route.continue();});
-    await page.clock.runFor(700);await expect(page).toHaveURL(/\/members\/feed\?arrival=1/,{timeout:20000});
-    await expect(page.getByText('Opening the shared room…')).toBeVisible();
-    await page.screenshot({path:test.info().outputPath('03-feed-loading-flash.png'),fullPage:true});
-    releaseFeed();await expect(page.getByRole('button',{name:'Bring an offering'})).toBeVisible();
-    await page.screenshot({path:test.info().outputPath('04-feed-ready.png'),fullPage:true});
-    await page.unroute('**/api/temple/feed');await page.clock.resume();
-    await expect(page.getByRole('heading',{name:'Synthetic Night Orchard, you have a place here.'})).toBeVisible();
-    await expect(page.getByRole('img',{name:'Your Temple portrait'})).toBeVisible();
+    const watchArrival=()=>{
+      const record=()=>{const seen=JSON.parse(sessionStorage.getItem('arrival-views')??'[]');for(const label of ['Your Temple identity is ready','Your Temple welcome'])if(document.querySelector(`[aria-label="${label}"]`))seen.push(label);if(document.body?.innerText.includes('Opening the shared room…'))seen.push('feed loading');sessionStorage.setItem('arrival-views',JSON.stringify(seen));};
+      new MutationObserver(record).observe(document,{childList:true,subtree:true});
+    };
+    await context.addInitScript(watchArrival);await page.evaluate(watchArrival);
+    await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed$/,{timeout:20000});
+    await expect(page.getByRole('button',{name:'Bring an offering'})).toBeVisible();
+    await expect(page.getByRole('region',{name:'Your Temple welcome'})).toHaveCount(0);await expect(page.getByText('Opening the shared room…')).toHaveCount(0);
+    expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('arrival-views')??'[]'))).toEqual([]);
+    await page.screenshot({path:test.info().outputPath('identity-direct-to-temple.png'),fullPage:true,style:'nextjs-portal{visibility:hidden!important}'});
+    releaseFeed();await page.unroute('**/api/temple/feed');
     const profile=(await (await context.request.get('/api/temple/identity')).json()).profile;
     const image=await context.request.get('/api/temple/media/'+profile.avatar_id);expect(image.status()).toBe(200);const cropped=await image.body();
     const metadata=await sharp(cropped).metadata();expect(metadata.width).toBe(512);expect(metadata.height).toBe(512);
@@ -102,7 +101,7 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     expect((await anonymous.request.get('/api/temple/media/'+profile.avatar_id)).status()).toBe(401);
     expect((await db.query('SELECT count(*)::int n FROM temple_profiles WHERE user_id=$1',[users.main.id])).rows[0].n).toBe(1);
     expect((await db.query('SELECT name FROM member_user WHERE id=$1',[users.main.id])).rows[0].name).toBe('PRIVATE TEST BILLING main');
-    await page.reload();await expect(page.getByRole('img',{name:'Your Temple portrait'})).toBeVisible();
+    await page.reload();await expect(page.getByRole('heading',{name:'The shared Temple',exact:true})).toBeVisible();
     await page.goto('/membership/welcome');await expect(page).toHaveURL(/\/members\/feed$/);
     await page.goto('/members/identity');await page.getByLabel('Choose avatar image',{exact:true}).setInputFiles({name:'reframe.png',mimeType:'image/png',buffer:bytes});
     await page.getByRole('button',{name:'Cancel crop'}).click();expect((await (await context.request.get('/api/temple/identity')).json()).profile.avatar_id).toBe(profile.avatar_id);
@@ -145,10 +144,10 @@ test('picture is optional; quiet entry can resume; unpaid members cannot create 
       if(key==='quiet'){
         await page.getByRole('link',{name:'Enter quietly. Choose a name later.'}).click();await expect(page).toHaveURL(/\/members\/feed/);
         expect((await (await context.request.get('/api/temple/identity')).json()).profile).toBeNull();
-        await page.goto('/membership/welcome');await expect(page.getByRole('heading',{name:'Who will you become here?'})).toBeVisible();continue;
+        await page.goto('/membership/welcome');await expect(page.getByRole('heading',{name:'Who will you become here?'})).toBeVisible();await page.getByLabel('Temple name',{exact:true}).fill('Quiet Return');await page.getByLabel('Temple alias',{exact:false}).fill('quiet-return-'+suffix);await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed$/);await expect(page.getByRole('heading',{name:'Welcome, Quiet Return.',exact:true})).toBeVisible();continue;
       }
       await page.getByLabel('Temple name',{exact:true}).fill('Quiet Light');await page.getByLabel('Temple alias',{exact:false}).fill('light-'+suffix);
-      await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed\?arrival=1/,{timeout:20000});
+      await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed$/,{timeout:20000});
       expect((await (await context.request.get('/api/temple/identity')).json()).profile.avatar_id).toBeNull();
     }finally{await context.close();}
   }

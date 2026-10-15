@@ -6,7 +6,11 @@ import { randomUUID,createHash } from 'node:crypto';
 import { mkdir,writeFile,readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 
-const origin=process.env.TEMPLE_TEST_ORIGIN??'http://127.0.0.1:3003',db=new Pool({connectionString:process.env.TEMPLE_TEST_DATABASE_URL});
+const database=process.env.TEMPLE_TEST_DATABASE_URL;
+if(!database||database!==process.env.MEMBERSHIP_DATABASE_URL||!['127.0.0.1','localhost','[::1]'].includes(new URL(database).hostname)||process.env.VERCEL_ENV)throw new Error('Community fixtures require the explicitly isolated local preview database.');
+const origin=process.env.TEMPLE_TEST_ORIGIN??'http://127.0.0.1:3003',db=new Pool({connectionString:database});
+// Repeated local journeys share a synthetic client address; clear only this disposable database's login throttles.
+test.beforeEach(async()=>{await db.query('DELETE FROM member_rate_limit');});
 const artifactDir=process.env.TEMPLE_TEST_ARTIFACT_DIR??'/tmp/temple-stage1-browser';
 const password='Synthetic-Temple-Test-Only-2026!';
 async function signIn(context:BrowserContext,key:string){const response=await context.request.post(origin+'/api/member-auth/sign-in/email',{headers:{origin},data:{email:`temple-preview-${key}@example.test`,password}});expect(response.status()).toBe(200);}
