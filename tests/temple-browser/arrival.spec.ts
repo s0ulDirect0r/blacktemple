@@ -88,7 +88,7 @@ test('confirmed return opens identity; avatar saves atomically and retries a los
     };
     await context.addInitScript(watchArrival);await page.evaluate(watchArrival);
     await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed$/,{timeout:20000});
-    await expect(page.getByRole('button',{name:'Bring an offering'})).toBeVisible();
+    await expect(page.getByRole('form',{name:'Create a post'})).toBeVisible();
     await expect(page.getByRole('region',{name:'Your Temple welcome'})).toHaveCount(0);await expect(page.getByText('Opening the shared room…')).toHaveCount(0);
     expect(await page.evaluate(()=>JSON.parse(sessionStorage.getItem('arrival-views')??'[]'))).toEqual([]);
     await page.screenshot({path:test.info().outputPath('identity-direct-to-temple.png'),fullPage:true,style:'nextjs-portal{visibility:hidden!important}'});
@@ -143,7 +143,7 @@ test('picture is optional; quiet entry can resume; unpaid members cannot create 
       }
       if(key==='quiet'){
         await page.getByRole('link',{name:'Enter quietly. Choose a name later.'}).click();await expect(page).toHaveURL(/\/members\/feed/);
-        expect((await (await context.request.get('/api/temple/identity')).json()).profile).toBeNull();
+        expect((await (await context.request.get('/api/temple/identity')).json()).profile).toBeNull();await expect(page.getByRole('form',{name:'Create a post'})).toHaveCount(0);await expect(page.getByRole('link',{name:'Choose your Temple identity'})).toBeVisible();
         await page.goto('/membership/welcome');await expect(page.getByRole('heading',{name:'Who will you become here?'})).toBeVisible();await page.getByLabel('Temple name',{exact:true}).fill('Quiet Return');await page.getByLabel('Temple alias',{exact:false}).fill('quiet-return-'+suffix);await page.getByRole('button',{name:'Take this name & enter'}).click();await expect(page).toHaveURL(/\/members\/feed$/);await expect(page.getByRole('heading',{name:'Welcome, Quiet Return.',exact:true})).toBeVisible();continue;
       }
       await page.getByLabel('Temple name',{exact:true}).fill('Quiet Light');await page.getByLabel('Temple alias',{exact:false}).fill('light-'+suffix);
