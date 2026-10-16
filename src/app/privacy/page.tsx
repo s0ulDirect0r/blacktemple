@@ -17,7 +17,7 @@ export default function PrivacyPage() {
       <div className="mx-auto max-w-3xl px-4 pb-24 sm:px-6">
         <main className="pt-16 sm:pt-24">
           <h1 className="font-pixel text-2xl leading-none text-white sm:text-4xl">Privacy</h1>
-          <p className="mt-4 text-sm text-zinc-500">Last updated October 6, 2026</p>
+          <p className="mt-4 text-sm text-zinc-500">Last updated October 16, 2026</p>
 
           <div className="mt-10 max-w-xl space-y-10 leading-relaxed text-zinc-400">
             <section className="space-y-4">
@@ -49,9 +49,22 @@ export default function PrivacyPage() {
             </section>
 
             <section className="space-y-4">
+              <h2 className="font-pixel text-base text-white">Optional one-time support</h2>
+              <p>
+                Support payments are handled by Stripe. Your card details go straight to Stripe and never reach this
+                site. Stripe may collect your email and other information needed to process the payment.
+              </p>
+              <p>
+                This site keeps the Stripe checkout and payment references, amount, currency, payment mode and
+                recording time for bookkeeping. The support ledger does not store your name or email. No account
+                is required, and support does not create a membership, subscription or recurring charge.
+              </p>
+            </section>
+
+            <section className="space-y-4">
               <h2 className="font-pixel text-base text-white">How long it&apos;s kept</h2>
               <p>
-                I keep booking records for bookkeeping and taxes. Stripe and Google keep their own records under their
+                I keep booking and support payment records for bookkeeping and taxes. Stripe and Google keep their own records under their
                 policies:{' '}
                 <a href="https://stripe.com/privacy" className={link}>
                   Stripe

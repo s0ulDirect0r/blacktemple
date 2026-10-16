@@ -1,0 +1,147 @@
+{
+  "startedAt": "2026-10-16T20:22:52.479Z",
+  "approvedScope": "Only one-time support production release; no charge, subscription/membership activation, credentials/access expansion or additional spend.",
+  "productionProject": "prj_CQztJhzlLjQzCUBw3faaLS69YLsZ",
+  "teamId": "team_l9FQIl3LQzYwGSs0COI8yizM",
+  "baseMain": "5d7283d3f9c22d9e698563cd26c7a5c9b79d66b3",
+  "database": {
+    "resource": "long-smoke-33898508",
+    "plan": "Free",
+    "tls": true,
+    "certificateAuthorized": true,
+    "migration": {
+      "name": "007_support.sql",
+      "executed_at": "2026-10-16T20:22:51.978Z"
+    },
+    "columns": [
+      {
+        "column_name": "checkout_session_id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "payment_intent_id",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "amount_cents",
+        "data_type": "integer",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "currency",
+        "data_type": "text",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "livemode",
+        "data_type": "boolean",
+        "is_nullable": "NO"
+      },
+      {
+        "column_name": "recorded_at",
+        "data_type": "timestamp with time zone",
+        "is_nullable": "NO"
+      }
+    ],
+    "constraints": [
+      {
+        "conname": "support_payments_amount_cents_check",
+        "definition": "CHECK (((amount_cents >= 100) AND (amount_cents <= 100000)))"
+      },
+      {
+        "conname": "support_payments_currency_check",
+        "definition": "CHECK ((currency = 'usd'::text))"
+      },
+      {
+        "conname": "support_payments_payment_intent_id_key",
+        "definition": "UNIQUE (payment_intent_id)"
+      },
+      {
+        "conname": "support_payments_pkey",
+        "definition": "PRIMARY KEY (checkout_session_id)"
+      }
+    ],
+    "countsBefore": {
+      "artworks": 19,
+      "projects": 4,
+      "call_bookings": 6
+    },
+    "countsAfter": {
+      "artworks": 19,
+      "projects": 4,
+      "call_bookings": 6
+    },
+    "supportPayments": 0
+  },
+  "liveStripe": {
+    "account": "acct_1H21BAFUbUrXDr2T",
+    "livemode": true,
+    "chargesEnabled": true,
+    "existingWebhook": {
+      "id": "we_1UNa2nFUbUrXDr2TTF4TEh6e",
+      "url": "https://www.blacktemple.dev/api/calls/webhook",
+      "events": [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.expired"
+      ],
+      "signedDelivery": [
+        {
+          "timestamp": "2026-10-16T20:24:26.994Z",
+          "path": "/api/calls/webhook",
+          "status": 200,
+          "method": "POST"
+        }
+      ],
+      "probe": {
+        "checkedAt": "2026-10-16T20:24:26.881Z",
+        "eventId": "evt_1UONzKFUbUrXDr2TJVMvMdge",
+        "type": "checkout.session.expired",
+        "livemode": true,
+        "endpoint": "we_1UNa2nFUbUrXDr2TTF4TEh6e",
+        "url": "https://www.blacktemple.dev/api/calls/webhook",
+        "safety": "Existing expired/unpaid Checkout event; all6production call rows alreadyreleased; handlerupdatesonlyheldrows."
+      }
+    }
+  },
+  "status": "preparing",
+  "integration": {
+    "approach": "Support-only transplant onto current main; existing calls Stripe client and webhook; synchronous ledger write with Stripe retries; no membership/community package or schema.",
+    "addedRoutes": [
+      "/support",
+      "/support/thanks",
+      "/api/support/checkout"
+    ],
+    "productionConfig": {
+      "SUPPORT_SITE_ORIGIN": "https://www.blacktemple.dev",
+      "SUPPORT_STRIPE_ACCOUNT_ID": "acct_1H21BAFUbUrXDr2T",
+      "SUPPORT_CHECKOUT_ENABLED": true
+    },
+    "existingCallsPausePreserved": true
+  },
+  "checks": {
+    "supportTests": 13,
+    "typecheck": "passed",
+    "build": "passed:51staticpages",
+    "changedFileLint": "passed",
+    "fullSuite": {
+      "passed": 33,
+      "failed": 2,
+      "reason": "Untouched legacy gallery API mock tests cannot patch ESM module namespace in current Node/tsx; no gallery implementation change."
+    },
+    "fullLint": {
+      "errors": 24,
+      "warning": 1,
+      "reason": "Untouched3Dart purity rules and obsolete disable warning; changed-file lint clean."
+    }
+  },
+  "cost": {
+    "existingMonthlyCreditUsd": 20,
+    "reportedInfrastructureValuationUsd": 0.8858834994505,
+    "inferredRemainingCreditUsd": 19.1141165005495,
+    "expectedAdditionalCashSpendUsd": 0,
+    "reportingLag": true
+  }
+}
