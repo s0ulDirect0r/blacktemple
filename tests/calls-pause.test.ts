@@ -6,13 +6,14 @@ import { NextRequest } from 'next/server';
 import { unstable_doesMiddlewareMatch } from 'next/experimental/testing/server';
 import { config, proxy } from '@/proxy';
 
-test('paused calls redirect home temporarily without carrying checkout parameters', () => {
+test('calls page remains accessible with checkout return parameters', () => {
   const response = proxy(new NextRequest('https://www.blacktemple.dev/calls?hold=example&_rsc=example'));
-  assert.equal(response.status, 307);
-  assert.equal(response.headers.get('location'), 'https://www.blacktemple.dev/');
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get('location'), null);
+  assert.equal(response.headers.get('x-middleware-next'), '1');
 });
 
-test('the pause also applies to client navigation and prefetch requests', () => {
+test('client navigation and prefetch requests reach the calls access check', () => {
   assert.equal(unstable_doesMiddlewareMatch({
     config,
     nextConfig: {},
@@ -21,17 +22,16 @@ test('the pause also applies to client navigation and prefetch requests', () => 
   }), true);
 });
 
-test('new availability and checkout requests are unavailable while paused', async () => {
+test('new availability and checkout requests reach their route handlers', () => {
   for (const [path, method] of [['/api/calls/slots', 'GET'], ['/api/calls/checkout', 'POST']]) {
     const response = proxy(new NextRequest(`https://www.blacktemple.dev${path}`, { method }));
-    assert.equal(response.status, 503);
-    assert.equal(response.headers.get('cache-control'), 'no-store');
-    assert.deepEqual(await response.json(), { error: 'Call bookings are temporarily unavailable.' });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('x-middleware-next'), '1');
   }
 });
 
-test('payment confirmation, webhooks, hold release and other pages stay outside the pause', () => {
-  for (const path of ['/calls/booked?session_id=example', '/api/calls/webhook', '/api/calls/release', '/', '/portfolio', '/writing', '/privacy']) {
+test('payment confirmation, webhooks, hold release and support stay outside the access check', () => {
+  for (const path of ['/calls/booked?session_id=example', '/api/calls/webhook', '/api/calls/release', '/support', '/api/support/checkout', '/', '/portfolio', '/writing', '/privacy']) {
     assert.equal(unstable_doesMiddlewareMatch({ config, nextConfig: {}, url: path }), false, path);
   }
 });
