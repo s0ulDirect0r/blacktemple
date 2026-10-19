@@ -1,3 +1,4 @@
+import './helpers/placeholder-db-env';
 import test, { mock } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -11,7 +12,6 @@ const sampleImage: ArtworkImage = {
   metadata: {
     title: 'Sample Image',
     description: 'A sample image for testing',
-    projectId: null,
     tags: ['sample'],
     created_at: new Date('2024-01-01T00:00:00Z').toISOString(),
     updated_at: new Date('2024-01-02T00:00:00Z').toISOString(),
