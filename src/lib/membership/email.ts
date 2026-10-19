@@ -42,6 +42,7 @@ export function accountEmail(kind: AccountEmailKind, email: string, url: string)
 
 /** Hooks only persist encrypted jobs. The request never waits on an email provider. */
 export async function enqueueAccountEmail(kind: AccountEmailKind, data: { user: { id: string; email: string }; url: string; token: string }) {
+  if (process.env.MEMBERSHIP_EMAIL_MODE === 'disabled') return;
   if (!stagingAccountAllowed(data.user.email)) return;
   const email = accountEmail(kind, data.user.email, data.url);
   const hash = tokenHash(data.token), id = `${kind}:${hash}`;

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, readdir, stat, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { accountEmail, encryptEmail, decryptEmail, deliverAccountEmail, captureDirectory, EmailDeliveryError } from '../src/lib/membership/email';
+import { enqueueAccountEmail, accountEmail, encryptEmail, decryptEmail, deliverAccountEmail, captureDirectory, EmailDeliveryError } from '../src/lib/membership/email';
 import { accountCallback, handleAccountRequest } from '../src/lib/membership/auth-route';
 import { GET as accountGet } from '../src/app/api/member-auth/[...all]/route';
 
@@ -81,4 +81,13 @@ test('auth redirects, origins, malformed JSON and public response normalization'
     assert.deepEqual(await (await handleAccountRequest(request('{}'),handlers)).json(),{status:true});
     assert.equal((await handleAccountRequest(new Request('http://localhost:3002/api/member-auth/list-users'),handlers)).status,404);
   } finally {if(previous===undefined)delete process.env.BETTER_AUTH_URL;else process.env.BETTER_AUTH_URL=previous;}
+});
+
+// Disabled local delivery must not place localhost links in a shared sandbox queue.
+test('disabled account email does not access the database or queue a message',async()=>{
+  const previous={...process.env};
+  try {
+    process.env.MEMBERSHIP_EMAIL_MODE='disabled';delete process.env.MEMBERSHIP_DATABASE_URL;delete process.env.BETTER_AUTH_SECRET;delete process.env.BETTER_AUTH_URL;
+    await enqueueAccountEmail('reset',{user:{id:'local-fixture',email:'fixture@example.test'},url:'http://localhost:3000/api/member-auth/reset-password/fixture',token:'fixture'});
+  } finally {process.env=previous;}
 });
