@@ -1,0 +1,3 @@
+'use client';
+import { createAuthClient } from 'better-auth/react';
+export const memberAuthClient = createAuthClient({ basePath: '/api/member-auth' });

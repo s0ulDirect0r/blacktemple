@@ -171,9 +171,11 @@ export async function createCallEvent(booking: {
   name: string;
   email: string;
   note: string | null;
+  /** First line of the event description; says where the booking came from. */
+  context?: string;
 }): Promise<CallEvent> {
   const description = [
-    'Booked at blacktemple.dev/calls.',
+    booking.context ?? 'Booked at blacktemple.dev/calls.',
     booking.note ? `\nFrom ${booking.name}:\n${booking.note}` : null,
   ]
     .filter(Boolean)

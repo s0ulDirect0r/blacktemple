@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -21,11 +22,11 @@ export default function CoronaParticles({
     const pos = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
       // Random point on sphere surface
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = seededRandom(i, 201) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i, 202) - 1);
 
       // Tight to surface: 1.02 to 1.08 times core radius
-      const radiusMultiplier = 1.02 + Math.random() * 0.06;
+      const radiusMultiplier = 1.02 + seededRandom(i, 203) * 0.06;
       const r = coreRadius * radiusMultiplier;
 
       pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);

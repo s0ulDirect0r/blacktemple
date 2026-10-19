@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -52,7 +53,7 @@ export default function HeroBeams({
       const color = new THREE.Color(RAINBOW_COLORS[colorIndex]);
 
       // Random pulse phase offset
-      const pulsePhase = Math.random() * Math.PI * 2;
+      const pulsePhase = seededRandom(i, 401) * Math.PI * 2;
 
       beamData.push({ rotation: euler, color, pulsePhase });
     }

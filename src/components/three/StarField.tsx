@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -12,9 +13,9 @@ export default function StarField() {
 
     for (let i = 0; i < STAR_COUNT; i++) {
       // Distribute stars in a sphere around the camera
-      const radius = 50 + Math.random() * 100;
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const radius = 50 + seededRandom(i, 101) * 100;
+      const theta = seededRandom(i, 102) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i, 103) - 1);
 
       positions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
       positions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);

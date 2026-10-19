@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "patches": [
+    {
+      "package": "braces",
+      "version": "3.0.3",
+      "file": "lib/parse.js",
+      "originalSha256": "e572166565f15fa6ad9865ae49d678218e32aabfd1b3720f6d0d43d39800d310",
+      "patchedSha256": "3ae5c8cd808859fa65b738449d86e021a6b03aac0d731b2810166e08dca246a9",
+      "replacements": [
+        {
+          "before": "    if (value === CHAR_LEFT_PARENTHESES) {\n",
+          "after": "    if (value === CHAR_LEFT_PARENTHESES) {\n      // Local GHSA-vfj7-8cjw-p6xm guard: count parsed blocks, not literal braces.\n      if (stack.length > 128) {\n        throw new SyntaxError('[braces] nesting exceeds local safety limit (128)');\n      }\n\n"
+        },
+        {
+          "before": "    if (value === CHAR_LEFT_CURLY_BRACE) {\n",
+          "after": "    if (value === CHAR_LEFT_CURLY_BRACE) {\n      // Local GHSA-vfj7-8cjw-p6xm guard: count parsed blocks, not literal braces.\n      if (stack.length > 128) {\n        throw new SyntaxError('[braces] nesting exceeds local safety limit (128)');\n      }\n\n"
+        }
+      ]
+    },
+    {
+      "package": "braces",
+      "version": "3.0.3",
+      "file": "lib/compile.js",
+      "originalSha256": "dc98f22eee3d511785d92a00758d5f0d48efed5f5813bdecc2de430c529b5c9f",
+      "patchedSha256": "ffe28624c2210259a1c9951859ef3078c30711bd10576fb512e8b30204fd65f6",
+      "replacements": [
+        {
+          "before": "  const walk = (node, parent = {}) => {\n",
+          "after": "  const walk = (node, parent = {}, nesting = 0) => {\n    // Protect public AST entry points as well as string-based parsing.\n    if (nesting > 129) {\n      throw new SyntaxError('[braces] nesting exceeds local safety limit (128)');\n    }\n"
+        },
+        {
+          "before": "output += walk(child, node);",
+          "after": "output += walk(child, node, nesting + 1);"
+        }
+      ]
+    },
+    {
+      "package": "braces",
+      "version": "3.0.3",
+      "file": "lib/stringify.js",
+      "originalSha256": "379f22d77bfa1478341ccd49c5e4267464aabcbba03558bab332aac23fc6f23a",
+      "patchedSha256": "8308ab68936bcbba64576ddbcea2b8fc91fef52ba6b82f6d1d246458661cbc5e",
+      "replacements": [
+        {
+          "before": "  const stringify = (node, parent = {}) => {\n",
+          "after": "  const stringify = (node, parent = {}, nesting = 0) => {\n    // Protect public AST entry points as well as string-based parsing.\n    if (nesting > 129) {\n      throw new SyntaxError('[braces] nesting exceeds local safety limit (128)');\n    }\n"
+        },
+        {
+          "before": "output += stringify(child);",
+          "after": "output += stringify(child, {}, nesting + 1);"
+        }
+      ]
+    },
+    {
+      "package": "braces",
+      "version": "3.0.3",
+      "file": "lib/expand.js",
+      "originalSha256": "41ccc196ebfa7b7781a634e721eb744e4e7bcb54cba427a7e3d6806a1b9e58f7",
+      "patchedSha256": "540d4a42efec4a396b882a8e194dbada91c9c0afba7f7b3776f7a167589b271b",
+      "replacements": [
+        {
+          "before": "  const walk = (node, parent = {}) => {\n",
+          "after": "  const walk = (node, parent = {}, nesting = 0) => {\n    // Protect public AST entry points as well as string-based parsing.\n    if (nesting > 129) {\n      throw new SyntaxError('[braces] nesting exceeds local safety limit (128)');\n    }\n"
+        },
+        {
+          "before": "walk(child, node);",
+          "after": "walk(child, node, nesting + 1);"
+        }
+      ]
+    },
+    {
+      "package": "sprintf-js",
+      "version": "1.0.3",
+      "file": "src/sprintf.js",
+      "originalSha256": "9904b0d448280bfdfcb0329bdac995883033597727404f9c058d051d9174b7c7",
+      "patchedSha256": "e2c379d276cab223aeeed41ed54760de7ba2ab12a020f1028756f3f35163b051",
+      "replacements": [
+        {
+          "before": "    function sprintf() {\n",
+          "after": "    // Local GHSA-hp3w-g68c-fv3c guard; Number formatting accepts at most\n    // 100 digits on the supported Node >= 20.9 runtime. String precision is\n    // substring length and deliberately keeps its existing semantics.\n    function validate_precision(match) {\n        if (match[7] !== undefined && /^[efg]$/.test(match[8])) {\n            var precision = Number(match[7]), minimum = match[8] === \"g\" ? 1 : 0\n            if (!Number.isInteger(precision) || precision < minimum || precision > 100) {\n                throw new SyntaxError(\"[sprintf] numeric precision is outside the supported range\")\n            }\n        }\n    }\n\n    function sprintf() {\n"
+        },
+        {
+          "before": "                match = parse_tree[i] // convenience purposes only\n",
+          "after": "                match = parse_tree[i] // convenience purposes only\n                validate_precision(match)\n"
+        },
+        {
+          "before": "            else if ((match = re.placeholder.exec(_fmt)) !== null) {\n",
+          "after": "            else if ((match = re.placeholder.exec(_fmt)) !== null) {\n                validate_precision(match)\n"
+        }
+      ]
+    }
+  ]
+}

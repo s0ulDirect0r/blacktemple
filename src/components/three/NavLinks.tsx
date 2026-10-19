@@ -40,6 +40,7 @@ const linksAbove: NavLink[] = [
 const linksBelow: NavLink[] = [
   { label: 'Book', zoneId: 'book' },
   { label: 'About Me', zoneId: 'about' },
+  { label: 'Members', zoneId: null, href: '/membership' },
 ];
 
 // All links combined for desktop star pattern

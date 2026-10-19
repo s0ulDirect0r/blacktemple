@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -195,11 +196,11 @@ export default function SwirlingAura({
 
     for (let i = 0; i < count; i++) {
       // Distribute on spherical shell, further out than corona
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = seededRandom(i, 601) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i, 602) - 1);
 
       // Shell from 1.2x to 2.4x core radius (20% smaller)
-      const radiusMultiplier = 1.2 + Math.random() * 1.2;
+      const radiusMultiplier = 1.2 + seededRandom(i, 603) * 1.2;
       const r = coreRadius * radiusMultiplier;
 
       pos[i * 3] = r * Math.sin(phi) * Math.cos(theta);
@@ -213,8 +214,8 @@ export default function SwirlingAura({
       col[i * 3 + 2] = color.b;
 
       // Random phase and speed for variation
-      pha[i] = Math.random() * Math.PI * 2;
-      spd[i] = 0.3 + Math.random() * 0.4; // Varying rotation speeds
+      pha[i] = seededRandom(i, 604) * Math.PI * 2;
+      spd[i] = 0.3 + seededRandom(i, 605) * 0.4; // Varying rotation speeds
       rad[i] = r;
     }
 

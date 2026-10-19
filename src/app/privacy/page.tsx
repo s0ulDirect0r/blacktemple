@@ -28,6 +28,20 @@ export default function PrivacyPage() {
             </section>
 
             <section className="space-y-4">
+              <h2 className="font-pixel text-base text-white">Membership accounts</h2>
+              <p>
+                A membership account stores your name, email, a protected password record, and sign-in sessions.
+                An essential session cookie keeps you signed in. The membership database also holds your chosen
+                tier, payment and access records, and any support or conversation requests you save.
+              </p>
+              <p>
+                Stripe handles card details directly. This site receives payment references and invoice status,
+                and sends Stripe your account name and email. Membership retention and account recovery
+                arrangements are still being reviewed before a live opening.
+              </p>
+            </section>
+
+            <section className="space-y-4">
               <h2 className="font-pixel text-base text-white">Booking a call</h2>
               <p>
                 When you book a call through this site, I collect your name, your

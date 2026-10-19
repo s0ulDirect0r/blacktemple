@@ -1,3 +1,4 @@
+import { seededRandom } from '@/lib/seeded-random';
 import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -27,11 +28,11 @@ export default function SurfaceActivity({
 
     for (let i = 0; i < count; i++) {
       // Random point on sphere
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
+      const theta = seededRandom(i, 502) * Math.PI * 2;
+      const phi = Math.acos(2 * seededRandom(i, 503) - 1);
 
       // Start at surface
-      const startRadius = coreRadius * (1.0 + Math.random() * 0.1);
+      const startRadius = coreRadius * (1.0 + seededRandom(i, 504) * 0.1);
 
       const x = Math.sin(phi) * Math.cos(theta);
       const y = Math.sin(phi) * Math.sin(theta);
@@ -42,13 +43,13 @@ export default function SurfaceActivity({
       pos[i * 3 + 2] = z * startRadius;
 
       // Radial outward velocity (0.03-0.11)
-      const speed = 0.03 + Math.random() * 0.08;
+      const speed = 0.03 + seededRandom(i, 505) * 0.08;
       vel[i * 3] = x * speed;
       vel[i * 3 + 1] = y * speed;
       vel[i * 3 + 2] = z * speed;
 
       // Slight color variation
-      const colorVariation = 0.9 + Math.random() * 0.2;
+      const colorVariation = 0.9 + seededRandom(i, 506) * 0.2;
       col[i * 3] = baseColor.r * colorVariation;
       col[i * 3 + 1] = baseColor.g * colorVariation;
       col[i * 3 + 2] = baseColor.b * colorVariation;
@@ -58,7 +59,7 @@ export default function SurfaceActivity({
   }, [coreRadius, count]);
 
   // Animation state for particle lifecycle
-  const particleLife = useRef(new Float32Array(count).fill(0).map(() => Math.random()));
+  const particleLife = useRef(new Float32Array(count).fill(0).map((_, i) => seededRandom(i, 501)));
   const maxLife = 3.0; // seconds before respawn
 
   useFrame((state, delta) => {
