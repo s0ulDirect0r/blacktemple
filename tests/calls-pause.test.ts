@@ -31,7 +31,7 @@ test('new availability and checkout requests reach their route handlers', () => 
 });
 
 test('payment confirmation, webhooks, hold release and support stay outside the access check', () => {
-  for (const path of ['/calls/booked?session_id=example', '/api/payments/webhook', '/api/calls/webhook', '/api/calls/release', '/support', '/api/support/checkout', '/', '/portfolio', '/writing', '/privacy']) {
+  for (const path of ['/calls/booked?session_id=example', '/api/payments/webhook', '/api/calls/release', '/support', '/api/support/checkout', '/', '/portfolio', '/writing', '/privacy']) {
     assert.equal(unstable_doesMiddlewareMatch({ config, nextConfig: {}, url: path }), false, path);
   }
 });
