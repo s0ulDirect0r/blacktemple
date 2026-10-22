@@ -4,6 +4,7 @@ import ImageManager from "@/components/ImageManager";
 import { GalleryProvider } from "@/context/GalleryContext";
 import AdminAuth from "@/components/AdminAuth";
 import MembersPanel from "@/components/MembersPanel";
+import FeedbackPanel from "@/components/FeedbackPanel";
 
 export default function AdminPage() {
   return (
@@ -15,6 +16,10 @@ export default function AdminPage() {
             <section>
               <h2 className="text-2xl font-semibold mb-4">Members</h2>
               <MembersPanel />
+            </section>
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">ESCALATION feedback</h2>
+              <FeedbackPanel />
             </section>
             <section>
               <h2 className="text-2xl font-semibold mb-4">Projects</h2>
