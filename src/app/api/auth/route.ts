@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createAdminToken, isAdminSecret } from '@/lib/admin-auth';
+import { rejectBots } from '@/lib/bot-guard';
 
 export async function POST(request: Request) {
+  const blocked = await rejectBots();
+  if (blocked) return blocked;
+
   try {
     const { secret } = await request.json();
 
