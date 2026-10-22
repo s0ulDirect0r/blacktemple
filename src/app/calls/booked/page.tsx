@@ -7,7 +7,8 @@ import { confirmCheckoutSession, describeSlot } from '@/lib/calls/checkout';
 import { stripe } from '@/lib/calls/stripe';
 import { CALLS_AVAILABLE } from '@/lib/calls/access';
 
-export const metadata: Metadata = { title: 'Booked', robots: { index: false } };
+export const metadata: Metadata = { title: 'Booked', robots: { index: false, follow: false }, referrer: 'no-referrer' };
+export const dynamic = 'force-dynamic';
 
 const CONTACT_EMAIL = 'matthewhuff89@gmail.com';
 

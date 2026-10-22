@@ -1,23 +1,6 @@
 import { NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 import { sql } from '@/lib/db';
-
-async function verifyAuth(request: Request) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return false;
-  }
-
-  const token = authHeader.split(' ')[1];
-  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
-  
-  try {
-    await jwtVerify(token, secret);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 export async function GET() {
   try {
@@ -38,7 +21,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    if (!await verifyAuth(request)) {
+    if (!await verifyAdminRequest(request)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

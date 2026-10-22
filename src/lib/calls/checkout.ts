@@ -152,10 +152,16 @@ export async function confirmCheckoutSession(
 ): Promise<CallBooking | null> {
   const bookingId = bookingIdOf(session);
   if (!bookingId || session.payment_status !== 'paid') return null;
+  // Only the session this booking created, paid in full, may confirm it.
+  if (session.amount_total !== CALL.priceCents || session.currency !== CALL.currency) return null;
 
   const paymentIntentId =
     typeof session.payment_intent === 'string' ? session.payment_intent : (session.payment_intent?.id ?? null);
-  const booking = await deps.markConfirmed(bookingId, { amountCents: session.amount_total, paymentIntentId });
+  const booking = await deps.markConfirmed(bookingId, {
+    sessionId: session.id,
+    amountCents: session.amount_total,
+    paymentIntentId,
+  });
   if (!booking || booking.calendarEventId) return booking;
 
   const event = await deps.createCallEvent(booking);
