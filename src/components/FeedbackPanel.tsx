@@ -82,7 +82,7 @@ export default function FeedbackPanel() {
           </tbody>
         </table>
       )}
-      {items === null ? <p className="text-gray-400">Loading feedback…</p> : items.length === 0 ? <p className="text-gray-400">No feedback yet.</p> : (
+      {items === null ? (!error && <p className="text-gray-400">Loading feedback…</p>) : items.length === 0 ? <p className="text-gray-400">No feedback yet.</p> : (
         <ul className="space-y-4">
           {items.map(item => (
             <li key={item.id} className="border-t border-white/10 pt-3 text-sm">
