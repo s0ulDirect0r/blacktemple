@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import type Stripe from 'stripe';
 import { POST as checkout } from '@/app/api/support/checkout/route';
-import { POST as webhook } from '@/app/api/calls/webhook/route';
+import { POST as webhook } from '@/app/api/payments/webhook/route';
 import { supportCents } from '@/lib/support/amount';
 import { checkoutSupport } from '@/lib/support/checkout';
 import { SUPPORT_LIVE_ACCOUNT_ID, supportConfiguration, supportSiteOrigin, supportStripe, verifySupportStripe } from '@/lib/support/config';
@@ -214,7 +214,7 @@ test('signed support webhook returns 200 only after canonical handling and 500 w
   t.after(() => retrieve.mock.restore());
   const body = JSON.stringify(event('checkout.session.completed', session({ client_reference_id: 'must_not_reach_calls' })));
   function delivery() {
-    return new Request('http://localhost/api/calls/webhook', { method: 'POST', body,
+    return new Request('http://localhost/api/payments/webhook', { method: 'POST', body,
       headers: { 'stripe-signature': stripe().webhooks.generateTestHeaderString({ payload: body, secret }) } });
   }
   assert.equal((await webhook(delivery())).status, 200);
@@ -233,6 +233,6 @@ test('existing webhook rejects missing and forged signatures before payment work
   const before = process.env.STRIPE_WEBHOOK_SECRET;
   process.env.STRIPE_WEBHOOK_SECRET = 'whsec_fixture_not_a_credential';
   t.after(() => { if (before === undefined) delete process.env.STRIPE_WEBHOOK_SECRET; else process.env.STRIPE_WEBHOOK_SECRET = before; });
-  assert.equal((await webhook(new Request('http://localhost/api/calls/webhook', { method: 'POST', body: '{}' }))).status, 400);
-  assert.equal((await webhook(new Request('http://localhost/api/calls/webhook', { method: 'POST', body: '{}', headers: { 'stripe-signature': 'forged' } }))).status, 400);
+  assert.equal((await webhook(new Request('http://localhost/api/payments/webhook', { method: 'POST', body: '{}' }))).status, 400);
+  assert.equal((await webhook(new Request('http://localhost/api/payments/webhook', { method: 'POST', body: '{}', headers: { 'stripe-signature': 'forged' } }))).status, 400);
 });

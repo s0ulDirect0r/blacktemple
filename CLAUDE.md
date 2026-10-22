@@ -123,7 +123,7 @@ Required in `.env`:
 - `BLOB_READ_WRITE_TOKEN` - Vercel Blob storage token
 
 For paid call booking (`/calls`, code in `src/lib/calls/`):
-- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe Checkout and the `/api/calls/webhook` endpoint
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` - Stripe Checkout and `/api/payments/webhook`, the webhook for one-time payments (calls and support). ESCALATION (`/api/escalation/stripe-webhook`) and paid membership (`/api/membership/webhook`) have their own endpoints.
 - `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` - Google Calendar access; get the refresh token with `npx tsx scripts/google-calendar-auth.ts`
 - `CALLS_AVAILABILITY_CALENDAR_ID` - calendar whose events are the bookable hours (the auth script creates an "Open for calls" calendar if unset)
 - `CALLS_BUSY_CALENDAR_IDS` - optional, comma-separated calendars that block slots (default `primary`)
