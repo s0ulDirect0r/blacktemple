@@ -99,13 +99,14 @@ Note: Must source `.env` before blob commands to access `BLOB_READ_WRITE_TOKEN`.
   - Metadata includes title, description, project association, tags
   - Projects stored in `projects` table
 
-### Database Schema
+### Databases
 
-- **`artworks`** - Artwork images with metadata
-- **`projects`** - Project categories for organizing artwork
-- **`migrations`** - Migration tracking table
+Black Temple is Matthew's platform: a place members and ESCALATION players visit, follow the work and eventually pay to be part of. It serves people within his Temple; it is not a multi-creator platform. Two PostgreSQL databases live in one Neon project:
 
-Migrations are numbered SQL files in `migrations/` directory.
+- **`temple`** — the platform. Accounts (Better Auth `member_*` tables), the free and paid memberships, the Temple community, ESCALATION (supporters, saves, feedback) and other people-centered features. Connection: `MEMBERSHIP_DATABASE_URL` (the `MEMBERSHIP_` prefix predates the rename). Migrations: `migrations/membership/*.sql`, applied with `npm run membership:migrate`. Code: `src/lib/membership/`, `src/lib/temple/`, `src/lib/escalation/`.
+- **`neondb`** — the public site. `artworks`, `projects`, `migrations`, plus call bookings and the support payment ledger. Connection: `DATABASE_URL`. Migrations: numbered SQL files in `migrations/`.
+
+New features about people go in `temple`. Call bookings and support payments are people data that may move to `temple` later. "Membership" in code and settings names is one feature of the platform (how people pay), not the platform itself.
 
 ## Key Components
 
