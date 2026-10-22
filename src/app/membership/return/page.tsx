@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { requireMemberSession } from '@/lib/membership/auth';
+import { paidMembershipVisible } from '@/lib/membership/config';
 import { membershipDatabase } from '@/lib/membership/database';
 import Confirmation from '@/components/membership/Confirmation';
 import SessionGuard from '@/components/membership/SessionGuard';
@@ -8,6 +9,7 @@ import ui from '@/components/membership/confirmation.module.css';
 
 export const metadata = { title: 'Membership confirmation', robots: { index: false } };
 export default async function ReturnPage({ searchParams }: { searchParams: Promise<{ checkout?: string }> }) {
+  if (!paidMembershipVisible()) notFound();
   const checkout = (await searchParams).checkout;
   const returnPath = '/membership/return?checkout=' + encodeURIComponent(checkout ?? '');
   const session = await requireMemberSession(returnPath);

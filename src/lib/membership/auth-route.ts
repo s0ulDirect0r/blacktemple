@@ -1,6 +1,7 @@
 import { stagingAccountAllowed } from './staging-policy';
 import { transaction } from './database';
 import { tokenHash } from './email';
+import { safeGameReturn } from './config';
 
 const prefix = '/api/member-auth';
 const postPaths = new Set(['/sign-up/email','/sign-in/email','/sign-out','/send-verification-email','/request-password-reset','/reset-password']);
@@ -13,6 +14,14 @@ export function accountCallback(value: unknown, route: '/login' | '/login/reset'
   const url = new URL(value,origin);
   if (url.origin !== origin || url.pathname !== route) throw new Error('Invalid callback');
 }
+/** The verified-login callback, keeping a validated ESCALATION return target if one was requested. */
+export function loginCallback(requested: unknown, origin: string) {
+  let gameReturn: string | null = null;
+  if (typeof requested === 'string') {
+    try { gameReturn = safeGameReturn(new URL(requested, origin).searchParams.get('return')); } catch { gameReturn = null; }
+  }
+  return '/login?verified=1' + (gameReturn ? '&return=' + encodeURIComponent(gameReturn) : '');
+}
 export function verificationResult(requestURL: string, state: 'invalid'|'expired'|'used') {
   return Response.redirect(new URL('/login?verification='+state,new URL(process.env.BETTER_AUTH_URL ?? requestURL).origin),303);
 }
@@ -23,7 +32,7 @@ async function verifyOnce(request: Request, handler: (request: Request) => Promi
   const origin = new URL(process.env.BETTER_AUTH_URL!).origin;
   try { accountCallback(url.searchParams.get('callbackURL') ?? undefined,'/login',origin); }
   catch { return clientError(400,'This account link has an invalid redirect.'); }
-  url.searchParams.set('callbackURL','/login?verified=1');
+  url.searchParams.set('callbackURL',loginCallback(url.searchParams.get('callbackURL'),origin));
   return transaction(async client => {
     const row = (await client.query<{expires_at:Date;consumed_at:Date|null}>('SELECT expires_at,consumed_at FROM member_email_tokens WHERE token_hash=$1 FOR UPDATE',[tokenHash(token)])).rows[0];
     if (!row) return verificationResult(request.url,'invalid');
@@ -69,7 +78,8 @@ export async function handleAccountRequest(request: Request, handlers: {GET:(req
     if ((sensitive || route === '/sign-in/email') && !stagingAccountAllowed(body.email)) {
       return sensitive ? generic() : clientError(401,'That email and password could not sign you in.');
     }
-    if (route === '/send-verification-email' || route === '/sign-up/email') body.callbackURL='/login?verified=1';
+    if (route === '/send-verification-email' || route === '/sign-up/email') body.callbackURL=loginCallback(body.callbackURL,origin);
+    if (route === '/sign-up/email') body.emailUpdates = body.emailUpdates === true;
     if (route === '/request-password-reset') body.redirectTo='/login/reset';
     const headers = new Headers(request.headers);
     headers.delete('content-length');

@@ -26,7 +26,8 @@ function createAuth() {
       expiresIn: VERIFICATION_SECONDS,
       sendVerificationEmail: data => enqueueAccountEmail('verify', data),
     },
-    user: { modelName: 'member_user' },
+    // emailUpdates: opt-in to occasional news (new work, ESCALATION). Never required.
+    user: { modelName: 'member_user', additionalFields: { emailUpdates: { type: 'boolean', required: false, defaultValue: false, input: true } } },
     account: { modelName: 'member_auth_account' },
     verification: { modelName: 'member_verification' },
     session: { modelName: 'member_session', expiresIn: 60 * 60 * 24 * 7, updateAge: 60 * 60 * 24, cookieCache: { enabled: false } },

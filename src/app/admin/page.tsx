@@ -3,6 +3,7 @@ import ProjectManager from "@/components/ProjectManager";
 import ImageManager from "@/components/ImageManager";
 import { GalleryProvider } from "@/context/GalleryContext";
 import AdminAuth from "@/components/AdminAuth";
+import MembersPanel from "@/components/MembersPanel";
 
 export default function AdminPage() {
   return (
@@ -11,6 +12,10 @@ export default function AdminPage() {
         <main className="min-h-screen p-8">
           <h1 className="text-4xl font-bold mb-8">Black Temple Admin</h1>
           <div className="space-y-12">
+            <section>
+              <h2 className="text-2xl font-semibold mb-4">Members</h2>
+              <MembersPanel />
+            </section>
             <section>
               <h2 className="text-2xl font-semibold mb-4">Projects</h2>
               <ProjectManager />

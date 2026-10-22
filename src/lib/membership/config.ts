@@ -71,3 +71,25 @@ export function safeReturnPath(value: unknown): string {
   const url = new URL(value, 'https://blacktemple.invalid');
   return url.origin === 'https://blacktemple.invalid' && (url.pathname === '/members' || url.pathname.startsWith('/members/') || ['/membership/checkout','/membership/return','/membership/welcome'].includes(url.pathname)) ? url.pathname + url.search : '/members';
 }
+
+/**
+ * Paid tiers, checkout and the paid welcome are shown only when explicitly
+ * enabled. Production runs free accounts only until the paid offering opens.
+ */
+export function paidMembershipVisible(env: Readonly<Record<string, string | undefined>> = process.env) {
+  return env.MEMBERSHIP_PAID_VISIBLE === 'true';
+}
+
+/** Member pages a free account can open. */
+export const FREE_MEMBER_PATHS = ['/members', '/members/support'];
+
+export const ESCALATION_ORIGIN = 'https://escalation.blacktemple.dev';
+
+/** Sign-in may return to the ESCALATION game's front page (with an optional query), nowhere else. */
+export function safeGameReturn(value: unknown): string | null {
+  if (typeof value !== 'string' || value.length > 2048 || /[\\\u0000-\u001f]/.test(value)) return null;
+  let url: URL;
+  try { url = new URL(value); } catch { return null; }
+  if (url.origin !== ESCALATION_ORIGIN || url.pathname !== '/' || url.username || url.password || url.hash) return null;
+  return url.origin + '/' + url.search;
+}

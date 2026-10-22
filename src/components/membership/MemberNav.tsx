@@ -6,9 +6,10 @@ import { memberAuthClient } from '@/lib/membership/auth-client';
 import styles from './membership.module.css';
 
 const links = [['/members','Studio'],['/members/feed','Shared Temple'],['/members/identity','Identity & export'],['/members/gatherings','Gatherings'],['/members/conversations','Private conversations'],['/members/membership','My Membership'],['/members/support','Support']];
-export default function MemberNav() {
+const freeLinks = [['/members','Home'],['/members/support','Support']];
+export default function MemberNav({ paid }: { paid: boolean }) {
   const pathname = usePathname();
-  return <nav className={styles.tabs} aria-label="Member spaces">{links.map(([href,label]) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}</nav>;
+  return <nav className={styles.tabs} aria-label="Member spaces">{(paid ? links : freeLinks).map(([href,label]) => <Link key={href} href={href} aria-current={pathname === href ? 'page' : undefined}>{label}</Link>)}</nav>;
 }
 export function SignOut() {
   const [error,setError] = useState('');

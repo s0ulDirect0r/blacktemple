@@ -33,7 +33,10 @@ export function proxy(request: NextRequest) {
       response.headers.set('Cache-Control', 'private, no-store');
       return response;
     }
-    const response = NextResponse.next();
+    // The members layout uses this to keep free accounts on the pages open to them.
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('x-member-path', path);
+    const response = NextResponse.next({ request: { headers: requestHeaders } });
     response.headers.set('Cache-Control', 'private, no-store');
     return response;
   }

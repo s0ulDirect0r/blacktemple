@@ -128,6 +128,10 @@ For paid call booking (`/calls`, code in `src/lib/calls/`):
 - `CALLS_AVAILABILITY_CALENDAR_ID` - calendar whose events are the bookable hours (the auth script creates an "Open for calls" calendar if unset)
 - `CALLS_BUSY_CALENDAR_IDS` - optional, comma-separated calendars that block slots (default `primary`)
 
+For membership (`/membership`, `/members`, code in `src/lib/membership/`, see `.env.membership.example`):
+- Free accounts are the general membership. `MEMBERSHIP_PAID_VISIBLE=true` shows the paid tiers, checkout and paid member spaces; production leaves it unset.
+- ESCALATION (escalation.blacktemple.dev) uses `/api/escalation/*` for sign-in status, supporter payments (Stripe webhook, `ESCALATION_STRIPE_WEBHOOK_SECRET`) and cloud saves.
+
 ## Testing
 
 Tests use Node.js native test runner (`node --test`):

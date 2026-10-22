@@ -1,8 +1,8 @@
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { requireMemberSession } from '@/lib/membership/auth';
 import { currentMembership } from '@/lib/membership/store';
-import { hasAccess } from '@/lib/membership/config';
+import { hasAccess, paidMembershipVisible } from '@/lib/membership/config';
 import { ownProfile } from '@/lib/temple/store';
 import SessionGuard from '@/components/membership/SessionGuard';
 import Arrival from '@/components/temple/Arrival';
@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Welcome to the Temple', robots: { index: false, follow: false } };
 
 export default async function WelcomePage() {
+  if (!paidMembershipVisible()) notFound();
   const session = await requireMemberSession('/membership/welcome');
   if (!hasAccess(await currentMembership(session.user.id))) redirect('/members/membership');
   if (await ownProfile(session.user.id)) redirect('/members/feed');

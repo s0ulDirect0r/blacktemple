@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireMemberSession } from '@/lib/membership/auth';
-import { tierById, money } from '@/lib/membership/config';
+import { tierById, money, paidMembershipVisible } from '@/lib/membership/config';
 import CheckoutButton from '@/components/membership/CheckoutButton';
 import SessionGuard from '@/components/membership/SessionGuard';
 import styles from '@/components/membership/membership.module.css';
 
 export const metadata = { title: 'Choose your membership', robots: { index: false } };
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ tier?: string }> }) {
+  if (!paidMembershipVisible()) notFound();
   const tier = tierById((await searchParams).tier);
   if (!tier) notFound();
   const session = await requireMemberSession('/membership/checkout?tier=' + tier.id);

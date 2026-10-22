@@ -1,15 +1,18 @@
 import Link from 'next/link';
 import { pageMetadata } from '@/lib/site';
 import { memberSession } from '@/lib/membership/auth';
-import { TIERS, money } from '@/lib/membership/config';
+import { TIERS, money, paidMembershipVisible } from '@/lib/membership/config';
+import FreeMembership from '@/components/membership/FreeMembership';
 import styles from '@/components/membership/membership.module.css';
 import Testimonials from '@/components/temple/Testimonials';
 import ui from '@/components/temple/temple.module.css';
 import { localTemplePreview } from '@/lib/temple/preview';
 
-export const metadata = pageMetadata({ title: 'Membership', description: 'A temple of creative experimentation. Support Anansi’s work and make room for your own creativity in the shared Temple.', path: '/membership' });
+export const metadata = pageMetadata({ title: 'Membership', description: 'Join Black Temple: one free account for ESCALATION and the games, art and writing taking shape here.', path: '/membership' });
+export const dynamic = 'force-dynamic';
 export default async function MembershipPage() {
   const session = await memberSession();
+  if (!paidMembershipVisible()) return <FreeMembership signedIn={Boolean(session)} />;
   return <div className={styles.world}><main className={styles.shell}>
     {localTemplePreview()&&<p className={styles.badge}>Local synthetic preview · test accounts and contributions</p>}
     <header className={styles.hero}>
