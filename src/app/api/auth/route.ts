@@ -1,32 +1,20 @@
 import { NextResponse } from 'next/server';
-import { SignJWT } from 'jose';
-import { nanoid } from 'nanoid';
-
-// Create a new JWT token
-async function createToken() {
-  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
-  const token = await new SignJWT({})
-    .setProtectedHeader({ alg: 'HS256' })
-    .setJti(nanoid())
-    .setIssuedAt()
-    .setExpirationTime('24h')
-    .sign(secret);
-  
-  return token;
-}
+import { createAdminToken, isAdminSecret } from '@/lib/admin-auth';
 
 export async function POST(request: Request) {
   try {
     const { secret } = await request.json();
-    
-    if (!secret || secret !== process.env.ADMIN_SECRET) {
+
+    if (!isAdminSecret(secret)) {
+      // Slow down online guessing; there is no shared store for a real rate limit.
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const token = await createToken();
+    const token = await createAdminToken();
     return NextResponse.json({ token });
   } catch (error) {
     console.error('Auth error:', error);
@@ -35,4 +23,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

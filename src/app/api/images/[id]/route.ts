@@ -1,26 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { jwtVerify } from 'jose';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 import { sql } from '@/lib/db';
 import { getArtworkById, mapRowToArtwork, ArtworkRow } from '@/lib/gallery';
 import { ArtworkMetadata } from '@/types/artwork';
-
-// Simple auth verification
-async function verifyAuth(request: NextRequest) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return false;
-  }
-
-  const token = authHeader.split(' ')[1];
-  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
-  
-  try {
-    await jwtVerify(token, secret);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 // GET handler to fetch a single image by ID
 export async function GET(
@@ -52,7 +34,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   // 1. Check authentication
-  if (!await verifyAuth(request)) {
+  if (!await verifyAdminRequest(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

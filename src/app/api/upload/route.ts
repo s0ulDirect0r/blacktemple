@@ -1,30 +1,22 @@
 import { NextResponse } from 'next/server';
 import { put } from '@vercel/blob';
 import { sql } from '@/lib/db';
-import { jwtVerify } from 'jose';
+import { verifyAdminRequest } from '@/lib/admin-auth';
 import { imageSize } from 'image-size';
+import { nanoid } from 'nanoid';
 import { ArtworkMetadata } from '@/types/artwork';
 
-async function verifyAuth(request: Request) {
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return false;
-  }
-
-  const token = authHeader.split(' ')[1];
-  const secret = new TextEncoder().encode(process.env.ADMIN_SECRET);
-  
-  try {
-    await jwtVerify(token, secret);
-    return true;
-  } catch {
-    return false;
-  }
-}
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+const ALLOWED_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+};
 
 export async function POST(request: Request) {
   try {
-    if (!await verifyAuth(request)) {
+    if (!await verifyAdminRequest(request)) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -32,36 +24,56 @@ export async function POST(request: Request) {
     }
 
     const data = await request.formData();
-    const file = data.get('file') as File;
-    const metadata = JSON.parse(data.get('metadata') as string) as ArtworkMetadata;
-
-    if (!file) {
+    const file = data.get('file');
+    if (!(file instanceof File)) {
       return NextResponse.json(
         { error: 'No file provided' },
         { status: 400 }
       );
     }
-
-    // Read the file once: measure its pixel dimensions and upload the same bytes.
-    const bytes = Buffer.from(await file.arrayBuffer());
-
-    let width: number | null = null;
-    let height: number | null = null;
-    try {
-      const size = imageSize(bytes);
-      if (size.width && size.height) {
-        width = size.width;
-        height = size.height;
-      }
-    } catch (measureError) {
-      console.warn('Could not measure image dimensions:', measureError);
+    if (file.size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        { error: 'File is too large' },
+        { status: 413 }
+      );
     }
 
-    // Upload to Vercel Blob
-    const blob = await put(file.name, bytes, {
+    let metadata: ArtworkMetadata;
+    try {
+      metadata = JSON.parse(String(data.get('metadata'))) as ArtworkMetadata;
+    } catch {
+      return NextResponse.json(
+        { error: 'Invalid metadata' },
+        { status: 400 }
+      );
+    }
+
+    // Read the file once: detect its real type and dimensions and upload the same bytes.
+    const bytes = Buffer.from(await file.arrayBuffer());
+
+    let size: ReturnType<typeof imageSize>;
+    try {
+      size = imageSize(bytes);
+    } catch {
+      return NextResponse.json(
+        { error: 'File is not a supported image' },
+        { status: 415 }
+      );
+    }
+    const contentType = size.type ? ALLOWED_TYPES[size.type] : undefined;
+    if (!contentType || !size.width || !size.height) {
+      return NextResponse.json(
+        { error: 'File is not a supported image' },
+        { status: 415 }
+      );
+    }
+    const { width, height } = size;
+
+    // Upload to Vercel Blob under a server-chosen name, with the detected type.
+    const blob = await put(`art/${nanoid()}.${size.type === 'jpg' ? 'jpg' : size.type}`, bytes, {
       access: 'public',
       token: process.env.BLOB_READ_WRITE_TOKEN!,
-      contentType: file.type || undefined,
+      contentType,
     });
 
     // Store metadata in database
@@ -84,8 +96,8 @@ export async function POST(request: Request) {
         ${metadata.tags || []},
         ${width},
         ${height},
-        ${metadata.created_at},
-        ${metadata.updated_at}
+        NOW(),
+        NOW()
       )
       RETURNING id;
     `;

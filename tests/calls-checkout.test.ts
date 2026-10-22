@@ -28,6 +28,7 @@ function session(overrides: Partial<Stripe.Checkout.Session> = {}): Stripe.Check
     payment_status: 'paid',
     payment_intent: 'pi_test_1',
     amount_total: 10_000,
+    currency: 'usd',
     ...overrides,
   } as Stripe.Checkout.Session;
 }
@@ -81,13 +82,20 @@ test('confirmCheckoutSession ignores unpaid sessions', async () => {
   assert.equal(deps.markConfirmed.mock.callCount(), 0);
 });
 
+test('confirmCheckoutSession ignores sessions that did not pay the call price', async () => {
+  const deps = fakeDeps(booking);
+  assert.equal(await confirmCheckoutSession(session({ amount_total: 100 }), deps), null);
+  assert.equal(await confirmCheckoutSession(session({ currency: 'eur' }), deps), null);
+  assert.equal(deps.markConfirmed.mock.callCount(), 0);
+});
+
 test('confirmCheckoutSession marks the booking paid and sends one invite', async () => {
   const deps = fakeDeps(booking);
   const result = await confirmCheckoutSession(session(), deps);
 
   assert.deepEqual(deps.markConfirmed.mock.calls[0].arguments, [
     booking.id,
-    { amountCents: 10_000, paymentIntentId: 'pi_test_1' },
+    { sessionId: 'cs_test_1', amountCents: 10_000, paymentIntentId: 'pi_test_1' },
   ]);
   assert.equal(deps.createCallEvent.mock.callCount(), 1);
   assert.deepEqual(deps.setCalendarEvent.mock.calls[0].arguments, [

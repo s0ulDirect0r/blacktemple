@@ -129,7 +129,7 @@ export class SlotTakenError extends Error {
  */
 export async function markConfirmed(
   id: string,
-  payment: { amountCents: number | null; paymentIntentId: string | null },
+  payment: { sessionId: string; amountCents: number | null; paymentIntentId: string | null },
 ): Promise<CallBooking | null> {
   try {
     const rows = (await sql`
@@ -138,7 +138,7 @@ export async function markConfirmed(
           confirmed_at = COALESCE(confirmed_at, now()),
           amount_cents = ${payment.amountCents},
           stripe_payment_intent_id = ${payment.paymentIntentId}
-      WHERE id = ${id}
+      WHERE id = ${id} AND stripe_session_id = ${payment.sessionId}
       RETURNING *
     `) as BookingRow[];
     return rows[0] ? toBooking(rows[0]) : null;
