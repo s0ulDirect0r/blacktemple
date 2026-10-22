@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { SignJWT, jwtVerify } from 'jose';
 import { membershipDatabase } from '@/lib/membership/database';
+import { dollars, postSignal } from '@/lib/sense/signals';
 
 export const ESCALATION_PRODUCT = 'escalation_early_access';
 export const MAX_SAVE_BYTES = 256 * 1024;
@@ -62,12 +63,17 @@ export interface SupporterPayment {
 
 /** Record a paid early-access checkout once; repeated deliveries are ignored. */
 export async function recordSupporterPayment(payment: SupporterPayment) {
-  await membershipDatabase().query(
+  const result = await membershipDatabase().query(
     `INSERT INTO escalation_supporters (stripe_session_id, user_id, email, amount_cents, currency, livemode, paid_at)
      SELECT $1, (SELECT id FROM member_user WHERE id = $2), $3, $4, $5, $6, $7
      ON CONFLICT (stripe_session_id) DO NOTHING`,
     [payment.sessionId, payment.userId, payment.email?.toLowerCase() ?? null, payment.amountCents, payment.currency, payment.livemode, payment.paidAt],
   );
+  // Only the first delivery of a payment is news.
+  if (result.rowCount) {
+    const who = payment.email ?? 'someone';
+    await postSignal('supporter', `ESCALATION early access: **${dollars(payment.amountCents, payment.currency)}** from ${who}${payment.livemode ? '' : ' (test)'}`);
+  }
 }
 
 /** Early-access payments for a member: linked to them, or made with their verified email. */

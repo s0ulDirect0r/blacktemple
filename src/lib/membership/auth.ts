@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation';
 import { membershipDatabase } from './database';
 import { safeReturnPath } from './config';
 import { enqueueAccountEmail, VERIFICATION_SECONDS, RESET_SECONDS } from './email';
+import { postSignal } from '@/lib/sense/signals';
 
 export function authConfigured() { return Boolean(process.env.MEMBERSHIP_DATABASE_URL && process.env.BETTER_AUTH_SECRET && process.env.BETTER_AUTH_URL); }
 let instance: ReturnType<typeof createAuth> | undefined;
@@ -25,6 +26,10 @@ function createAuth() {
       sendOnSignUp: true, sendOnSignIn: false, autoSignInAfterVerification: false,
       expiresIn: VERIFICATION_SECONDS,
       sendVerificationEmail: data => enqueueAccountEmail('verify', data),
+      afterEmailVerification: async user => {
+        const optedIn = (user as { emailUpdates?: boolean }).emailUpdates ? ' · wants email updates' : '';
+        await postSignal('member', `New member: **${user.name}**${optedIn}`);
+      },
     },
     // emailUpdates: opt-in to occasional news (new work, ESCALATION). Never required.
     user: { modelName: 'member_user', additionalFields: { emailUpdates: { type: 'boolean', required: false, defaultValue: false, input: true } } },
