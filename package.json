@@ -40,7 +40,7 @@
     "image-size": "^2.0.4",
     "jose": "^6.0.8",
     "nanoid": "^5.1.2",
-    "next": "16.3.8",
+    "next": "16.4.2",
     "next-cloudinary": "^6.16.0",
     "next-mdx-remote": "^6.0.0",
     "pg": "8.23.1",
