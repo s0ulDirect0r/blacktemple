@@ -189,7 +189,7 @@ function ThreadPane({ id, titles, existingNotes, onOpen, onChanged }: { id: stri
   return (
     <div className="flex h-full flex-col">
       <p className="px-4 pt-4 text-xs text-zinc-500">Thread in #{thread.root.channel}</p>
-      <div className="flex-1 space-y-1 overflow-y-auto p-2">
+      <div className="sense-scroll flex-1 space-y-1 overflow-y-auto p-2">
         <PostItem post={thread.root} onOpen={onOpen} onChanged={changed} titles={titles} existingNotes={existingNotes} compact />
         <div className="ml-3 border-l border-white/10 pl-2">
           {thread.replies.map((reply, i) => <PostItem key={reply.id} post={reply} grouped={continues(thread.replies[i - 1], reply)} onOpen={onOpen} onChanged={changed} titles={titles} existingNotes={existingNotes} compact />)}
@@ -214,7 +214,30 @@ export default function SenseApp() {
   // Phones and tablets: the sidebar slides over the feed, and panes open full screen.
   const [drawer, setDrawer] = useState(false);
   const [error, setError] = useState('');
-  const feedEnd = useRef<HTMLDivElement>(null);
+  // Like Discord: stay pinned to the newest post unless you've scrolled up to read.
+  const feedScroll = useRef<HTMLDivElement>(null);
+  const feedContent = useRef<HTMLDivElement>(null);
+  const atBottom = useRef(true);
+  const [showJump, setShowJump] = useState(false);
+  const scrollToLatest = useCallback((smooth = false) => {
+    const el = feedScroll.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+  }, []);
+  const onFeedScroll = () => {
+    const el = feedScroll.current;
+    if (!el) return;
+    const fromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    atBottom.current = fromBottom < 80;
+    setShowJump(fromBottom > 400);
+  };
+  // Images and edits change the feed's height after render; keep the newest post in view if you were there.
+  useEffect(() => {
+    const content = feedContent.current;
+    if (!content) return;
+    const observer = new ResizeObserver(() => { if (atBottom.current) scrollToLatest(); });
+    observer.observe(content);
+    return () => observer.disconnect();
+  }, [scrollToLatest]);
 
   // Written and unwritten titles for [[ autocomplete, once each regardless of case.
   const titles = useMemo(() => {
@@ -235,18 +258,24 @@ export default function SenseApp() {
   const hasMore = feed?.key === viewKey && feed.hasMore;
   const found = results?.key === viewKey ? results.found : null;
 
+  /** `scroll`: jump to the newest post (opening a channel, posting). Otherwise only follow if already at the bottom. */
   const loadFeed = useCallback((scroll = true) => {
     if (view.kind !== 'channel') return Promise.resolve();
     return sense<{ posts: SensePost[]; hasMore: boolean }>(`/posts?channel=${view.slug}`).then(result => {
       setFeed({ key: JSON.stringify(view), ...result });
-      if (scroll) requestAnimationFrame(() => feedEnd.current?.scrollIntoView());
+      if (scroll) atBottom.current = true;
+      if (atBottom.current) requestAnimationFrame(() => scrollToLatest());
     });
-  }, [view]);
+  }, [view, scrollToLatest]);
 
   const loadOlder = async () => {
     if (view.kind !== 'channel' || !posts?.length) return;
     const result = await sense<{ posts: SensePost[]; hasMore: boolean }>(`/posts?channel=${view.slug}&before=${encodeURIComponent(posts[0].createdAt)}`);
+    // Keep the post you were reading in place while older ones load above it.
+    const el = feedScroll.current;
+    const fromBottom = el ? el.scrollHeight - el.scrollTop : 0;
     setFeed({ key: viewKey, posts: [...result.posts, ...posts], hasMore: result.hasMore });
+    requestAnimationFrame(() => { if (el) el.scrollTop = el.scrollHeight - fromBottom; });
   };
 
   useEffect(() => {
@@ -315,7 +344,7 @@ export default function SenseApp() {
               className="w-full rounded border border-white/15 bg-black/40 px-2 py-1 text-sm" />
           </form>
         </div>
-        <div className="flex-1 space-y-5 overflow-y-auto p-3 text-sm" onClick={e => { const button = (e.target as HTMLElement).closest('button'); if (button && !button.dataset.keepOpen) setDrawer(false); }}>
+        <div className="sense-scroll flex-1 space-y-5 overflow-y-auto p-3 text-sm" onClick={e => { const button = (e.target as HTMLElement).closest('button'); if (button && !button.dataset.keepOpen) setDrawer(false); }}>
           <section>
             <div className="mb-1 flex items-center justify-between text-xs text-zinc-500">
               <span>Channels</span>
@@ -382,19 +411,28 @@ export default function SenseApp() {
           </div>
           {error && <p role="alert" className="mt-1 text-xs text-red-300">{error} <button type="button" onClick={() => setError('')} className="underline">Dismiss</button></p>}
         </header>
-        <div className="flex-1 overflow-y-auto px-2 py-3">
+        <div className="relative min-h-0 flex-1">
+        <div ref={feedScroll} onScroll={onFeedScroll} className="sense-scroll h-full overflow-y-auto px-2 py-3">
+          <div ref={feedContent}>
           {view.kind === 'channel' ? (
             posts === null ? <p className="px-3 text-sm text-zinc-500">Loading…</p> : (
               <>
                 {hasMore && <button type="button" onClick={loadOlder} className="mb-2 px-3 text-xs text-zinc-500 hover:text-zinc-300">Load earlier posts</button>}
                 {posts.length === 0 && <p className="px-3 text-sm text-zinc-500">Start the channel. Post a thought, link a [[note]], paste an image.</p>}
                 {posts.map((post, i) => <PostItem key={post.id} post={post} grouped={continues(posts[i - 1], post)} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />)}
-                <div ref={feedEnd} />
               </>
             )
           ) : (
             <FoundList results={found} onOpenFound={openFound} empty={view.kind === 'tag' ? 'Nothing tagged yet.' : 'Nothing matches.'} />
           )}
+          </div>
+        </div>
+        {view.kind === 'channel' && showJump && (
+          <button type="button" onClick={() => scrollToLatest(true)}
+            className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full border border-white/15 bg-zinc-900/95 px-4 py-1.5 text-xs text-zinc-200 shadow-lg hover:bg-zinc-800">
+            Jump to latest ↓
+          </button>
+        )}
         </div>
         {view.kind === 'channel' && (
           <div className="border-t border-white/10 p-3">
@@ -404,7 +442,7 @@ export default function SenseApp() {
         )}
       </main>
 
-      <aside className={`${pane ? 'fixed inset-0 z-20 block' : 'hidden'} min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:static lg:block`}>
+      <aside className={`${pane ? 'fixed inset-0 z-20 block' : 'hidden'} sense-scroll min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:static lg:block`}>
         {pane && (
           <div className="flex px-3 lg:justify-end">
             <button type="button" onClick={() => setPane(null)} aria-label="Close panel" className="text-sm text-zinc-400 hover:text-zinc-200 lg:text-xs lg:text-zinc-500">
