@@ -32,13 +32,26 @@ export default function Composer({ placeholder, titles, initial = '', mode = 'en
 
   useEffect(() => { setText(initial); }, [initial]);
 
-  // Grow with the text instead of scrolling inside the box.
-  useLayoutEffect(() => {
+  // Grow with the text instead of scrolling inside the box, and re-fit when the width changes.
+  const fit = useCallback(() => {
     const el = ref.current;
     if (!el) return;
+    const max = mode === 'editor' ? 100000 : 320;
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, mode === 'editor' ? 100000 : 320)}px`;
-  }, [text, mode]);
+    // The box is border-box sized, so add the border back onto the content height.
+    const border = el.offsetHeight - el.clientHeight;
+    el.style.height = `${Math.min(el.scrollHeight + border, max)}px`;
+    el.style.overflowY = el.scrollHeight + border > max ? 'auto' : 'hidden';
+  }, [mode]);
+  useLayoutEffect(fit, [text, fit]);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    let width = el.clientWidth;
+    const observer = new ResizeObserver(() => { if (el.clientWidth !== width) { width = el.clientWidth; fit(); } });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [fit]);
 
   const update = (value: string) => { setText(value); onChange?.(value); };
 

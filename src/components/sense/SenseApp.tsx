@@ -11,9 +11,19 @@ type Pane = { kind: 'thread'; id: string } | { kind: 'note'; title: string } | n
 
 const AUTHOR_STYLE: Record<string, string> = { owner: 'text-zinc-200', agent: 'text-sky-300', member: 'text-emerald-300', system: 'text-amber-300' };
 
-function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, compact }: {
+/** Like Discord: a post continues the one above when the same author wrote again within 7 minutes. */
+const GROUP_WINDOW_MS = 7 * 60 * 1000;
+function continues(previous: SensePost | undefined, post: SensePost) {
+  return Boolean(previous) && post.author.kind !== 'system' && previous!.author.kind === post.author.kind &&
+    previous!.author.label === post.author.label &&
+    new Date(post.createdAt).getTime() - new Date(previous!.createdAt).getTime() < GROUP_WINDOW_MS;
+}
+
+function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, compact, grouped }: {
   post: SensePost; onOpen: (t: SenseTarget) => void; onThread?: (id: string) => void; onChanged: () => void;
   titles: string[]; existingNotes: Set<string>; compact?: boolean;
+  /** Continues the post above: no name line; time and actions appear on hover. */
+  grouped?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [weaving, setWeaving] = useState(false);
@@ -38,19 +48,32 @@ function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, co
     catch (e) { setError(e instanceof Error ? e.message : 'That didn’t delete.'); }
   };
 
+  const actions = (
+    <span className="ml-auto hidden gap-3 text-zinc-500 group-hover:flex group-focus-within:flex">
+      {onThread && <button type="button" onClick={() => onThread(post.parentId ?? post.id)} className="hover:text-zinc-200">Reply</button>}
+      <button type="button" onClick={() => setWeaving(w => !w)} className="hover:text-zinc-200">Weave</button>
+      {!signal && <button type="button" onClick={() => setEditing(e => !e)} className="hover:text-zinc-200">Edit</button>}
+      <button type="button" onClick={remove} className="hover:text-red-300">Delete</button>
+    </span>
+  );
+
   return (
-    <article className={`group rounded-md px-3 py-2 hover:bg-white/[0.03] ${signal ? 'border-l-2 border-amber-400/50 rounded-l-none' : ''}`}>
-      <header className="flex items-baseline gap-2 text-xs">
-        <span className={`font-medium ${AUTHOR_STYLE[post.author.kind] ?? 'text-zinc-200'}`}>{post.author.label}</span>
-        <time className="text-zinc-500" dateTime={post.createdAt}>{timeLabel(post.createdAt)}</time>
-        {post.editedAt && <span className="text-zinc-600">edited</span>}
-        <span className="ml-auto hidden gap-3 text-zinc-500 group-hover:flex group-focus-within:flex">
-          {onThread && <button type="button" onClick={() => onThread(post.parentId ?? post.id)} className="hover:text-zinc-200">Reply</button>}
-          <button type="button" onClick={() => setWeaving(w => !w)} className="hover:text-zinc-200">Weave</button>
-          {!signal && <button type="button" onClick={() => setEditing(e => !e)} className="hover:text-zinc-200">Edit</button>}
-          <button type="button" onClick={remove} className="hover:text-red-300">Delete</button>
-        </span>
-      </header>
+    <article className={`group relative rounded-md px-3 hover:bg-white/[0.03] ${grouped ? 'py-0.5' : 'mt-2 py-1.5'} ${signal ? 'border-l-2 border-amber-400/50 rounded-l-none' : ''}`}>
+      {grouped ? (
+        // Name line hidden; time and actions float in on hover.
+        <div className="absolute right-3 top-0.5 hidden items-baseline gap-3 rounded bg-zinc-950/90 px-2 text-xs group-hover:flex group-focus-within:flex">
+          <time className="text-zinc-500" dateTime={post.createdAt}>{timeLabel(post.createdAt)}</time>
+          {post.editedAt && <span className="text-zinc-600">edited</span>}
+          {actions}
+        </div>
+      ) : (
+        <header className="flex items-baseline gap-2 text-xs">
+          <span className={`font-medium ${AUTHOR_STYLE[post.author.kind] ?? 'text-zinc-200'}`}>{post.author.label}</span>
+          <time className="text-zinc-500" dateTime={post.createdAt}>{timeLabel(post.createdAt)}</time>
+          {post.editedAt && <span className="text-zinc-600">edited</span>}
+          {actions}
+        </header>
+      )}
       {editing ? (
         <div className="mt-1">
           <Composer mode="editor" initial={post.body} titles={titles} placeholder="Edit post" autoFocus
@@ -164,7 +187,7 @@ function ThreadPane({ id, titles, existingNotes, onOpen, onChanged }: { id: stri
       <div className="flex-1 space-y-1 overflow-y-auto p-2">
         <PostItem post={thread.root} onOpen={onOpen} onChanged={changed} titles={titles} existingNotes={existingNotes} compact />
         <div className="ml-3 border-l border-white/10 pl-2">
-          {thread.replies.map(reply => <PostItem key={reply.id} post={reply} onOpen={onOpen} onChanged={changed} titles={titles} existingNotes={existingNotes} compact />)}
+          {thread.replies.map((reply, i) => <PostItem key={reply.id} post={reply} grouped={continues(thread.replies[i - 1], reply)} onOpen={onOpen} onChanged={changed} titles={titles} existingNotes={existingNotes} compact />)}
         </div>
       </div>
       <div className="border-t border-white/10 p-3">
@@ -353,7 +376,7 @@ export default function SenseApp() {
               <>
                 {hasMore && <button type="button" onClick={loadOlder} className="mb-2 px-3 text-xs text-zinc-500 hover:text-zinc-300">Load earlier posts</button>}
                 {posts.length === 0 && <p className="px-3 text-sm text-zinc-500">Start the channel. Post a thought, link a [[note]], paste an image.</p>}
-                {posts.map(post => <PostItem key={post.id} post={post} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />)}
+                {posts.map((post, i) => <PostItem key={post.id} post={post} grouped={continues(posts[i - 1], post)} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />)}
                 <div ref={feedEnd} />
               </>
             )
