@@ -160,7 +160,7 @@ export default function Composer({ placeholder, titles, initial = '', mode = 'en
         onPaste={e => { const files = [...e.clipboardData.files]; if (files.length) { e.preventDefault(); addImages(files); } }}
         onDrop={e => { const files = [...e.dataTransfer.files]; if (files.length) { e.preventDefault(); addImages(files); } }}
         onDragOver={e => { if (e.dataTransfer.types.includes('Files')) e.preventDefault(); }}
-        className="block w-full resize-none rounded-md border border-white/15 bg-black/40 px-3 py-2 text-[15px] leading-relaxed text-zinc-100 placeholder:text-zinc-500 focus:border-violet-400/60 focus:outline-none"
+        className="block w-full resize-none rounded-md border border-white/15 bg-black/40 px-3 py-2 text-base leading-relaxed lg:text-[15px] text-zinc-100 placeholder:text-zinc-500 focus:border-violet-400/60 focus:outline-none"
       />
       <div className="mt-1 flex items-center justify-between text-xs text-zinc-500">
         <span>

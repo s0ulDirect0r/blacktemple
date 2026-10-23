@@ -139,6 +139,9 @@ Matthew's private sensemaking space: channels of posts and threads (Discord-like
 
 - API-first: `/api/sense/*` is the only interface (the admin page is one client). Every post and note records an author (`owner`, `agent`, `member`, `system`); `src/lib/sense/actor.ts` is where agent tokens and member sessions will authenticate later, so an MCP server or app can use the same API.
 - Data: `sense_*` tables in the `temple` database. Links and tags are re-derived from bodies on every save (`src/lib/sense/text.ts` holds the shared rules).
+- Agents: Matthew mints named agent tokens (`bts_…`, stored only as a SHA-256 hash) in Sense → "Agents and MCP". An agent can read, post, reply and write or append to notes under its own name, edit only its own posts and notes, and cannot mint tokens or export.
+- MCP: `/api/mcp` is a stateless Streamable HTTP MCP server (`src/lib/sense/mcp.ts`, tools prefixed `sense_`). Authenticate with `Authorization: Bearer bts_…`; connect Claude Code with `claude mcp add --transport http black-temple https://www.blacktemple.dev/api/mcp --header "Authorization: Bearer <token>"`.
+- Layout: three panes on desktop; below the `lg` breakpoint the sidebar is a drawer and notes, threads and agents open full screen.
 - Images: private Vercel Blob store via `SENSE_BLOB_READ_WRITE_TOKEN` (separate from the public gallery store's `BLOB_READ_WRITE_TOKEN`); a local folder stands in outside production.
 
 ## Testing

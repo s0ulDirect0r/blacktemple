@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import AgentsPane from './AgentsPane';
 import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
 import { sense, timeLabel, type Backlink, type Found, type SenseNote, type SensePost, type Sidebar } from './api';
 
 type View = { kind: 'channel'; slug: string } | { kind: 'tag'; tag: string } | { kind: 'search'; q: string };
-type Pane = { kind: 'thread'; id: string } | { kind: 'note'; title: string } | null;
+type Pane = { kind: 'thread'; id: string } | { kind: 'note'; title: string } | { kind: 'agents' } | null;
 
 const AUTHOR_STYLE: Record<string, string> = { owner: 'text-zinc-200', agent: 'text-sky-300', member: 'text-emerald-300', system: 'text-amber-300' };
 
@@ -58,7 +59,7 @@ function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, co
   );
 
   return (
-    <article className={`group relative rounded-md px-3 hover:bg-white/[0.03] ${grouped ? 'py-0.5' : 'mt-2 py-1.5'} ${signal ? 'border-l-2 border-amber-400/50 rounded-l-none' : ''}`}>
+    <article tabIndex={0} className={`group relative rounded-md px-3 focus:outline-none hover:bg-white/[0.03] ${grouped ? 'py-0.5' : 'mt-2 py-1.5'} ${signal ? 'border-l-2 border-amber-400/50 rounded-l-none' : ''}`}>
       {grouped ? (
         // Name line hidden; time and actions float in on hover.
         <div className="absolute right-3 top-0.5 hidden items-baseline gap-3 rounded bg-zinc-950/90 px-2 text-xs group-hover:flex group-focus-within:flex">
@@ -206,6 +207,8 @@ export default function SenseApp() {
   const [results, setResults] = useState<{ key: string; found: Found[] } | null>(null);
   const [query, setQuery] = useState('');
   const [newChannel, setNewChannel] = useState<string | null>(null);
+  // Phones and tablets: the sidebar slides over the feed, and panes open full screen.
+  const [drawer, setDrawer] = useState(false);
   const [error, setError] = useState('');
   const feedEnd = useRef<HTMLDivElement>(null);
 
@@ -295,10 +298,11 @@ export default function SenseApp() {
   const heading = view.kind === 'channel' ? `#${view.slug}` : view.kind === 'tag' ? `Tagged #${view.tag}` : `Search: ${view.q}`;
 
   return (
-    <div className="grid h-screen grid-cols-[220px_minmax(0,1fr)_minmax(0,400px)] bg-black text-zinc-100">
+    <div className="grid h-[100dvh] grid-cols-1 bg-black text-zinc-100 lg:grid-cols-[220px_minmax(0,1fr)_minmax(0,400px)]">
+      {drawer && <button type="button" aria-label="Close menu" onClick={() => setDrawer(false)} className="fixed inset-0 z-30 bg-black/60 lg:hidden" />}
       <datalist id="sense-note-titles">{titles.map(t => <option key={t} value={t} />)}</datalist>
 
-      <nav className="flex min-h-0 flex-col border-r border-white/10 bg-zinc-950" aria-label="Sense">
+      <nav className={`${drawer ? 'fixed inset-y-0 left-0 z-40 flex w-72' : 'hidden'} min-h-0 flex-col border-r border-white/10 bg-zinc-950 lg:static lg:flex lg:w-auto`} aria-label="Sense">
         <div className="border-b border-white/10 p-3">
           <Link href="/admin" className="text-xs text-zinc-500 hover:text-zinc-300">← Admin</Link>
           <p className="mt-1 text-sm font-semibold tracking-wide text-white">Sense</p>
@@ -307,11 +311,11 @@ export default function SenseApp() {
               className="w-full rounded border border-white/15 bg-black/40 px-2 py-1 text-sm" />
           </form>
         </div>
-        <div className="flex-1 space-y-5 overflow-y-auto p-3 text-sm">
+        <div className="flex-1 space-y-5 overflow-y-auto p-3 text-sm" onClick={e => { const button = (e.target as HTMLElement).closest('button'); if (button && !button.dataset.keepOpen) setDrawer(false); }}>
           <section>
             <div className="mb-1 flex items-center justify-between text-xs text-zinc-500">
               <span>Channels</span>
-              <button type="button" onClick={() => setNewChannel('')} aria-label="New channel" className="hover:text-zinc-200">+</button>
+              <button type="button" data-keep-open="true" onClick={() => setNewChannel('')} aria-label="New channel" className="hover:text-zinc-200">+</button>
             </div>
             {sidebar?.channels.map(channel => (
               <button key={channel.slug} type="button" onClick={() => setView({ kind: 'channel', slug: channel.slug })}
@@ -360,14 +364,18 @@ export default function SenseApp() {
             </section>
           )}
         </div>
-        <div className="border-t border-white/10 p-3">
-          <button type="button" onClick={exportVault} className="text-xs text-zinc-500 hover:text-zinc-300">Export as markdown (.zip)</button>
+        <div className="space-y-1 border-t border-white/10 p-3">
+          <button type="button" onClick={() => { setPane({ kind: 'agents' }); setDrawer(false); }} className="block text-xs text-zinc-500 hover:text-zinc-300">Agents and MCP</button>
+          <button type="button" onClick={exportVault} className="block text-xs text-zinc-500 hover:text-zinc-300">Export as markdown (.zip)</button>
         </div>
       </nav>
 
       <main className="flex min-h-0 flex-col">
         <header className="border-b border-white/10 px-4 py-3 pr-28">
-          <h1 className="text-sm font-semibold text-white">{heading}</h1>
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={() => setDrawer(true)} aria-label="Open channels and notes" className="-ml-1 rounded px-1 text-lg leading-none text-zinc-400 hover:text-white lg:hidden">☰</button>
+            <h1 className="text-sm font-semibold text-white">{heading}</h1>
+          </div>
           {error && <p role="alert" className="mt-1 text-xs text-red-300">{error} <button type="button" onClick={() => setError('')} className="underline">Dismiss</button></p>}
         </header>
         <div className="flex-1 overflow-y-auto px-2 py-3">
@@ -392,13 +400,16 @@ export default function SenseApp() {
         )}
       </main>
 
-      <aside className="min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16">
+      <aside className={`${pane ? 'fixed inset-0 z-20 block' : 'hidden'} min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:static lg:block`}>
         {pane && (
-          <div className="flex justify-end px-3">
-            <button type="button" onClick={() => setPane(null)} aria-label="Close panel" className="text-xs text-zinc-500 hover:text-zinc-300">Close</button>
+          <div className="flex px-3 lg:justify-end">
+            <button type="button" onClick={() => setPane(null)} aria-label="Close panel" className="text-sm text-zinc-400 hover:text-zinc-200 lg:text-xs lg:text-zinc-500">
+              <span className="lg:hidden">← Back</span><span className="hidden lg:inline">Close</span>
+            </button>
           </div>
         )}
         {pane?.kind === 'note' && <NotePane key={pane.title.toLowerCase()} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} />}
+        {pane?.kind === 'agents' && <AgentsPane />}
         {pane?.kind === 'thread' && <ThreadPane key={pane.id} id={pane.id} titles={titles} existingNotes={existingNotes} onOpen={open} onChanged={refresh} />}
         {!pane && <p className="p-4 text-sm text-zinc-500">Open a [[note]] or a thread to see it here.</p>}
       </aside>
