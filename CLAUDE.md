@@ -133,6 +133,14 @@ For membership (`/membership`, `/members`, code in `src/lib/membership/`, see `.
 - Free accounts are the general membership. `MEMBERSHIP_PAID_VISIBLE=true` shows the paid tiers, checkout and paid member spaces; production leaves it unset.
 - ESCALATION (escalation.blacktemple.dev) uses `/api/escalation/*` for sign-in status, supporter payments (Stripe webhook, `ESCALATION_STRIPE_WEBHOOK_SECRET`) and cloud saves.
 
+### Sense (`/admin/sense`)
+
+Matthew's private sensemaking space: channels of posts and threads (Discord-like) plus titled notes joined by `[[wiki links]]` with backlinks, `#tags`, search, pasted images and a markdown export that opens as an Obsidian vault. #signals receives new verified members, ESCALATION supporter payments and feedback automatically.
+
+- API-first: `/api/sense/*` is the only interface (the admin page is one client). Every post and note records an author (`owner`, `agent`, `member`, `system`); `src/lib/sense/actor.ts` is where agent tokens and member sessions will authenticate later, so an MCP server or app can use the same API.
+- Data: `sense_*` tables in the `temple` database. Links and tags are re-derived from bodies on every save (`src/lib/sense/text.ts` holds the shared rules).
+- Images: private Vercel Blob store via `SENSE_BLOB_READ_WRITE_TOKEN` (separate from the public gallery store's `BLOB_READ_WRITE_TOKEN`); a local folder stands in outside production.
+
 ## Testing
 
 Tests use Node.js native test runner (`node --test`):

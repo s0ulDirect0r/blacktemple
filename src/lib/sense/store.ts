@@ -72,9 +72,13 @@ function cleanTitle(title: unknown) {
 async function reindex(client: PoolClient, kind: 'post' | 'note', id: string, text: string) {
   await client.query('DELETE FROM sense_links WHERE source_kind = $1 AND source_id = $2', [kind, id]);
   await client.query('DELETE FROM sense_tags WHERE source_kind = $1 AND source_id = $2', [kind, id]);
-  const links = extractLinks(text).map(link => link.key);
+  const links = extractLinks(text);
   const tags = extractTags(text);
-  if (links.length) await client.query('INSERT INTO sense_links (source_kind, source_id, target) SELECT $1, $2, unnest($3::text[]) ON CONFLICT DO NOTHING', [kind, id, links]);
+  if (links.length) {
+    await client.query(
+      'INSERT INTO sense_links (source_kind, source_id, target, title) SELECT $1, $2, unnest($3::text[]), unnest($4::text[]) ON CONFLICT DO NOTHING',
+      [kind, id, links.map(link => link.key), links.map(link => link.title)]);
+  }
   if (tags.length) await client.query('INSERT INTO sense_tags (source_kind, source_id, tag) SELECT $1, $2, unnest($3::text[]) ON CONFLICT DO NOTHING', [kind, id, tags]);
 }
 
@@ -88,7 +92,7 @@ export async function listChannels() {
   const { rows } = await membershipDatabase().query<{ slug: string; posts: string; last_at: Date | null }>(
     `SELECT c.slug, count(p.id) AS posts, max(p.created_at) AS last_at
      FROM sense_channels c LEFT JOIN sense_posts p ON p.channel_id = c.id AND p.deleted_at IS NULL
-     GROUP BY c.slug, c.created_at ORDER BY c.created_at, c.slug`,
+     GROUP BY c.slug, c.created_at ORDER BY c.slug = 'inbox' DESC, c.slug = 'signals', c.created_at, c.slug`,
   );
   return rows.map(row => ({ slug: row.slug, posts: Number(row.posts), lastAt: row.last_at?.toISOString() ?? null }));
 }
@@ -190,14 +194,14 @@ export async function listNotes() {
     db.query<{ id: string; title: string; updated_at: Date; backlinks: string }>(
       `SELECT n.id, n.title, n.updated_at, (SELECT count(*) FROM sense_links l WHERE l.target = lower(n.title)) AS backlinks
        FROM sense_notes n ORDER BY n.updated_at DESC`),
-    db.query<{ target: string; backlinks: string }>(
-      `SELECT l.target, count(*) AS backlinks FROM sense_links l
+    db.query<{ target: string; title: string; backlinks: string }>(
+      `SELECT l.target, min(l.title) AS title, count(*) AS backlinks FROM sense_links l
        WHERE NOT EXISTS (SELECT 1 FROM sense_notes n WHERE lower(n.title) = l.target)
        GROUP BY l.target ORDER BY count(*) DESC, l.target LIMIT 200`),
   ]);
   return {
     notes: notes.rows.map(row => ({ id: row.id, title: row.title, updatedAt: row.updated_at.toISOString(), backlinks: Number(row.backlinks) })),
-    unwritten: ghosts.rows.map(row => ({ key: row.target, backlinks: Number(row.backlinks) })),
+    unwritten: ghosts.rows.map(row => ({ key: row.target, title: row.title, backlinks: Number(row.backlinks) })),
   };
 }
 
@@ -239,8 +243,11 @@ function excerptAround(body: string, key: string) {
 /** A note by title (written or not) with everything that links to it. */
 export async function getNoteByTitle(title: string) {
   const key = linkKey(title);
-  const { rows } = await membershipDatabase().query('SELECT * FROM sense_notes WHERE lower(title) = $1', [key]);
-  return { note: rows[0] ? toNote(rows[0]) : null, title: rows[0]?.title ?? title.trim(), backlinks: await backlinks(key) };
+  const db = membershipDatabase();
+  const { rows } = await db.query('SELECT * FROM sense_notes WHERE lower(title) = $1', [key]);
+  // An unwritten note takes the title as it was first written in a link.
+  const written = rows[0]?.title ?? (await db.query<{ title: string }>('SELECT min(title) AS title FROM sense_links WHERE target = $1', [key])).rows[0]?.title;
+  return { note: rows[0] ? toNote(rows[0]) : null, title: written ?? title.trim(), backlinks: await backlinks(key) };
 }
 
 /** Create the note, or update it in place if one already has this title. */

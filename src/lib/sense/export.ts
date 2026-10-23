@@ -18,8 +18,25 @@ function vaultMarkdown(body: string, imageFiles: Map<string, string>, postLogs: 
     .replace(/\[([^\]]*)\]\(sense:(?:note|tag)\/[^)]*\)/g, '$1');
 }
 
+/** Dates and times in the reader's own zone, so posts land on the day they were written. */
+function clock(timeZone: string) {
+  const parts = (date: Date) => Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(date).map(p => [p.type, p.value]));
+  return {
+    day: (date: Date) => { const p = parts(date); return `${p.year}-${p.month}-${p.day}`; },
+    time: (date: Date) => { const p = parts(date); return `${p.hour}:${p.minute}`; },
+  };
+}
+
+function validTimeZone(value: string | null) {
+  if (!value) return 'UTC';
+  try { new Intl.DateTimeFormat('en-US', { timeZone: value }); return value; } catch { return 'UTC'; }
+}
+
 /** The whole space as an Obsidian-ready vault: notes/, channels/, images/. */
-export async function exportVault(): Promise<Response> {
+export async function exportVault(requestedTimeZone: string | null = null): Promise<Response> {
+  const { day, time } = clock(validTimeZone(requestedTimeZone));
   const db = membershipDatabase();
   const [notes, posts, images] = await Promise.all([
     db.query<{ title: string; body: string; created_at: Date; updated_at: Date }>('SELECT title, body, created_at, updated_at FROM sense_notes ORDER BY title'),
@@ -30,17 +47,17 @@ export async function exportVault(): Promise<Response> {
 
   const imageFiles = new Map(images.map(image => [image.id, image.storage_key.replace(/^sense\//, '')]));
   // One log file per channel per day, named for the day the thread started.
-  const logName = (post: ExportPost) => `${post.slug} ${post.created_at.toISOString().slice(0, 10)}`;
+  const logName = (post: ExportPost) => `${post.slug} ${day(post.created_at)}`;
   const roots = new Map(posts.rows.filter(post => !post.parent_id).map(post => [post.id, post]));
   const postLogs = new Map(posts.rows.map(post => [post.id, logName(roots.get(post.parent_id ?? post.id) ?? post)]));
 
   const logs = new Map<string, string[]>();
   for (const root of roots.values()) {
-    const lines = logs.get(logName(root)) ?? [`# #${root.slug} · ${root.created_at.toISOString().slice(0, 10)}\n`];
-    lines.push(`## ${root.created_at.toISOString().slice(11, 16)} · ${root.author_label}\n\n${vaultMarkdown(root.body, imageFiles, postLogs, '../')}\n`);
+    const lines = logs.get(logName(root)) ?? [`# #${root.slug} · ${day(root.created_at)}\n`];
+    lines.push(`## ${time(root.created_at)} · ${root.author_label}\n\n${vaultMarkdown(root.body, imageFiles, postLogs, '../')}\n`);
     for (const reply of posts.rows.filter(post => post.parent_id === root.id)) {
       const text = vaultMarkdown(reply.body, imageFiles, postLogs, '../').split('\n').map(line => '> ' + line).join('\n');
-      lines.push(`> **${reply.author_label}** · ${reply.created_at.toISOString().slice(0, 16).replace('T', ' ')}\n${text}\n`);
+      lines.push(`> **${reply.author_label}** · ${day(reply.created_at)} ${time(reply.created_at)}\n${text}\n`);
     }
     logs.set(logName(root), lines);
   }
@@ -63,7 +80,7 @@ export async function exportVault(): Promise<Response> {
     }
   }
 
-  const date = new Date().toISOString().slice(0, 10);
+  const date = day(new Date());
   return new Response(Readable.toWeb(Readable.from(zip(entries()))) as ReadableStream, {
     headers: { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="black-temple-sense-${date}.zip"`, 'Cache-Control': 'private, no-store' },
   });

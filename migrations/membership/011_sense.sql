@@ -46,7 +46,9 @@ CREATE INDEX IF NOT EXISTS sense_notes_search ON sense_notes USING GIN (search);
 CREATE TABLE IF NOT EXISTS sense_links (
   source_kind TEXT NOT NULL CHECK (source_kind IN ('post', 'note')),
   source_id UUID NOT NULL,
+  -- Matching key (lowercased) and the title as written, for showing unwritten notes.
   target TEXT NOT NULL,
+  title TEXT NOT NULL,
   PRIMARY KEY (source_kind, source_id, target)
 );
 CREATE INDEX IF NOT EXISTS sense_links_target ON sense_links (target);

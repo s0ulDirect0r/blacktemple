@@ -19,7 +19,7 @@ function storage() {
   const token = process.env.SENSE_BLOB_READ_WRITE_TOKEN;
   if (token) return { kind: 'blob' as const, token };
   if (process.env.VERCEL_ENV === 'production') throw new MemberError(503, 'Image storage isn’t set up yet.');
-  return { kind: 'local' as const, dir: process.env.SENSE_LOCAL_IMAGE_DIR || join(tmpdir(), 'blacktemple-sense-images') };
+  return { kind: 'local' as const, dir: process.env.SENSE_LOCAL_IMAGE_DIR || join(/*turbopackIgnore: true*/ tmpdir(), 'blacktemple-sense-images') };
 }
 
 export async function saveImage(bytes: Buffer) {
@@ -36,8 +36,9 @@ export async function saveImage(bytes: Buffer) {
   if (store.kind === 'blob') {
     await put(key, bytes, { access: 'private', token: store.token, contentType, addRandomSuffix: false });
   } else {
-    await mkdir(join(store.dir, 'sense'), { recursive: true });
-    await writeFile(join(store.dir, key), bytes, { mode: 0o600 });
+    // Development only; the ignore hints keep the bundler from tracing the whole project.
+    await mkdir(join(/*turbopackIgnore: true*/ store.dir, 'sense'), { recursive: true });
+    await writeFile(join(/*turbopackIgnore: true*/ store.dir, key), bytes, { mode: 0o600 });
   }
   await membershipDatabase().query(
     'INSERT INTO sense_images (id, storage_key, content_type, bytes, width, height) VALUES ($1, $2, $3, $4, $5, $6)',
@@ -58,7 +59,7 @@ export async function loadImage(id: string): Promise<{ body: ReadableStream<Uint
     return { body: result.stream, contentType: rows[0].content_type };
   }
   try {
-    return { body: await readFile(join(store.dir, rows[0].storage_key)), contentType: rows[0].content_type };
+    return { body: await readFile(join(/*turbopackIgnore: true*/ store.dir, rows[0].storage_key)), contentType: rows[0].content_type };
   } catch {
     return null;
   }

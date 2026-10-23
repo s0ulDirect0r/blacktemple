@@ -11,7 +11,8 @@ export default function AdminPage() {
     <AdminAuth>
       <GalleryProvider>
         <main className="min-h-screen p-8">
-          <h1 className="text-4xl font-bold mb-8">Black Temple Admin</h1>
+          <h1 className="text-4xl font-bold mb-4">Black Temple Admin</h1>
+          <p className="mb-8"><a href="/admin/sense" className="text-violet-300 underline">Open Sense →</a></p>
           <div className="space-y-12">
             <section>
               <h2 className="text-2xl font-semibold mb-4">Members</h2>
