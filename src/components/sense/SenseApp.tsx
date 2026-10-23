@@ -43,6 +43,8 @@ function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, co
     } catch (e) { setError(e instanceof Error ? e.message : 'That didn’t weave.'); }
   };
 
+  const cancelWeave = () => { setWeaving(false); setWeaveTitle(''); setError(''); };
+
   const remove = async () => {
     if (!window.confirm('Delete this post?')) return;
     try { await sense(`/posts/${post.id}`, { method: 'DELETE' }); onChanged(); }
@@ -84,10 +86,12 @@ function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, co
         <div className="mt-0.5 text-[15px] leading-relaxed text-zinc-200"><Markdown text={post.body} onOpen={onOpen} existingNotes={existingNotes} /></div>
       )}
       {weaving && (
-        <form className="mt-2 flex gap-2" onSubmit={e => { e.preventDefault(); weave(); }}>
+        <form className="mt-2 flex gap-2" onSubmit={e => { e.preventDefault(); weave(); }}
+          onKeyDown={e => { if (e.key === 'Escape') { e.preventDefault(); cancelWeave(); } }}>
           <input autoFocus list="sense-note-titles" value={weaveTitle} onChange={e => setWeaveTitle(e.target.value)} placeholder="Weave into note…"
-            className="w-64 rounded border border-white/15 bg-black/40 px-2 py-1 text-sm text-zinc-100" />
+            aria-label="Note to weave into" className="w-64 rounded border border-white/15 bg-black/40 px-2 py-1 text-sm text-zinc-100" />
           <button type="submit" className="rounded border border-white/20 px-2 text-sm text-zinc-200 hover:bg-white/10">Weave</button>
+          <button type="button" onClick={cancelWeave} className="px-1 text-sm text-zinc-500 hover:text-zinc-200">Cancel</button>
         </form>
       )}
       {!compact && post.replyCount > 0 && onThread && (
