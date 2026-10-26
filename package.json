@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "vercel-build": "tsx scripts/membership-migrate.ts --deploy && npm run build",
     "start": "next start",
     "lint": "eslint .",
     "migrate": "tsx scripts/migrate.ts",
