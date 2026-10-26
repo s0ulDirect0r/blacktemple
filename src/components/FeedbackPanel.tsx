@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { AdminFeedback, FeedbackKind } from '@/lib/escalation/feedback';
 
-const KINDS: FeedbackKind[] = ['fun', 'hard', 'broken', 'note'];
+const KINDS: FeedbackKind[] = ['fun', 'hard', 'broken', 'note', 'error'];
 type Count = { arena: string | null; wave: number | null; kind: FeedbackKind; n: number };
 
 function adminHeaders() {

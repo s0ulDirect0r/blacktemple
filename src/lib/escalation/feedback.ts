@@ -1,8 +1,9 @@
-import { createHmac, randomUUID } from 'node:crypto';
+import { createHash, createHmac, randomUUID } from 'node:crypto';
 import { membershipDatabase } from '@/lib/membership/database';
 import { MemberError } from '@/lib/membership/errors';
 
-export const FEEDBACK_KINDS = ['fun', 'hard', 'broken', 'note'] as const;
+/** `error` is sent by the game on its own; the others are the player's clicks. */
+export const FEEDBACK_KINDS = ['fun', 'hard', 'broken', 'note', 'error'] as const;
 export type FeedbackKind = typeof FEEDBACK_KINDS[number];
 
 export const MAX_FEEDBACK_BODY_BYTES = 450 * 1024;
@@ -11,6 +12,8 @@ const MAX_TEXT = 500;
 const MAX_ERRORS = 10;
 const MAX_ERROR_LENGTH = 500;
 const HOURLY_LIMIT = 20;
+/** Error reports have their own hourly allowance, so a crash loop never uses up a player's clicks. */
+const ERROR_HOURLY_LIMIT = 10;
 /** Screenshots are the only large data; keep the newest few hundred. */
 const SCREENSHOT_KEEP = 300;
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
@@ -27,6 +30,8 @@ export interface FeedbackInput {
   screen: 'dead' | 'won' | null;
   errors: string[] | null;
   shot: Buffer | null;
+  /** Groups repeats of one error: a hash of its first line with the numbers taken out. */
+  fingerprint: string | null;
 }
 
 function shortText(value: unknown, max = 64): string | null {
@@ -57,10 +62,12 @@ export function parseFeedback(body: unknown): FeedbackInput {
   const wave = finiteNumber(context.wave, 0, 100_000);
 
   let errors: string[] | null = null;
-  if (kind === 'broken' && Array.isArray(raw.errors)) {
+  if ((kind === 'broken' || kind === 'error') && Array.isArray(raw.errors)) {
     errors = raw.errors.filter((e): e is string => typeof e === 'string').slice(0, MAX_ERRORS).map(e => e.slice(0, MAX_ERROR_LENGTH));
     if (!errors.length) errors = null;
   }
+  if (kind === 'error' && !errors) throw new MemberError(400, 'Send the error.');
+  const fingerprint = kind === 'error' && errors ? errorFingerprint(errors[0]) : null;
 
   let shot: Buffer | null = null;
   if (kind === 'broken' && raw.shot !== undefined && raw.shot !== null) {
@@ -73,7 +80,7 @@ export function parseFeedback(body: unknown): FeedbackInput {
   }
 
   return {
-    kind, text, errors, shot,
+    kind, text, errors, shot, fingerprint,
     arena: shortText(context.arena),
     wave: wave === null ? null : Math.floor(wave),
     seconds: finiteNumber(context.seconds, 0, 86_400 * 7),
@@ -82,6 +89,12 @@ export function parseFeedback(body: unknown): FeedbackInput {
     build: shortText(context.build),
     screen: context.screen === 'dead' || context.screen === 'won' ? context.screen : null,
   };
+}
+
+/** One error's identity across players and builds: its first line, numbers (line, column, counts) taken out. */
+export function errorFingerprint(error: string): string {
+  const line = error.split('\n')[0].replace(/\d+/g, '#').trim();
+  return createHash('sha256').update(line).digest('hex').slice(0, 32);
 }
 
 /** The first address in the forwarded chain, as Vercel's edge sets it. */
@@ -95,8 +108,11 @@ export function ipHash(ip: string) {
   return createHmac('sha256', secret).update('escalation-feedback-ip:' + ip).digest('hex');
 }
 
-/** Store feedback, enforcing the hourly limit per IP and per member in the same transaction. */
-export async function recordFeedback(input: FeedbackInput, who: { userId: string | null; ipHash: string }) {
+/**
+ * Store feedback, enforcing the hourly limit per IP and per member in the same transaction. Error
+ * reports count against their own limit. Resolves to whether this is the first report of its error.
+ */
+export async function recordFeedback(input: FeedbackInput, who: { userId: string | null; ipHash: string }): Promise<{ firstSeen: boolean }> {
   const client = await membershipDatabase().connect();
   try {
     await client.query('BEGIN');
@@ -104,15 +120,23 @@ export async function recordFeedback(input: FeedbackInput, who: { userId: string
     await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', ['escalation-feedback:' + who.ipHash]);
     const { rows } = await client.query<{ recent: string }>(
       `SELECT count(*) AS recent FROM escalation_feedback
-       WHERE created_at > NOW() - INTERVAL '1 hour' AND (ip_hash = $1 OR ($2::text IS NOT NULL AND user_id = $2))`,
-      [who.ipHash, who.userId],
+       WHERE created_at > NOW() - INTERVAL '1 hour' AND (ip_hash = $1 OR ($2::text IS NOT NULL AND user_id = $2))
+         AND (kind = 'error') = $3`,
+      [who.ipHash, who.userId, input.kind === 'error'],
     );
-    if (Number(rows[0].recent) >= HOURLY_LIMIT) throw new MemberError(429, 'Thanks — that’s plenty of feedback for now. Try again later.');
+    if (Number(rows[0].recent) >= (input.kind === 'error' ? ERROR_HOURLY_LIMIT : HOURLY_LIMIT)) throw new MemberError(429, 'Thanks — that’s plenty of feedback for now. Try again later.');
+    let firstSeen = false;
+    if (input.fingerprint) {
+      // Serialize per error so two players hitting it at once ping only once.
+      await client.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', ['escalation-error:' + input.fingerprint]);
+      const seen = await client.query('SELECT 1 FROM escalation_feedback WHERE fingerprint = $1 LIMIT 1', [input.fingerprint]);
+      firstSeen = !seen.rowCount;
+    }
     await client.query(
-      `INSERT INTO escalation_feedback (id, user_id, ip_hash, kind, text, arena, wave, seconds, killer, fps, build, screen, errors, shot)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`,
+      `INSERT INTO escalation_feedback (id, user_id, ip_hash, kind, text, arena, wave, seconds, killer, fps, build, screen, errors, shot, fingerprint)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
       [randomUUID(), who.userId, who.ipHash, input.kind, input.text, input.arena, input.wave, input.seconds, input.killer,
-        input.fps, input.build, input.screen, input.errors ? JSON.stringify(input.errors) : null, input.shot],
+        input.fps, input.build, input.screen, input.errors ? JSON.stringify(input.errors) : null, input.shot, input.fingerprint],
     );
     if (input.shot) {
       await client.query(
@@ -122,6 +146,7 @@ export async function recordFeedback(input: FeedbackInput, who: { userId: string
       );
     }
     await client.query('COMMIT');
+    return { firstSeen };
   } catch (error) {
     await client.query('ROLLBACK');
     throw error;

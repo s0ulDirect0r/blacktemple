@@ -17,8 +17,13 @@ export async function POST(request: Request) {
     try { body = JSON.parse(raw); } catch { throw new MemberError(400, 'Send feedback as a JSON object.'); }
     const input = parseFeedback(body);
     const session = await sessionFromHeaders(request.headers);
-    await recordFeedback(input, { userId: session?.user.id ?? null, ipHash: ipHash(clientIp(request)) });
+    const { firstSeen } = await recordFeedback(input, { userId: session?.user.id ?? null, ipHash: ipHash(clientIp(request)) });
     const where = [input.arena, input.wave !== null ? `wave ${input.wave}` : null, input.screen].filter(Boolean).join(' · ');
+    // An error report pings #signals only the first time its error is seen.
+    if (input.kind === 'error') {
+      if (firstSeen) await postSignal('feedback', `ESCALATION error, **new**${where ? ` · ${where}` : ''}${input.build ? ` · ${input.build}` : ''}\n\n> ${input.errors![0].split('\n')[0]}\n\n#feedback`);
+      return json(request, { ok: true });
+    }
     const label = { fun: 'FUN', hard: 'TOO HARD', broken: 'BROKEN', note: 'NOTE' }[input.kind];
     await postSignal('feedback', `ESCALATION feedback: **${label}**${where ? ` · ${where}` : ''}${input.text ? `\n\n> ${input.text.replace(/\n/g, ' ')}` : ''}\n\n${session ? session.user.name : 'anonymous'} #feedback`);
     return json(request, { ok: true });

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { clientIp, parseFeedback } from '../src/lib/escalation/feedback';
+import { clientIp, errorFingerprint, parseFeedback } from '../src/lib/escalation/feedback';
 
 const png = (extra = 0) => 'data:image/png;base64,' + Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(extra)]).toString('base64');
 
@@ -33,6 +33,20 @@ test('errors are capped and only kept with broken', () => {
   assert.equal(input.errors!.length, 10);
   assert.ok(input.errors!.every(e => e.length === 500));
   assert.equal(parseFeedback({ kind: 'fun', errors }).errors, null);
+});
+
+test('error reports need an error and carry its fingerprint', () => {
+  const input = parseFeedback({ kind: 'error', errors: ['TypeError: x is undefined\n  at tick (main.js:12:4)'], context: { arena: 'tutorial', wave: 2 } });
+  assert.equal(input.errors!.length, 1);
+  assert.equal(input.fingerprint, errorFingerprint('TypeError: x is undefined'));
+  assert.equal(parseFeedback({ kind: 'broken', errors: ['x'] }).fingerprint, null);
+  assert.throws(() => parseFeedback({ kind: 'error' }), /Send the error/);
+  assert.throws(() => parseFeedback({ kind: 'error', errors: [42] }), /Send the error/);
+});
+
+test('one error keeps one fingerprint across line numbers', () => {
+  assert.equal(errorFingerprint('RangeError at main.js:12:4\nstack'), errorFingerprint('RangeError at main.js:980:17'));
+  assert.notEqual(errorFingerprint('RangeError: a'), errorFingerprint('TypeError: a'));
 });
 
 test('client IP is the first forwarded address', () => {
