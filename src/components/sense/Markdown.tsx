@@ -47,7 +47,9 @@ function Markdown({ text, onOpen, existingNotes }: { text: string; onOpen: (targ
             const target = parseTarget(href);
             if (!target) return <a href={href} target="_blank" rel="noreferrer noopener" className="text-sky-300 underline">{children}</a>;
             const ghost = target.kind === 'note' && existingNotes && !existingNotes.has(target.title.trim().toLowerCase());
-            const style = target.kind === 'tag' ? 'text-zinc-400 hover:text-zinc-200' : ghost ? 'text-violet-300/60 underline decoration-dotted' : 'text-violet-300 hover:text-violet-200';
+            const style = target.kind === 'tag' ? 'text-[#b9f5ff]/90 hover:text-[#b9f5ff]'
+              : ghost ? 'text-violet-300/60 underline decoration-dotted underline-offset-4'
+              : 'text-violet-300 underline decoration-dashed decoration-violet-300/50 underline-offset-4 hover:text-violet-200';
             return <button type="button" onClick={() => onOpen(target)} className={style}>{children}</button>;
           },
           img({ src, alt }) {

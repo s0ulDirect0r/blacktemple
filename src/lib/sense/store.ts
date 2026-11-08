@@ -97,6 +97,50 @@ export async function listChannels() {
   return rows.map(row => ({ slug: row.slug, posts: Number(row.posts), lastAt: row.last_at?.toISOString() ?? null }));
 }
 
+/** Activity in the last 24 hours, for the "today" meter. */
+export async function recentActivity() {
+  const { rows } = await membershipDatabase().query<{ posts: string; notes: string }>(
+    `SELECT (SELECT count(*) FROM sense_posts WHERE deleted_at IS NULL AND created_at > NOW() - INTERVAL '24 hours') AS posts,
+            (SELECT count(*) FROM sense_notes WHERE updated_at > NOW() - INTERVAL '24 hours') AS notes`);
+  return { posts: Number(rows[0].posts), notes: Number(rows[0].notes) };
+}
+
+export interface MapNode { id: string; kind: 'note' | 'unwritten' | 'tag'; label: string; weight: number }
+export interface MapEdge { from: string; to: string; kind: 'link' | 'tag' }
+
+/**
+ * Notes as a star map: written and unwritten notes, the tags notes carry, and the
+ * links between them. Node ids are `note:<lowercased title>` or `tag:<tag>`; weight is backlinks (or uses, for tags).
+ */
+export async function noteMap(): Promise<{ nodes: MapNode[]; edges: MapEdge[] }> {
+  const db = membershipDatabase();
+  const [{ notes, unwritten }, links, tags] = await Promise.all([
+    listNotes(),
+    db.query<{ source: string; target: string }>(
+      `SELECT DISTINCT lower(n.title) AS source, l.target FROM sense_links l
+       JOIN sense_notes n ON l.source_kind = 'note' AND n.id = l.source_id`),
+    db.query<{ source: string; tag: string }>(
+      `SELECT DISTINCT lower(n.title) AS source, t.tag FROM sense_tags t
+       JOIN sense_notes n ON t.source_kind = 'note' AND n.id = t.source_id`),
+  ]);
+  const nodes = new Map<string, MapNode>();
+  for (const n of notes) nodes.set('note:' + n.title.toLowerCase(), { id: 'note:' + n.title.toLowerCase(), kind: 'note', label: n.title, weight: n.backlinks });
+  for (const u of unwritten) nodes.set('note:' + u.key, { id: 'note:' + u.key, kind: 'unwritten', label: u.title, weight: u.backlinks });
+  const edges: MapEdge[] = [];
+  for (const { source, target } of links.rows) {
+    if (source !== target && nodes.has('note:' + source) && nodes.has('note:' + target)) edges.push({ from: 'note:' + source, to: 'note:' + target, kind: 'link' });
+  }
+  for (const { source, tag } of tags.rows) {
+    if (!nodes.has('note:' + source)) continue;
+    const id = 'tag:' + tag;
+    const node = nodes.get(id) ?? { id, kind: 'tag' as const, label: '#' + tag, weight: 0 };
+    node.weight += 1;
+    nodes.set(id, node);
+    edges.push({ from: 'note:' + source, to: id, kind: 'tag' });
+  }
+  return { nodes: [...nodes.values()], edges };
+}
+
 export async function createChannel(slug: unknown) {
   const clean = typeof slug === 'string' ? slug.trim().toLowerCase().replace(/^#/, '').replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') : '';
   if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(clean)) throw new MemberError(400, 'Channel names are letters, numbers and dashes.');

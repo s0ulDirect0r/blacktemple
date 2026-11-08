@@ -108,7 +108,7 @@ export default function AdminAuth({ children }: AdminAuthProps) {
       <div className="relative">
         <button
           onClick={handleLogout}
-          className="absolute top-4 right-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          className="absolute top-4 right-4 z-30 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
         >
           Logout
         </button>

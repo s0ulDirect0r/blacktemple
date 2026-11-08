@@ -9,6 +9,8 @@ export interface Sidebar {
   notes: { id: string; title: string; updatedAt: string; backlinks: number }[];
   unwritten: { key: string; title: string; backlinks: number }[];
   tags: { tag: string; count: number }[];
+  /** Posts and note edits in the last 24 hours. */
+  today: { posts: number; notes: number };
 }
 
 export interface Found {
