@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import AgentsPane from './AgentsPane';
 import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
@@ -256,13 +256,15 @@ export default function SenseApp() {
     setShowJump(fromBottom > 400);
   };
   // Images and edits change the feed's height after render; keep the newest post in view if you were there.
+  const mapOpen = view.kind === 'map';
   useEffect(() => {
     const content = feedContent.current;
     if (!content) return;
     const observer = new ResizeObserver(() => { if (atBottom.current) scrollToLatest(); });
     observer.observe(content);
     return () => observer.disconnect();
-  }, [scrollToLatest]);
+    // The feed is unmounted while the map is open, so watch the new one when it comes back.
+  }, [scrollToLatest, mapOpen]);
 
   // Written and unwritten titles for [[ autocomplete, once each regardless of case.
   const titles = useMemo(() => {
@@ -289,9 +291,13 @@ export default function SenseApp() {
     return sense<{ posts: SensePost[]; hasMore: boolean }>(`/posts?channel=${view.slug}`).then(result => {
       setFeed({ key: JSON.stringify(view), ...result });
       if (scroll) atBottom.current = true;
-      if (atBottom.current) requestAnimationFrame(() => scrollToLatest());
     });
-  }, [view, scrollToLatest]);
+  }, [view]);
+
+  // Once new posts are in the page, follow them to the bottom if you were there (or just posted).
+  useLayoutEffect(() => {
+    if (posts && atBottom.current) scrollToLatest();
+  }, [posts, scrollToLatest]);
 
   const loadOlder = async () => {
     if (view.kind !== 'channel' || !posts?.length) return;
