@@ -6,7 +6,8 @@ import type { SenseActor } from './actor';
 /** Agent tokens start with this so they're recognizable in logs and configs. */
 export const AGENT_TOKEN_PREFIX = 'bts_';
 
-function hash(token: string) {
+/** SHA-256 of a token; the only form tokens are stored in. */
+export function tokenHash(token: string) {
   return createHash('sha256').update(token).digest('hex');
 }
 
@@ -15,7 +16,7 @@ export async function createAgentToken(label: unknown) {
   if (!clean || clean.length > 60) throw new MemberError(400, 'Name the agent (up to 60 characters).');
   const token = AGENT_TOKEN_PREFIX + randomBytes(32).toString('base64url');
   const id = randomUUID();
-  await membershipDatabase().query('INSERT INTO sense_agent_tokens (id, label, token_hash) VALUES ($1, $2, $3)', [id, clean, hash(token)]);
+  await membershipDatabase().query('INSERT INTO sense_agent_tokens (id, label, token_hash) VALUES ($1, $2, $3)', [id, clean, tokenHash(token)]);
   // The only time the token itself is ever returned.
   return { id, label: clean, token };
 }
@@ -37,7 +38,7 @@ export async function agentFromToken(token: string): Promise<SenseActor | null> 
     `UPDATE sense_agent_tokens SET last_used_at = NOW()
      WHERE token_hash = $1 AND revoked_at IS NULL
      RETURNING id, label`,
-    [hash(token)],
+    [tokenHash(token)],
   );
   return rows[0] ? { kind: 'agent', id: rows[0].id, label: rows[0].label } : null;
 }

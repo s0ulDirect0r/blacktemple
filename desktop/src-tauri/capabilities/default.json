@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "temple-site",
+  "description": "The Temple's own site may hand the app its device token and ask it to forget it. Nothing else is exposed.",
+  "windows": ["main"],
+  "remote": {
+    "urls": ["https://www.blacktemple.dev/*", "https://blacktemple.dev/*", "http://localhost:*/*"]
+  },
+  "permissions": ["allow-remember-device", "allow-forget-device"]
+}

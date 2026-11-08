@@ -2,6 +2,7 @@
 
 import { useState, useEffect, ReactNode, createContext, useContext } from 'react';
 import AuthForm from './AuthForm';
+import { forgetThisDevice, rememberThisDevice } from './desktop';
 
 interface AdminAuthProps {
   children: ReactNode;
@@ -41,6 +42,7 @@ export default function AdminAuth({ children }: AdminAuthProps) {
 
         if (response.ok) {
           setIsAuthenticated(true);
+          void rememberThisDevice(session);
         } else {
           sessionStorage.removeItem('adminSession');
         }
@@ -71,6 +73,7 @@ export default function AdminAuth({ children }: AdminAuthProps) {
       const { token } = await response.json();
       sessionStorage.setItem('adminSession', token);
       setIsAuthenticated(true);
+      void rememberThisDevice(token);
     } catch (error) {
       console.error('Auth error:', error);
       throw new Error('Authentication failed');
@@ -78,6 +81,7 @@ export default function AdminAuth({ children }: AdminAuthProps) {
   };
 
   const handleLogout = () => {
+    void forgetThisDevice();
     sessionStorage.removeItem('adminSession');
     setIsAuthenticated(false);
   };

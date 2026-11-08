@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { sense, timeLabel } from './api';
 
 interface Agent { id: string; label: string; createdAt: string; lastUsedAt: string | null }
+interface Device { id: string; name: string; createdAt: string; lastUsedAt: string | null }
 
 /** Name an agent, get its token once, connect it over MCP, and revoke it later. */
 export default function AgentsPane() {
@@ -11,9 +12,12 @@ export default function AgentsPane() {
   const [label, setLabel] = useState('');
   const [created, setCreated] = useState<{ label: string; token: string } | null>(null);
   const [copied, setCopied] = useState('');
+  const [devices, setDevices] = useState<Device[] | null>(null);
   const [error, setError] = useState('');
 
   const load = useCallback(() => sense<{ agents: Agent[] }>('/agents').then(r => setAgents(r.agents)).catch(e => setError(e.message)), []);
+  const loadDevices = useCallback(() => sense<{ devices: Device[] }>('/devices').then(r => setDevices(r.devices)).catch(e => setError(e.message)), []);
+  useEffect(() => { loadDevices(); }, [loadDevices]);
   useEffect(() => { load(); }, [load]);
 
   const create = async () => {
@@ -30,6 +34,12 @@ export default function AgentsPane() {
     if (!window.confirm(`Revoke ${agent.label}? It stops working immediately.`)) return;
     await sense(`/agents/${agent.id}`, { method: 'DELETE' }).catch(e => setError(e.message));
     load();
+  };
+
+  const revokeDevice = async (device: Device) => {
+    if (!window.confirm(`Sign out ${device.name}? It will ask for the password next time it opens.`)) return;
+    await sense(`/devices/${device.id}`, { method: 'DELETE' }).catch(e => setError(e.message));
+    loadDevices();
   };
 
   const origin = typeof window === 'undefined' ? '' : window.location.origin;
@@ -80,6 +90,24 @@ export default function AgentsPane() {
                   <span className="block text-xs text-zinc-500">Created {timeLabel(agent.createdAt)} · {agent.lastUsedAt ? `last used ${timeLabel(agent.lastUsedAt)}` : 'never used'}</span>
                 </span>
                 <button type="button" onClick={() => revoke(agent)} className="text-xs text-zinc-500 hover:text-red-300">Revoke</button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section>
+        <h3 className="mb-1 text-xs text-zinc-500">Your devices</h3>
+        <p className="mb-2 text-xs text-zinc-500">Devices that stay signed in, like the desktop app. Signing one out stops new sessions at once; a session it already has lasts up to 8 hours.</p>
+        {devices === null ? <p className="text-zinc-500">Loading…</p> : devices.length === 0 ? <p className="text-zinc-500">None yet.</p> : (
+          <ul className="space-y-2">
+            {devices.map(device => (
+              <li key={device.id} className="flex items-baseline justify-between gap-3 rounded border border-white/10 px-3 py-2">
+                <span>
+                  <span className="text-zinc-200">{device.name}</span>
+                  <span className="block text-xs text-zinc-500">Added {timeLabel(device.createdAt)} · {device.lastUsedAt ? `last signed in ${timeLabel(device.lastUsedAt)}` : 'not signed in since'}</span>
+                </span>
+                <button type="button" onClick={() => revokeDevice(device)} className="text-xs text-zinc-500 hover:text-red-300">Sign out</button>
               </li>
             ))}
           </ul>
