@@ -299,6 +299,27 @@ export default function SenseApp() {
     if (posts && atBottom.current) scrollToLatest();
   }, [posts, scrollToLatest]);
 
+  /** Show the post straight away, then swap in the saved one (or take it back out if saving fails). */
+  const sendPost = async (channel: string, body: string) => {
+    const key = JSON.stringify({ kind: 'channel', slug: channel });
+    const pendingId = `pending-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    const now = new Date().toISOString();
+    const pending: SensePost = { id: pendingId, channel, parentId: null, author: { kind: 'owner', label: 'Matthew' }, body, signalKind: null, replyCount: 0, createdAt: now, editedAt: null };
+    const swap = (fn: (posts: SensePost[]) => SensePost[]) => setFeed(f => (f && f.key === key ? { ...f, posts: fn(f.posts) } : f));
+    atBottom.current = true;
+    swap(posts => [...posts, pending]);
+    try {
+      const saved = await sense<SensePost>('/posts', { method: 'POST', body: JSON.stringify({ channel, body }) });
+      // A feed reload while saving can drop the placeholder; add the saved post back if it isn't there.
+      swap(posts => posts.some(p => p.id === pendingId) ? posts.map(p => (p.id === pendingId ? saved : p))
+        : posts.some(p => p.id === saved.id) ? posts : [...posts, saved]);
+      loadSidebar();
+    } catch (e) {
+      swap(posts => posts.filter(p => p.id !== pendingId));
+      throw e;
+    }
+  };
+
   const loadOlder = async () => {
     if (view.kind !== 'channel' || !posts?.length) return;
     const result = await sense<{ posts: SensePost[]; hasMore: boolean }>(`/posts?channel=${view.slug}&before=${encodeURIComponent(posts[0].createdAt)}`);
@@ -475,7 +496,11 @@ export default function SenseApp() {
               <>
                 {hasMore && <button type="button" onClick={loadOlder} className="mb-2 px-3 text-xs text-zinc-500 hover:text-zinc-300">Load earlier posts</button>}
                 {posts.length === 0 && <p className="px-3 text-sm text-zinc-500">Start the channel. Post a thought, link a [[note]], paste an image.</p>}
-                {posts.map((post, i) => <PostItem key={post.id} post={post} grouped={continues(posts[i - 1], post)} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />)}
+                {posts.map((post, i) => {
+                  const item = <PostItem key={post.id} post={post} grouped={continues(posts[i - 1], post)} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />;
+                  // Not saved yet: faded, and no edit or thread actions until it has a real id.
+                  return post.id.startsWith('pending-') ? <div key={post.id} className="pointer-events-none opacity-60" aria-busy="true">{item}</div> : item;
+                })}
               </>
             )
           ) : (
@@ -494,7 +519,7 @@ export default function SenseApp() {
         {view.kind === 'channel' && (
           <div className="border-t border-white/10 px-4 py-3">
             <Composer key={view.slug} autoFocus titles={titles} placeholder={`Post in #${view.slug}`}
-              onSubmit={async body => { await sense('/posts', { method: 'POST', body: JSON.stringify({ channel: view.slug, body }) }); await loadFeed(); loadSidebar(); }} />
+              onSubmit={body => sendPost(view.slug, body)} />
           </div>
         )}
       </main>

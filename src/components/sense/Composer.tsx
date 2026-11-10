@@ -107,11 +107,21 @@ export default function Composer({ placeholder, titles, initial = '', mode = 'en
 
   const submit = async () => {
     if (!text.trim() || busy || uploading) return;
-    setBusy(true);
     setError('');
+    const sent = text;
+    // Posting clears the box at once so you can keep writing; the text comes back if it fails.
+    if (mode === 'enter') {
+      update('');
+      try { await onSubmit(sent); } catch (e) {
+        update(sent);
+        setError(e instanceof Error ? e.message : 'That didn’t post.');
+      }
+      ref.current?.focus();
+      return;
+    }
+    setBusy(true);
     try {
-      await onSubmit(text);
-      if (mode === 'enter') update('');
+      await onSubmit(sent);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'That didn’t save.');
     } finally {
