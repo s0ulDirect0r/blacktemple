@@ -6,7 +6,7 @@ import AgentsPane from './AgentsPane';
 import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
 import SenseMap from './SenseMap';
-import TemplePanel from './TemplePanel';
+import JevPanel from './JevPanel';
 import WritingRoom from './WritingRoom';
 import { sense, timeLabel, type Backlink, type Found, type SenseNote, type SensePost, type Sidebar } from './api';
 
@@ -545,7 +545,8 @@ export default function SenseApp() {
         {pane?.kind === 'note' && <NotePane key={`${pane.title.toLowerCase()}:${noteVersion}`} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} onWrite={title => setRoom({ title })} />}
         {pane?.kind === 'agents' && <AgentsPane />}
         {pane?.kind === 'thread' && <ThreadPane key={pane.id} id={pane.id} titles={titles} existingNotes={existingNotes} onOpen={open} onChanged={refresh} />}
-        {!pane && <TemplePanel sidebar={sidebar} onOpenNote={title => setPane({ kind: 'note', title })} onOpenAgents={() => setPane({ kind: 'agents' })} />}
+        {/* The Temple panel (TemplePanel.tsx) is parked while Jev is being tried out here. */}
+        {!pane && <JevPanel sidebar={sidebar} channel={view.kind === 'channel' ? view.slug : null} />}
       </aside>
       {room && (
         <WritingRoom key={room.title?.toLowerCase() ?? 'new'} title={room.title} titles={titles} existingNotes={existingNotes}
