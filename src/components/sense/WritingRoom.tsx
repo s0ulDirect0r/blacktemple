@@ -118,15 +118,16 @@ function ActiveBlock({ text, caret, titles, onChange, onKey, onImageError }: {
  * the bar fades while you type; it saves itself a moment after you stop.
  */
 export default function WritingRoom({ title: startTitle, titles, existingNotes, onClose, onOpenElsewhere }: {
-  title: string; titles: string[]; existingNotes: Set<string>;
-  /** `title` is where you ended up (after renames or following links); `changed` if anything was saved. */
+  /** The note to open, or null to start a new, untitled one. */
+  title: string | null; titles: string[]; existingNotes: Set<string>;
+  /** `title` is where you ended up (after renames or following links), empty if a new note never got one; `changed` if anything was saved. */
   onClose: (title: string, changed: boolean) => void;
   /** Tags and posts open back in Sense. */
   onOpenElsewhere: (target: SenseTarget) => void;
 }) {
-  const [current, setCurrent] = useState(startTitle);
+  const [current, setCurrent] = useState<string | null>(startTitle);
   const [loaded, setLoaded] = useState(false);
-  const [title, setTitle] = useState(startTitle);
+  const [title, setTitle] = useState(startTitle ?? '');
   const [blocks, setBlocks] = useState<Block[]>([]);
   const [active, setActive] = useState<{ index: number; caret: number } | null>(null);
   const [status, setStatus] = useState<Status>('saved');
@@ -149,6 +150,14 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
   const blockEls = useRef(new Map<number, HTMLDivElement>());
 
   useEffect(() => {
+    // A new note: nothing to load. The cursor starts in the title.
+    if (current === null) {
+      note.current = null;
+      setBlocks(makeBlocks(''));
+      setActive(null);
+      setLoaded(true);
+      return;
+    }
     let live = true;
     setLoaded(false);
     sense<{ note: SenseNote | null; title: string }>(`/notes/by-title?title=${encodeURIComponent(current)}`).then(result => {
@@ -174,7 +183,7 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
     if (!dirty.current) return;
     const { title: nextTitle, blocks: nextBlocks } = latest.current;
     const body = fromBlocks(nextBlocks.map(b => b.text));
-    if (!nextTitle.trim()) { setStatus('error'); setMessage('Give it a title to save.'); return; }
+    if (!nextTitle.trim()) return; // stays unsaved; the bar asks for a title
     if (!note.current && !body) return;
     dirty.current = false;
     setStatus('saving');
@@ -182,7 +191,8 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
       try {
         const saved = await sense<SenseNote>('/notes', {
           method: 'POST',
-          body: JSON.stringify({ id: note.current?.id, title: nextTitle.trim(), body, baseUpdatedAt: force ? undefined : note.current?.updatedAt }),
+          // A note that doesn't exist yet is only ever created, never written over one that has the same title.
+          body: JSON.stringify({ id: note.current?.id, title: nextTitle.trim(), body, baseUpdatedAt: force ? undefined : note.current?.updatedAt, create: !note.current }),
         });
         note.current = saved;
         changed.current = true;
@@ -208,10 +218,13 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
     timer.current = setTimeout(() => { if (!conflict.current) save(); }, 1200);
   }, [save]);
 
+  /** Unsaved writing worth warning about: a title alone on a note that was never written isn't. */
+  const unsaved = () => dirty.current && (!!note.current || !!fromBlocks(latest.current.blocks.map(b => b.text)));
+
   const close = useCallback(async () => {
     await save();
-    if (dirty.current && !window.confirm('This note has changes that didn’t save. Leave anyway?')) return;
-    onClose(note.current?.title ?? latest.current.title, changed.current);
+    if (unsaved() && !window.confirm('This note has changes that didn’t save. Leave anyway?')) return;
+    onClose(note.current?.title ?? latest.current.title.trim(), changed.current);
   }, [save, onClose]);
 
   // Esc leaves (once you're out of a paragraph); ⌘S saves now. Warn before closing the window with unsaved text.
@@ -304,12 +317,13 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
   const follow = async (target: SenseTarget) => {
     if (target.kind !== 'note') { await close(); onOpenElsewhere(target); return; }
     await save();
-    if (dirty.current && !window.confirm('This note has changes that didn’t save. Open the other note anyway?')) return;
+    if (unsaved() && !window.confirm('This note has changes that didn’t save. Open the other note anyway?')) return;
     setCurrent(target.title);
   };
 
   const words = useMemo(() => wordCount(blocks.map(b => b.text).join('\n\n')), [blocks]);
-  const statusLabel = { saved: 'Saved', unsaved: 'Unsaved', saving: 'Saving…', conflict: 'Not saved', error: 'Not saved' }[status];
+  const statusLabel = status === 'unsaved' && !title.trim() ? 'Needs a title'
+    : { saved: note.current ? 'Saved' : 'New', unsaved: 'Unsaved', saving: 'Saving…', conflict: 'Not saved', error: 'Not saved' }[status];
   const chromeHidden = typing && status !== 'conflict' && status !== 'error';
 
   return (
@@ -344,7 +358,7 @@ export default function WritingRoom({ title: startTitle, titles, existingNotes, 
           {!loaded ? <p className="text-sm text-zinc-500">{message || 'Opening…'}</p> : (
             <>
               <p className="sense-eyebrow">{note.current ? 'Note' : 'New note'}</p>
-              <textarea value={title} rows={1} aria-label="Title" placeholder="Title"
+              <textarea value={title} rows={1} aria-label="Title" placeholder="Title" autoFocus={startTitle === null}
                 onChange={e => { setTitle(e.target.value.replace(/\n/g, '')); touch(); }}
                 onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); open(0, 0); } }}
                 className="sense-serif mt-3 block w-full resize-none overflow-hidden bg-transparent text-[2.25rem] font-semibold leading-tight text-white outline-none placeholder:text-zinc-700 sm:text-[2.6rem]"

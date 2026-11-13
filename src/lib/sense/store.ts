@@ -295,8 +295,11 @@ export async function getNoteByTitle(title: string) {
 }
 
 /** Create the note, or update it in place if one already has this title. */
-/** `baseUpdatedAt`: the version the writer started from. If the note changed since (an agent appended, another window saved), refuse with 412 instead of overwriting. */
-export async function saveNote(actor: SenseActor, input: { id?: unknown; title: unknown; body: unknown; baseUpdatedAt?: unknown }) {
+/**
+ * `baseUpdatedAt`: the version the writer started from. If the note changed since (an agent appended, another window saved), refuse with 412 instead of overwriting.
+ * `create`: only make a new note; refuse with 409 if one already has this title (instead of replacing it).
+ */
+export async function saveNote(actor: SenseActor, input: { id?: unknown; title: unknown; body: unknown; baseUpdatedAt?: unknown; create?: unknown }) {
   const title = cleanTitle(input.title);
   const body = typeof input.body === 'string' ? input.body.replace(/\r\n/g, '\n') : '';
   if (body.length > MAX_NOTE) throw new MemberError(413, 'That note is too long.');
@@ -305,6 +308,7 @@ export async function saveNote(actor: SenseActor, input: { id?: unknown; title: 
       ? (await client.query('SELECT * FROM sense_notes WHERE id = $1 FOR UPDATE', [input.id])).rows[0]
       : (await client.query('SELECT * FROM sense_notes WHERE lower(title) = $1 FOR UPDATE', [linkKey(title)])).rows[0];
     if (typeof input.id === 'string' && !existing) throw new MemberError(404, 'That note is gone.');
+    if (input.create === true && existing) throw new MemberError(409, `There’s already a note called “${existing.title}”.`);
     if (existing && !canEdit(actor, existing)) throw new MemberError(403, 'Only the author can edit this note.');
     if (existing && typeof input.baseUpdatedAt === 'string' && new Date(existing.updated_at).toISOString() !== input.baseUpdatedAt) {
       throw new MemberError(412, 'This note changed somewhere else since you opened it.');

@@ -239,7 +239,7 @@ export default function SenseApp() {
   const [view, setView] = useState<View>({ kind: 'channel', slug: 'inbox' });
   const [pane, setPane] = useState<Pane>(null);
   // A note open full screen for longer writing, and a counter so the note pane reloads after it.
-  const [room, setRoom] = useState<string | null>(null);
+  const [room, setRoom] = useState<{ title: string | null } | null>(null);
   const [noteVersion, setNoteVersion] = useState(0);
   // Feed and results remember which view they belong to, so switching views shows "Loading" without resetting state.
   const [feed, setFeed] = useState<{ key: string; posts: SensePost[]; hasMore: boolean } | null>(null);
@@ -437,7 +437,7 @@ export default function SenseApp() {
           <section>
             <div className="mb-2 flex items-center justify-between px-2">
               <span className="sense-eyebrow">Notes</span>
-              <button type="button" onClick={() => { const t = window.prompt('Note title'); if (t?.trim()) setPane({ kind: 'note', title: t.trim() }); }} aria-label="New note" className="text-zinc-500 hover:text-zinc-200">+</button>
+              <button type="button" onClick={() => setRoom({ title: null })} aria-label="New note" title="New note" className="text-zinc-500 hover:text-zinc-200">+</button>
             </div>
             {sidebar?.notes.map(note => (
               <button key={note.id} type="button" onClick={() => setPane({ kind: 'note', title: note.title })}
@@ -542,14 +542,14 @@ export default function SenseApp() {
             </button>
           </div>
         )}
-        {pane?.kind === 'note' && <NotePane key={`${pane.title.toLowerCase()}:${noteVersion}`} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} onWrite={setRoom} />}
+        {pane?.kind === 'note' && <NotePane key={`${pane.title.toLowerCase()}:${noteVersion}`} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} onWrite={title => setRoom({ title })} />}
         {pane?.kind === 'agents' && <AgentsPane />}
         {pane?.kind === 'thread' && <ThreadPane key={pane.id} id={pane.id} titles={titles} existingNotes={existingNotes} onOpen={open} onChanged={refresh} />}
         {!pane && <TemplePanel sidebar={sidebar} onOpenNote={title => setPane({ kind: 'note', title })} onOpenAgents={() => setPane({ kind: 'agents' })} />}
       </aside>
       {room && (
-        <WritingRoom key={room.toLowerCase()} title={room} titles={titles} existingNotes={existingNotes}
-          onClose={(title, changed) => { setRoom(null); if (changed) { refresh(); setNoteVersion(v => v + 1); } setPane({ kind: 'note', title }); }}
+        <WritingRoom key={room.title?.toLowerCase() ?? 'new'} title={room.title} titles={titles} existingNotes={existingNotes}
+          onClose={(title, changed) => { setRoom(null); if (changed) { refresh(); setNoteVersion(v => v + 1); } if (title) setPane({ kind: 'note', title }); }}
           onOpenElsewhere={open} />
       )}
     </div>
