@@ -34,7 +34,7 @@ export async function sense<T>(path: string, init: RequestInit = {}): Promise<T>
   const response = await fetch(`/api/sense${path}`, { ...init, headers });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data.error ?? 'That didn’t work. Try again.');
+    throw Object.assign(new Error(data.error ?? 'That didn’t work. Try again.'), { status: response.status });
   }
   return response.json();
 }

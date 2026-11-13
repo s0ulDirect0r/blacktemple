@@ -7,6 +7,7 @@ import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
 import SenseMap from './SenseMap';
 import TemplePanel from './TemplePanel';
+import WritingRoom from './WritingRoom';
 import { sense, timeLabel, type Backlink, type Found, type SenseNote, type SensePost, type Sidebar } from './api';
 
 type View = { kind: 'channel'; slug: string } | { kind: 'tag'; tag: string } | { kind: 'search'; q: string } | { kind: 'map' };
@@ -144,8 +145,10 @@ function FoundList({ results, onOpenFound, empty }: { results: Found[] | null; o
   );
 }
 
-function NotePane({ title, titles, existingNotes, onOpen, onOpenFound, onChanged }: {
+function NotePane({ title, titles, existingNotes, onOpen, onOpenFound, onChanged, onWrite }: {
   title: string; titles: string[]; existingNotes: Set<string>; onOpen: (t: SenseTarget) => void; onOpenFound: (f: Found) => void; onChanged: () => void;
+  /** Open full screen in the writing room. */
+  onWrite: (title: string) => void;
 }) {
   const [data, setData] = useState<{ note: SenseNote | null; title: string; backlinks: Backlink[] } | null>(null);
   const [editing, setEditing] = useState(false);
@@ -177,7 +180,11 @@ function NotePane({ title, titles, existingNotes, onOpen, onOpenFound, onChanged
   return (
     <div className="space-y-4 p-4">
       <div>
-        <p className="sense-eyebrow">{data.note ? 'Note' : 'Unwritten note'}</p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="sense-eyebrow">{data.note ? 'Note' : 'Unwritten note'}</p>
+          <button type="button" onClick={() => onWrite(data.note?.title ?? data.title)} title="Open full screen for longer writing"
+            className="rounded border border-violet-300/30 px-2 py-0.5 text-xs text-violet-200 hover:bg-violet-300/10">✎ Write</button>
+        </div>
         {editing
           ? <input value={draftTitle} onChange={e => setDraftTitle(e.target.value)} className="mt-1 w-full rounded border border-white/15 bg-black/40 px-2 py-1 text-lg font-semibold text-white" aria-label="Note title" />
           : <h2 className="mt-2 text-xl font-medium text-white">{data.note?.title ?? data.title}</h2>}
@@ -231,6 +238,9 @@ export default function SenseApp() {
   const [sidebar, setSidebar] = useState<Sidebar | null>(null);
   const [view, setView] = useState<View>({ kind: 'channel', slug: 'inbox' });
   const [pane, setPane] = useState<Pane>(null);
+  // A note open full screen for longer writing, and a counter so the note pane reloads after it.
+  const [room, setRoom] = useState<string | null>(null);
+  const [noteVersion, setNoteVersion] = useState(0);
   // Feed and results remember which view they belong to, so switching views shows "Loading" without resetting state.
   const [feed, setFeed] = useState<{ key: string; posts: SensePost[]; hasMore: boolean } | null>(null);
   const [results, setResults] = useState<{ key: string; found: Found[] } | null>(null);
@@ -532,11 +542,16 @@ export default function SenseApp() {
             </button>
           </div>
         )}
-        {pane?.kind === 'note' && <NotePane key={pane.title.toLowerCase()} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} />}
+        {pane?.kind === 'note' && <NotePane key={`${pane.title.toLowerCase()}:${noteVersion}`} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} onWrite={setRoom} />}
         {pane?.kind === 'agents' && <AgentsPane />}
         {pane?.kind === 'thread' && <ThreadPane key={pane.id} id={pane.id} titles={titles} existingNotes={existingNotes} onOpen={open} onChanged={refresh} />}
         {!pane && <TemplePanel sidebar={sidebar} onOpenNote={title => setPane({ kind: 'note', title })} onOpenAgents={() => setPane({ kind: 'agents' })} />}
       </aside>
+      {room && (
+        <WritingRoom key={room.toLowerCase()} title={room} titles={titles} existingNotes={existingNotes}
+          onClose={(title, changed) => { setRoom(null); if (changed) { refresh(); setNoteVersion(v => v + 1); } setPane({ kind: 'note', title }); }}
+          onOpenElsewhere={open} />
+      )}
     </div>
   );
 }
