@@ -176,6 +176,8 @@ pub fn run() {
                 .inner_size(1440.0, 900.0)
                 .min_inner_size(720.0, 480.0)
                 .initialization_script(&script)
+                // Let the page receive dropped files (images onto the composer) instead of Tauri.
+                .disable_drag_drop_handler()
                 .on_navigation(move |url| {
                     if stays_in_app(url, &nav_home) {
                         return true;
