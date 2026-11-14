@@ -23,4 +23,8 @@ signs the device out. Devices are listed, and can be signed out, in Sense → Ag
 The site can call only two app commands (`remember_device`, `forget_device`), and only
 from blacktemple.dev or localhost (`src-tauri/capabilities/default.json`).
 
-After a rebuild, macOS may ask once whether the new build may read its keychain item.
+Builds are signed with the self-signed "Reel Code Signing" certificate in the login keychain
+(`bundle.macOS.signingIdentity` in `tauri.conf.json`), so every build counts as the same app to
+the keychain: click Always Allow once and rebuilds stop asking. Without that certificate the build
+fails to sign; remove `signingIdentity` to fall back to an ad-hoc signature, which asks again after
+every rebuild.
