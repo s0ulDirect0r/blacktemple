@@ -9,7 +9,7 @@
 .signs li + li { margin-top: 10px; }
 .signs li::before { content: '—'; position: absolute; left: 0; color: #71717a; }
 .panelTitle { margin-bottom: 18px; }
-.price { margin: 6px 0 4px; color: #fff; font-family: var(--font-pixel), monospace; font-size: 28px; line-height: 1.6; }
+.price { margin: 28px 0 4px; color: #fff; font-family: var(--font-pixel), monospace; font-size: 28px; line-height: 1.6; }
 .panelNote { margin-top: 18px; font-size: 14px; }
 .panelCta { width: 100%; margin-top: 26px; }
 .unavailable { opacity: .55; cursor: not-allowed; }
