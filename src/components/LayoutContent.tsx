@@ -11,7 +11,7 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   // The portfolio and the admin tools render on their own, without the scene or the site nav.
   if (pathname.startsWith('/portfolio') || pathname.startsWith('/admin')) return <>{children}</>;
-  const standalone = ['/music', '/spidernomicon', '/calls', '/privacy', '/support', '/membership', '/members', '/login'];
+  const standalone = ['/music', '/spidernomicon', '/calls', '/interviews', '/privacy', '/support', '/membership', '/members', '/login'];
   if (standalone.some((prefix) => pathname.startsWith(prefix))) {
     return <><ZoneNavBar placement="inline" />{children}</>;
   }

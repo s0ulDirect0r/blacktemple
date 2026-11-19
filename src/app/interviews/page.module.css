@@ -1,0 +1,19 @@
+.steps, .deliverables { margin: 0; padding: 0; list-style: none; }
+.steps { counter-reset: step; }
+.steps li, .deliverables li { position: relative; padding-left: 34px; }
+.steps li + li, .deliverables li + li { margin-top: 18px; }
+.steps li::before { counter-increment: step; content: counter(step); position: absolute; left: 0; top: 2px; color: var(--accent); font-family: var(--font-pixel), monospace; font-size: 11px; line-height: 2.4; }
+.deliverables li::before { content: '✦'; position: absolute; left: 2px; top: 0; color: var(--accent); font-size: 13px; }
+.signs { margin: 20px 0 0; padding: 0; list-style: none; }
+.signs li { padding-left: 20px; position: relative; }
+.signs li + li { margin-top: 10px; }
+.signs li::before { content: '—'; position: absolute; left: 0; color: #71717a; }
+.panelTitle { margin-bottom: 18px; }
+.price { margin: 28px 0 4px; color: #fff; font-family: var(--font-pixel), monospace; font-size: 28px; line-height: 1.6; }
+.panelNote { margin-top: 18px; font-size: 14px; }
+.panelCta { width: 100%; margin-top: 26px; }
+.unavailable { opacity: .55; cursor: not-allowed; }
+.unavailable:hover { background: #fff; transform: none; }
+.build { margin-top: 34px; padding: 22px 22px 22px 20px; border-left: 1px solid #ffffff40; background: #c4b5fd08; }
+.build p + p { margin-top: 12px; }
+.section { padding-bottom: 72px; }
