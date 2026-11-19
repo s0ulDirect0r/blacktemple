@@ -1,4 +1,5 @@
-import { INTERVIEWS } from '@/lib/interviews/config';
+import InterviewsCheckoutButton from '@/components/interviews/InterviewsCheckoutButton';
+import { INTERVIEWS, formatInterviewsPrice } from '@/lib/interviews/config';
 import { pageMetadata } from '@/lib/site';
 import calls from '../calls/page.module.css';
 import styles from './page.module.css';
@@ -22,23 +23,10 @@ function stars(seed: number, count: number) {
 const distantStars = stars(53, 28);
 const nearStars = stars(211, 14);
 
-function BookButton({ className = '' }: { className?: string }) {
-  if (!INTERVIEWS.paymentLink) {
-    return (
-      <span className={`${calls.cta} ${styles.unavailable} ${className}`} aria-disabled="true">
-        Booking opens soon
-      </span>
-    );
-  }
-  return (
-    <a href={INTERVIEWS.paymentLink} className={`${calls.cta} ${className}`}>
-      Book your interviews <span aria-hidden="true">↗</span>
-    </a>
-  );
-}
-
 /** Standalone page (no 3D scene, see LayoutContent; the site bar sits above). */
 export default function InterviewsPage() {
+  const price = formatInterviewsPrice();
+
   return (
     <div className={calls.page}>
       <div className={calls.starfield} aria-hidden="true">
@@ -68,7 +56,7 @@ export default function InterviewsPage() {
 
           <p className={calls.terms}>
             <span>{INTERVIEWS.interviewCount} interviews</span>
-            <span>{INTERVIEWS.priceLabel} USD</span>
+            <span>{price} USD</span>
             <span>One-on-one on Google Meet</span>
           </p>
         </header>
@@ -131,9 +119,9 @@ export default function InterviewsPage() {
                 <strong>The notes:</strong> my notes from all five conversations.
               </li>
             </ul>
-            <p className={styles.price}>{INTERVIEWS.priceLabel}</p>
+            <p className={styles.price}>{price}</p>
             <p>All five interviews, the readout and the rewritten pitch, paid up front.</p>
-            <BookButton className={styles.panelCta} />
+            <InterviewsCheckoutButton className={`${calls.cta} ${styles.panelCta}`} unavailableClassName={styles.unavailable} />
             <p className={styles.panelNote}>After you pay, I&apos;ll reach out to set up our first call.</p>
           </div>
         </div>
