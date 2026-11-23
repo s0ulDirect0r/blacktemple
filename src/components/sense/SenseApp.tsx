@@ -3,13 +3,17 @@
 import Link from 'next/link';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import AgentsPane from './AgentsPane';
+import { useAdminAuth } from '@/components/AdminAuth';
 import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
-import SenseMap from './SenseMap';
+import SenseHabits from './SenseHabits';
+import SenseHome from './SenseHome';
+import SensePeople from './SensePeople';
+import SenseProjects from './SenseProjects';
 import WritingRoom from './WritingRoom';
 import { sense, timeLabel, type Backlink, type Found, type SenseNote, type SensePost, type Sidebar } from './api';
 
-type View = { kind: 'channel'; slug: string } | { kind: 'tag'; tag: string } | { kind: 'search'; q: string } | { kind: 'map' };
+type View = { kind: 'channel'; slug: string } | { kind: 'tag'; tag: string } | { kind: 'search'; q: string } | { kind: 'projects' } | { kind: 'home' } | { kind: 'habits' } | { kind: 'people' };
 type Pane = { kind: 'thread'; id: string } | { kind: 'note'; title: string } | { kind: 'agents' } | null;
 
 const AUTHOR_STYLE: Record<string, string> = { owner: 'text-zinc-100', agent: 'text-[#b9f5ff]', member: 'text-emerald-300', system: 'text-amber-300' };
@@ -233,8 +237,9 @@ function ThreadPane({ id, titles, existingNotes, onOpen, onChanged }: { id: stri
 }
 
 export default function SenseApp() {
+  const { logout } = useAdminAuth();
   const [sidebar, setSidebar] = useState<Sidebar | null>(null);
-  const [view, setView] = useState<View>({ kind: 'channel', slug: 'inbox' });
+  const [view, setView] = useState<View>({ kind: 'home' });
   const [pane, setPane] = useState<Pane>(null);
   // A note open full screen for longer writing, and a counter so the note pane reloads after it.
   const [room, setRoom] = useState<{ title: string | null } | null>(null);
@@ -264,15 +269,15 @@ export default function SenseApp() {
     setShowJump(fromBottom > 400);
   };
   // Images and edits change the feed's height after render; keep the newest post in view if you were there.
-  const mapOpen = view.kind === 'map';
+  const feedHidden = view.kind === 'projects' || view.kind === 'home' || view.kind === 'habits' || view.kind === 'people';
   useEffect(() => {
     const content = feedContent.current;
     if (!content) return;
     const observer = new ResizeObserver(() => { if (atBottom.current) scrollToLatest(); });
     observer.observe(content);
     return () => observer.disconnect();
-    // The feed is unmounted while the map is open, so watch the new one when it comes back.
-  }, [scrollToLatest, mapOpen]);
+    // The feed is unmounted while Home or Projects is open, so watch the new one when it comes back.
+  }, [scrollToLatest, feedHidden]);
 
   // Written and unwritten titles for [[ autocomplete, once each regardless of case.
   const titles = useMemo(() => {
@@ -388,9 +393,9 @@ export default function SenseApp() {
     } catch (e) { setError(e instanceof Error ? e.message : 'Couldn’t create that channel.'); }
   };
 
-  const heading = view.kind === 'channel' ? `#${view.slug}` : view.kind === 'tag' ? `#${view.tag}` : view.kind === 'map' ? 'The constellation' : view.q;
-  const eyebrow = view.kind === 'channel' ? 'Channel' : view.kind === 'tag' ? 'Tagged' : view.kind === 'map' ? 'Map' : 'Search';
-  // Leaving the map returns to the channel you were last in.
+  const heading = view.kind === 'channel' ? `#${view.slug}` : view.kind === 'tag' ? `#${view.tag}` : view.kind === 'projects' ? 'Projects' : view.kind === 'home' ? 'Home' : view.kind === 'habits' ? 'Habits' : view.kind === 'people' ? 'People' : view.q;
+  const eyebrow = view.kind === 'channel' ? 'Channel' : view.kind === 'tag' ? 'Tagged' : feedHidden ? 'Sense' : 'Search';
+  // Leaving Home or Projects returns to the channel you were last in.
   const lastChannel = useRef('inbox');
   useEffect(() => { if (view.kind === 'channel') lastChannel.current = view.slug; }, [view]);
 
@@ -442,11 +447,12 @@ export default function SenseApp() {
         <div className="space-y-1 border-t border-white/10 p-3">
           <button type="button" onClick={() => { setPane({ kind: 'agents' }); setDrawer(false); }} className="block text-xs text-zinc-500 hover:text-zinc-300">Agents and MCP</button>
           <button type="button" onClick={exportVault} className="block text-xs text-zinc-500 hover:text-zinc-300">Export as markdown (.zip)</button>
+          <button type="button" onClick={logout} className="block text-xs text-zinc-500 hover:text-red-300">Log out</button>
         </div>
       </nav>
 
       <main className="flex min-h-0 flex-col">
-        <header className="border-b border-white/10 px-5 pb-4 pt-4 pr-28">
+        <header className="border-b border-white/10 px-5 pb-4 pt-4">
           <div className="flex items-end gap-3">
             <button type="button" onClick={() => setDrawer(true)} aria-label="Open channels" className="-ml-1 rounded px-1 text-lg leading-none text-zinc-400 hover:text-white lg:hidden">☰</button>
             <div className="min-w-0">
@@ -454,12 +460,28 @@ export default function SenseApp() {
               <h1 className="mt-1.5 truncate font-pixel text-base text-white">{heading}</h1>
               <div className="sense-rule mt-3" />
             </div>
+            <nav className="ml-auto flex flex-wrap justify-end gap-1.5" aria-label="View">
+              {(['Home', 'Feed', 'Projects', 'Habits', 'People'] as const).map(name => {
+                const on = name === 'Feed' ? !feedHidden : view.kind === name.toLowerCase();
+                const go = (): View => name === 'Home' ? { kind: 'home' } : name === 'Projects' ? { kind: 'projects' } : name === 'Habits' ? { kind: 'habits' } : name === 'People' ? { kind: 'people' } : { kind: 'channel', slug: lastChannel.current };
+                return (
+                  <button key={name} type="button" aria-pressed={on} onClick={() => setView(go())}
+                    className={`border px-2.5 py-1.5 font-pixel text-[8px] ${on ? 'border-violet-300 bg-violet-300 text-black' : 'border-white/20 text-zinc-400 hover:text-white'}`}>{name}</button>
+                );
+              })}
+            </nav>
           </div>
           {error && <p role="alert" className="mt-1 text-xs text-red-300">{error} <button type="button" onClick={() => setError('')} className="underline">Dismiss</button></p>}
         </header>
         <div className="relative min-h-0 flex-1">
-        {view.kind === 'map' ? (
-          <SenseMap refreshKey={sidebar} onOpenNote={title => setPane({ kind: 'note', title })} onOpenTag={tag => setView({ kind: 'tag', tag })} />
+        {view.kind === 'home' ? (
+          <SenseHome />
+        ) : view.kind === 'habits' ? (
+          <SenseHabits />
+        ) : view.kind === 'people' ? (
+          <SensePeople />
+        ) : view.kind === 'projects' ? (
+          <SenseProjects />
         ) : (
         <div ref={feedScroll} onScroll={onFeedScroll} className="sense-scroll h-full overflow-y-auto px-2 py-3">
           <div ref={feedContent}>
@@ -496,7 +518,7 @@ export default function SenseApp() {
         )}
       </main>
 
-      <aside className={`${pane ? 'fixed inset-0 z-20 block lg:static' : 'hidden'} sense-scroll min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:bg-black/60`}>
+      <aside className={`${pane ? 'fixed inset-0 z-20 block lg:static' : 'hidden'} sense-scroll min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-3 lg:bg-black/60`}>
         {pane && (
           <div className="flex px-3 lg:justify-end">
             <button type="button" onClick={() => setPane(null)} aria-label="Close panel" className="text-sm text-zinc-400 hover:text-zinc-200 lg:text-xs lg:text-zinc-500">

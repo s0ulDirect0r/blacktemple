@@ -5,7 +5,7 @@ export const metadata = { title: 'Sense', robots: { index: false, follow: false 
 
 export default function SensePage() {
   return (
-    <AdminAuth>
+    <AdminAuth ownLogout>
       <SenseApp />
     </AdminAuth>
   );

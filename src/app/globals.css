@@ -145,3 +145,67 @@ body {
 .sense-room-text .sense-markdown img { max-height: 32rem; }
 .sense-room-text textarea { font: inherit; line-height: inherit; color: inherit; }
 @media (max-width: 640px) { .sense-room-text { font-size: 18px; } }
+
+/* Sense Home: today's centerpiece, the closing moment, and the tracker's pulse. Motion is short and tied to what you do. */
+.home-today { position: relative; overflow: hidden; border-color: #c4b5fd77;
+  background: radial-gradient(120% 150% at 0% 0%, #2a1b5c80, transparent 62%), radial-gradient(90% 130% at 100% 100%, #0e3a4a66, transparent 60%), #06060ce0;
+  box-shadow: 0 0 0 1px #c4b5fd14, 0 0 50px #7c5cff2b, inset 0 0 90px #7c5cff14; transition: border-color .6s, box-shadow .6s; }
+.home-today.open { animation: home-breathe 4.5s ease-in-out infinite; }
+.home-today.closed { border-color: #fcd34d99;
+  background: radial-gradient(120% 150% at 0% 0%, #5c451b66, transparent 62%), radial-gradient(90% 130% at 100% 100%, #3a2a0a55, transparent 60%), #0a0806e6;
+  box-shadow: 0 0 0 1px #fcd34d22, 0 0 70px #fcd34d33, inset 0 0 90px #fcd34d12; }
+.home-today .home-title { text-shadow: 0 0 30px #c4b5fd66; }
+.home-today.closed .home-title { text-shadow: 0 0 30px #fcd34d77; }
+.home-today.burst::after { content: ''; position: absolute; inset: -20%; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #fef3c7 0%, #fcd34dbb 18%, #fcd34d33 42%, transparent 66%); animation: home-burst 1s ease-out forwards; }
+@keyframes home-breathe { 0%, 100% { box-shadow: 0 0 0 1px #c4b5fd14, 0 0 40px #7c5cff22, inset 0 0 90px #7c5cff10; } 50% { box-shadow: 0 0 0 1px #c4b5fd2e, 0 0 80px #7c5cff4d, inset 0 0 90px #7c5cff24; } }
+@keyframes home-burst { from { opacity: 1; transform: scale(.15); } to { opacity: 0; transform: scale(1.5); } }
+.home-cell { position: relative; transition: transform .12s ease-out, filter .12s; animation: home-cell-in .45s ease-out both; animation-delay: var(--d, 0ms); }
+.home-cell:hover { transform: scale(1.45); filter: brightness(1.5); z-index: 1; }
+.home-cell.today { animation: home-cell-pop .9s ease-out both, home-cell-breathe 2.6s ease-in-out .9s infinite; }
+@keyframes home-cell-in { from { opacity: 0; transform: scale(.3); } }
+@keyframes home-cell-pop { 0% { transform: scale(.3); } 45% { transform: scale(2.4); filter: brightness(2.2); box-shadow: 0 0 22px #fde68a; } 100% { transform: scale(1); } }
+@keyframes home-cell-breathe { 0%, 100% { box-shadow: 0 0 0 0 #ffffff00; } 50% { box-shadow: 0 0 10px 2px #ffffff66; } }
+.home-num { font-family: var(--font-pixel), monospace; text-shadow: 0 0 18px #c4b5fd88; }
+@media (prefers-reduced-motion: reduce) {
+  .home-today.open, .home-cell, .home-cell.today { animation: none; }
+  .home-today.burst::after { display: none; }
+  .home-cell:hover { transform: none; }
+}
+
+/* Sense Home: the path from today out through the week, month, quarter and year. */
+.home-path { position: relative; }
+.home-path::before { content: ''; position: absolute; left: 13px; top: -1.5rem; bottom: 3.25rem; width: 2px;
+  background: linear-gradient(#c4b5fd, #7c5cffaa 55%, #7c5cff22); box-shadow: 0 0 14px #7c5cff99; }
+.home-node { position: relative; z-index: 1; display: block; width: 16px; height: 16px; margin-left: 6px; border-radius: 50%; border: 2px solid #c4b5fd77; background: #05050a; transition: background .4s, box-shadow .4s, border-color .4s; }
+.home-node.set { background: #c4b5fd; border-color: #ede9fe; box-shadow: 0 0 16px 2px #c4b5fdaa; }
+.home-node.done { background: #fcd34d; border-color: #fde68a; box-shadow: 0 0 16px 2px #fcd34daa; }
+.home-time { height: 4px; border-radius: 2px; background: #ffffff12; overflow: hidden; }
+.home-time > i { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, #b9f5ff, #c4b5fd); box-shadow: 0 0 10px #b9f5ffaa; transform-origin: left; animation: home-grow .9s ease-out both; }
+@keyframes home-grow { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) { .home-time > i { animation: none; } }
+
+/* Sense Habits: each habit is a card with its own chain. Doing it bursts the card and fires the "did it" button. */
+.habit-card { position: relative; overflow: hidden; border: 1px solid #ffffff22; border-radius: 12px; transition: border-color .6s, box-shadow .6s;
+  background: radial-gradient(110% 140% at 0% 0%, #1b143a99, transparent 60%), #06060cd9; }
+.habit-card.done { border-color: #fcd34d77; box-shadow: 0 0 44px #fcd34d1f, inset 0 0 70px #fcd34d0d; }
+.habit-card.burst::after { content: ''; position: absolute; inset: -20%; pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, #fef3c7 0%, #fcd34dbb 18%, #fcd34d33 42%, transparent 66%); animation: home-burst 1s ease-out forwards; }
+.habit-do { border: 1px solid #c4b5fdaa; border-radius: 10px; padding: 14px 30px; font-size: 20px; font-weight: 600; color: #fff;
+  background: linear-gradient(180deg, #7c5cff66, #4c2fd066); box-shadow: 0 0 26px #7c5cff66, inset 0 1px 0 #ffffff33; transition: transform .1s, box-shadow .2s; animation: habit-invite 2.8s ease-in-out infinite; }
+.habit-do:hover { transform: translateY(-1px) scale(1.03); box-shadow: 0 0 40px #7c5cffaa, inset 0 1px 0 #ffffff44; }
+.habit-do:active { transform: scale(.96); }
+@keyframes habit-invite { 0%, 100% { box-shadow: 0 0 22px #7c5cff55, inset 0 1px 0 #ffffff33; } 50% { box-shadow: 0 0 42px #7c5cffaa, inset 0 1px 0 #ffffff33; } }
+.habit-cell-on { background: #c4b5fd; box-shadow: 0 0 6px #c4b5fd99; }
+.habit-card.done .habit-cell-on.today { background: #fcd34d; box-shadow: 0 0 10px #fcd34d; }
+@media (prefers-reduced-motion: reduce) { .habit-do { animation: none; } .habit-card.burst::after { display: none; } }
+
+/* Sense Projects: a tick box that lights up, and a progress bar that turns gold when every task is done. */
+.task-box { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 7px; border: 2px solid #c4b5fd88; background: #05050a;
+  color: #0b0716; font-size: 16px; font-weight: 800; line-height: 1; transition: border-color .15s, box-shadow .15s; }
+button.task-box:hover { border-color: #ede9fe; box-shadow: 0 0 12px #c4b5fd77; }
+.task-box.on { background: #c4b5fd; border-color: #ede9fe; box-shadow: 0 0 14px #c4b5fdaa; animation: task-pop .45s ease-out; }
+@keyframes task-pop { 0% { transform: scale(.5); } 55% { transform: scale(1.35); box-shadow: 0 0 26px #ede9fe; } 100% { transform: scale(1); } }
+.home-time > i { transition: width .5s ease-out; }
+.home-time.gold > i { background: linear-gradient(90deg, #fcd34d, #fde68a); box-shadow: 0 0 12px #fcd34dcc; }
+@media (prefers-reduced-motion: reduce) { .task-box.on { animation: none; } .home-time > i { transition: none; } }

@@ -6,6 +6,8 @@ import { forgetThisDevice, rememberThisDevice } from './desktop';
 
 interface AdminAuthProps {
   children: ReactNode;
+  /** The page shows its own log out control (via `useAdminAuth().logout`), so skip the floating button. */
+  ownLogout?: boolean;
 }
 
 interface AdminAuthContextType {
@@ -20,7 +22,7 @@ const AdminAuthContext = createContext<AdminAuthContextType>({
 
 export const useAdminAuth = () => useContext(AdminAuthContext);
 
-export default function AdminAuth({ children }: AdminAuthProps) {
+export default function AdminAuth({ children, ownLogout }: AdminAuthProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -106,12 +108,14 @@ export default function AdminAuth({ children }: AdminAuthProps) {
   return (
     <AdminAuthContext.Provider value={{ isAuthenticated, logout: handleLogout }}>
       <div className="relative">
-        <button
-          onClick={handleLogout}
-          className="absolute top-4 right-4 z-30 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-        >
-          Logout
-        </button>
+        {!ownLogout && (
+          <button
+            onClick={handleLogout}
+            className="absolute top-4 right-4 z-30 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+          >
+            Logout
+          </button>
+        )}
         {children}
       </div>
     </AdminAuthContext.Provider>
