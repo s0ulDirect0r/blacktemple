@@ -6,7 +6,6 @@ import AgentsPane from './AgentsPane';
 import Composer from './Composer';
 import Markdown, { type SenseTarget } from './Markdown';
 import SenseMap from './SenseMap';
-import JevPanel from './JevPanel';
 import WritingRoom from './WritingRoom';
 import { sense, timeLabel, type Backlink, type Found, type SenseNote, type SensePost, type Sidebar } from './api';
 
@@ -74,7 +73,6 @@ function PostItem({ post, onOpen, onThread, onChanged, titles, existingNotes, co
   const actions = (
     <span className="ml-auto hidden gap-3 text-zinc-500 group-hover:flex group-focus-within:flex">
       {onThread && <button type="button" onClick={() => onThread(post.parentId ?? post.id)} className="hover:text-zinc-200">Reply</button>}
-      <button type="button" onClick={() => setWeaving(w => !w)} className="hover:text-zinc-200">Weave</button>
       {!signal && <button type="button" onClick={() => setEditing(e => !e)} className="hover:text-zinc-200">Edit</button>}
       <button type="button" onClick={remove} className="hover:text-red-300">Delete</button>
     </span>
@@ -397,7 +395,7 @@ export default function SenseApp() {
   useEffect(() => { if (view.kind === 'channel') lastChannel.current = view.slug; }, [view]);
 
   return (
-    <div className="sense-world grid h-[100dvh] grid-cols-1 text-zinc-100 lg:grid-cols-[232px_minmax(0,1fr)_minmax(0,380px)]">
+    <div className={`sense-world grid h-[100dvh] grid-cols-1 text-zinc-100 ${pane ? 'lg:grid-cols-[232px_minmax(0,1fr)_minmax(0,380px)]' : 'lg:grid-cols-[232px_minmax(0,1fr)]'}`}>
       {drawer && <button type="button" aria-label="Close menu" onClick={() => setDrawer(false)} className="fixed inset-0 z-30 bg-black/60 lg:hidden" />}
       <datalist id="sense-note-titles">{titles.map(t => <option key={t} value={t} />)}</datalist>
 
@@ -407,16 +405,12 @@ export default function SenseApp() {
           <p className="mt-3 font-pixel text-xs text-white">Sense</p>
           <p className="mt-1 text-xs text-zinc-500">Your room in the Temple</p>
           <form className="mt-3" onSubmit={e => { e.preventDefault(); if (query.trim()) setView({ kind: 'search', q: query.trim() }); }}>
-            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" aria-label="Search posts and notes"
+            <input value={query} onChange={e => setQuery(e.target.value)} placeholder="Search…" aria-label="Search posts"
               className="w-full rounded border border-white/15 bg-black/40 px-2 py-1.5 text-sm placeholder:text-zinc-500 focus:border-violet-300/60 focus:outline-none" />
           </form>
         </div>
         <div className="sense-scroll flex-1 space-y-6 overflow-y-auto p-3 text-sm" onClick={e => { const button = (e.target as HTMLElement).closest('button'); if (button && !button.dataset.keepOpen) setDrawer(false); }}>
           <section>
-            <button type="button" onClick={() => setView({ kind: 'map' })}
-              className={`mb-5 flex w-full items-center gap-2 rounded px-2 py-1.5 text-left ${view.kind === 'map' ? 'bg-violet-300/10 text-white shadow-[inset_2px_0_0_#c4b5fd]' : 'text-zinc-300 hover:text-white'}`}>
-              <span className="text-violet-300" aria-hidden="true">✦</span> Map
-            </button>
             <div className="mb-2 flex items-center justify-between px-2">
               <span className="sense-eyebrow">Channels</span>
               <button type="button" data-keep-open="true" onClick={() => setNewChannel('')} aria-label="New channel" className="text-zinc-500 hover:text-zinc-200">+</button>
@@ -432,29 +426,6 @@ export default function SenseApp() {
                 <input autoFocus value={newChannel} onChange={e => setNewChannel(e.target.value)} onBlur={createChannel} placeholder="channel-name"
                   className="mt-1 w-full rounded border border-white/15 bg-black/40 px-2 py-0.5 text-sm" />
               </form>
-            )}
-          </section>
-          <section>
-            <div className="mb-2 flex items-center justify-between px-2">
-              <span className="sense-eyebrow">Notes</span>
-              <button type="button" onClick={() => setRoom({ title: null })} aria-label="New note" title="New note" className="text-zinc-500 hover:text-zinc-200">+</button>
-            </div>
-            {sidebar?.notes.map(note => (
-              <button key={note.id} type="button" onClick={() => setPane({ kind: 'note', title: note.title })}
-                className={`block w-full truncate rounded px-2 py-0.5 text-left ${pane?.kind === 'note' && pane.title.toLowerCase() === note.title.toLowerCase() ? 'bg-violet-300/10 text-white' : 'text-zinc-400 hover:text-zinc-200'}`}>
-                <span className="mr-1.5 text-violet-300/70" aria-hidden="true">◇</span>{note.title}{note.backlinks > 0 && <span className="ml-1 text-xs text-zinc-600">{note.backlinks}</span>}
-              </button>
-            ))}
-            {sidebar && sidebar.unwritten.length > 0 && (
-              <>
-                <p className="mb-1 mt-3 px-2 text-xs text-zinc-600">Unwritten</p>
-                {sidebar.unwritten.map(ghost => (
-                  <button key={ghost.key} type="button" onClick={() => setPane({ kind: 'note', title: ghost.title })}
-                    className="block w-full truncate rounded px-2 py-0.5 text-left text-zinc-500 hover:text-zinc-300">
-                    <span className="mr-1.5 text-zinc-600" aria-hidden="true">◌</span>{ghost.title}<span className="ml-1 text-xs text-zinc-600">{ghost.backlinks}</span>
-                  </button>
-                ))}
-              </>
             )}
           </section>
           {sidebar && sidebar.tags.length > 0 && (
@@ -477,21 +448,12 @@ export default function SenseApp() {
       <main className="flex min-h-0 flex-col">
         <header className="border-b border-white/10 px-5 pb-4 pt-4 pr-28">
           <div className="flex items-end gap-3">
-            <button type="button" onClick={() => setDrawer(true)} aria-label="Open channels and notes" className="-ml-1 rounded px-1 text-lg leading-none text-zinc-400 hover:text-white lg:hidden">☰</button>
+            <button type="button" onClick={() => setDrawer(true)} aria-label="Open channels" className="-ml-1 rounded px-1 text-lg leading-none text-zinc-400 hover:text-white lg:hidden">☰</button>
             <div className="min-w-0">
               <p className="sense-eyebrow">{eyebrow}</p>
               <h1 className="mt-1.5 truncate font-pixel text-base text-white">{heading}</h1>
               <div className="sense-rule mt-3" />
             </div>
-            <nav className="ml-auto hidden gap-1.5 sm:flex" aria-label="View">
-              {(['Feed', 'Map'] as const).map(name => {
-                const on = name === 'Map' ? view.kind === 'map' : view.kind !== 'map';
-                return (
-                  <button key={name} type="button" aria-pressed={on} onClick={() => setView(name === 'Map' ? { kind: 'map' } : { kind: 'channel', slug: lastChannel.current })}
-                    className={`border px-2.5 py-1.5 font-pixel text-[8px] ${on ? 'border-violet-300 bg-violet-300 text-black' : 'border-white/20 text-zinc-400 hover:text-white'}`}>{name}</button>
-                );
-              })}
-            </nav>
           </div>
           {error && <p role="alert" className="mt-1 text-xs text-red-300">{error} <button type="button" onClick={() => setError('')} className="underline">Dismiss</button></p>}
         </header>
@@ -505,7 +467,7 @@ export default function SenseApp() {
             posts === null ? <p className="px-3 text-sm text-zinc-500">Loading…</p> : (
               <>
                 {hasMore && <button type="button" onClick={loadOlder} className="mb-2 px-3 text-xs text-zinc-500 hover:text-zinc-300">Load earlier posts</button>}
-                {posts.length === 0 && <p className="px-3 text-sm text-zinc-500">Start the channel. Post a thought, link a [[note]], paste an image.</p>}
+                {posts.length === 0 && <p className="px-3 text-sm text-zinc-500">Start the channel. Post a thought or drop in an image.</p>}
                 {posts.map((post, i) => {
                   const item = <PostItem key={post.id} post={post} grouped={continues(posts[i - 1], post)} onOpen={open} onThread={id => setPane({ kind: 'thread', id })} onChanged={refresh} titles={titles} existingNotes={existingNotes} />;
                   // Not saved yet: faded, and no edit or thread actions until it has a real id.
@@ -534,7 +496,7 @@ export default function SenseApp() {
         )}
       </main>
 
-      <aside className={`${pane ? 'fixed inset-0 z-20 block' : 'hidden'} sense-scroll min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:static lg:block lg:bg-black/60`}>
+      <aside className={`${pane ? 'fixed inset-0 z-20 block lg:static' : 'hidden'} sense-scroll min-h-0 overflow-y-auto border-l border-white/10 bg-zinc-950 pt-16 lg:bg-black/60`}>
         {pane && (
           <div className="flex px-3 lg:justify-end">
             <button type="button" onClick={() => setPane(null)} aria-label="Close panel" className="text-sm text-zinc-400 hover:text-zinc-200 lg:text-xs lg:text-zinc-500">
@@ -545,8 +507,6 @@ export default function SenseApp() {
         {pane?.kind === 'note' && <NotePane key={`${pane.title.toLowerCase()}:${noteVersion}`} title={pane.title} titles={titles} existingNotes={existingNotes} onOpen={open} onOpenFound={openFound} onChanged={refresh} onWrite={title => setRoom({ title })} />}
         {pane?.kind === 'agents' && <AgentsPane />}
         {pane?.kind === 'thread' && <ThreadPane key={pane.id} id={pane.id} titles={titles} existingNotes={existingNotes} onOpen={open} onChanged={refresh} />}
-        {/* The Temple panel (TemplePanel.tsx) is parked while Jev is being tried out here. */}
-        {!pane && <JevPanel sidebar={sidebar} channel={view.kind === 'channel' ? view.slug : null} />}
       </aside>
       {room && (
         <WritingRoom key={room.title?.toLowerCase() ?? 'new'} title={room.title} titles={titles} existingNotes={existingNotes}

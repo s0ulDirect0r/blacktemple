@@ -211,7 +211,7 @@ export default function Composer({ placeholder, titles, initial = '', mode = 'en
       />
       <div className="mt-1 flex items-center justify-between text-xs text-zinc-500">
         <span>
-          {dragging ? 'Drop images on the box to add them' : uploading > 0 ? `Uploading ${uploading > 1 ? `${uploading} images` : 'image'}…` : busy ? 'Saving…' : mode === 'enter' ? 'Enter to post · Shift+Enter for a new line · [[ to link · paste or drop images' : '⌘S to save · [[ to link · paste or drop images'}
+          {dragging ? 'Drop images on the box to add them' : uploading > 0 ? `Uploading ${uploading > 1 ? `${uploading} images` : 'image'}…` : busy ? 'Saving…' : mode === 'enter' ? 'Enter to post · Shift+Enter for a new line · paste or drop images' : '⌘S to save · paste or drop images'}
         </span>
         {error && <span role="alert" className="text-red-300">{error}</span>}
       </div>
